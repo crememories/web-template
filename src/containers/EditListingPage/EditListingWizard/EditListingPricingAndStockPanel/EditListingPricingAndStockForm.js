@@ -2,26 +2,33 @@ import React from 'react';
 import { bool, func, number, shape, string } from 'prop-types';
 import { compose } from 'redux';
 import { Field, Form as FinalForm } from 'react-final-form';
+import arrayMutators from 'final-form-arrays';
 import classNames from 'classnames';
-import arrayMutators from "final-form-arrays";
 
 // Import configs and util modules
 import appSettings from '../../../../config/settings';
 import { intlShape, injectIntl, FormattedMessage } from '../../../../util/reactIntl';
-import { propTypes } from '../../../../util/types';
+import { STOCK_INFINITE_ITEMS, STOCK_MULTIPLE_ITEMS, propTypes } from '../../../../util/types';
 import { isOldTotalMismatchStockError } from '../../../../util/errors';
 import * as validators from '../../../../util/validators';
 import { formatMoney } from '../../../../util/currency';
 import { types as sdkTypes } from '../../../../util/sdkLoader';
 
 // Import shared components
-import { Button, Form, FieldCurrencyInput, FieldTextInput } from '../../../../components';
+import {
+  Button,
+  Form,
+  FieldCurrencyInput,
+  FieldCheckboxGroup,
+  FieldTextInput,
+} from '../../../../components';
 
 // Import modules from this directory
 import css from './EditListingPricingAndStockForm.module.css';
 import EditListingPricingVariant from './EditListingPricingVariant';
 
 const { Money } = sdkTypes;
+const MILLION = 1000000;
 
 const getPriceValidators = (listingMinimumPriceSubUnits, marketplaceCurrency, intl) => {
   const priceRequiredMsgId = { id: 'EditListingPricingAndStockForm.priceRequired' };
@@ -42,12 +49,55 @@ const getPriceValidators = (listingMinimumPriceSubUnits, marketplaceCurrency, in
     : priceRequired;
 };
 
+/**
+ * If stock type is changed to infinity (on the fly),
+ * we show checkbox for providers to update their current stock to infinity.
+ * This is created to avoid overselling problem, if operator changes stock type
+ * from finite to infinite. I.e. the provider notices, if stock management configuration has changed.
+ *
+ * Note 1: infinity is faked using billiard aka 10^15
+ * Note 2: If stock is less than a million (10^6) items, we show this checkbox component.
+ *
+ * @param {Object} props contains { hasInfiniteStock, currentStock, formId, intl }
+ * @returns a component containing checkbox group (stockTypeInfinity) with one key: infinity
+ */
+const UpdateStockToInfinityCheckboxMaybe = ({ hasInfiniteStock, currentStock, formId, intl }) => {
+  return hasInfiniteStock && currentStock != null && currentStock < MILLION ? (
+    <div className={css.input}>
+      <p>
+        <FormattedMessage
+          id="EditListingPricingAndStockForm.updateToInfiniteInfo"
+          values={{
+            currentStock,
+            b: msgFragment => <b>{msgFragment}</b>,
+          }}
+        />
+      </p>
+      <FieldCheckboxGroup
+        id={`${formId}.stockTypeInfinity`}
+        name="stockTypeInfinity"
+        options={[
+          {
+            key: 'infinity',
+            label: intl.formatMessage({
+              id: 'EditListingPricingAndStockForm.updateToInfinite',
+            }),
+          },
+        ]}
+        validate={validators.requiredFieldArrayCheckbox(
+          intl.formatMessage({
+            id: 'EditListingPricingAndStockForm.updateToInfiniteRequired',
+          })
+        )}
+      />
+    </div>
+  ) : null;
+};
+
 export const EditListingPricingAndStockFormComponent = props => (
   <FinalForm
-    mutators={{
-      ...arrayMutators
-    }}
     {...props}
+    mutators={{ ...arrayMutators }}
     render={formRenderProps => {
       const {
         formId,
@@ -68,6 +118,7 @@ export const EditListingPricingAndStockFormComponent = props => (
         updateInProgress,
         fetchErrors,
         variantLabel,
+        values,
       } = formRenderProps;
 
       const variants = {};
@@ -79,11 +130,13 @@ export const EditListingPricingAndStockFormComponent = props => (
       );
       // Note: outdated listings don't have listingType!
       // I.e. listings that are created with previous listing type setup.
-      const hasStockManagement = listingType?.stockType !== 'oneItem';
+      const hasStockManagement = listingType?.stockType === STOCK_MULTIPLE_ITEMS;
       const stockValidator = validators.numberAtLeast(
         intl.formatMessage({ id: 'EditListingPricingAndStockForm.stockIsRequired' }),
         0
       );
+      const hasInfiniteStock = STOCK_INFINITE_ITEMS.includes(listingType?.stockType);
+      const currentStock = values.stock;
 
       const classes = classNames(css.root, className);
       const submitReady = (updated && pristine) || ready;
@@ -113,7 +166,7 @@ export const EditListingPricingAndStockFormComponent = props => (
             </p>
           ) : null}
           <FieldCurrencyInput
-            id={`${formId}price`}
+            id={`${formId}.price`}
             name="price"
             className={css.input}
             autoFocus={autoFocus}
@@ -128,10 +181,17 @@ export const EditListingPricingAndStockFormComponent = props => (
             validate={priceValidators}
           />
 
+          <UpdateStockToInfinityCheckboxMaybe
+            formId={formId}
+            hasInfiniteStock={hasInfiniteStock}
+            currentStock={currentStock}
+            intl={intl}
+          />
+
           {hasStockManagement ? (
             <FieldTextInput
               className={css.input}
-              id="stock"
+              id={`${formId}.stock`}
               name="stock"
               label={intl.formatMessage({ id: 'EditListingPricingAndStockForm.stockLabel' })}
               placeholder={intl.formatMessage({

@@ -3,9 +3,9 @@
 // Main configuration here is the extended data config //
 /////////////////////////////////////////////////////////
 
-// NOTE: if you want to change the structure of the data,
-// you should also check src/util/configHelpers.js
-// some validation is added there.
+// Note: The listingFields come from listingFields asset nowadays by default.
+//       To use this built-in configuration, you need to change the overwrite from configHelper.js
+//       (E.g. use mergeDefaultTypesAndFieldsForDebugging func)
 
 /**
  * Configuration options for listing fields (custom extended data fields):
@@ -269,35 +269,44 @@ export const listingFields = [
 
 // A presets of supported listing configurations
 //
-// Note 1: With first iteration of hosted configs, we are unlikely to support
-//         multiple listing types, even though this template has some
-//         rudimentary support for it.
+// Note 1: The listingTypes come from listingTypes asset nowadays by default.
+//         To use this built-in configuration, you need to change the overwrite from configHelper.js
+//         (E.g. use mergeDefaultTypesAndFieldsForDebugging func)
 // Note 2: transaction type is part of listing type. It defines what transaction process and units
 //         are used when transaction is created against a specific listing.
 
 /**
  * Configuration options for listing experience:
- * - listingType:     Unique string. This will be saved to listing's public data on
- *                    EditListingWizard.
- * - label            Label for the listing type. Used as microcopy for options to select
- *                    listing type in EditListingWizard.
- * - transactionType  Set of configurations how this listing type will behave when transaction is
- *                    created.
- *   - process          Transaction process.
- *                      The process must match one of the processes that this client app can handle
- *                      (check src/util/transaction.js) and the process must also exists in correct
- *                      marketplace environment.
- *   - alias            Valid alias for the aforementioned process. This will be saved to listing's
- *                      public data as transctionProcessAlias and transaction is initiated with this.
- *   - unitType         Unit type is mainly used as pricing unit. This will be saved to
- *                      transaction's protected data.
- *                      Recommendation: don't use same unit types in completely different processes
- *                      ('item' sold should not be priced the same as 'item' booked).
- * - stockType        This is relevant only to listings with product-selling listing type.
- *                    If set to 'oneItem', stock management is not showed and the listing is
- *                    considered unique (stock = 1).
- *                    Possible values: 'oneItem' and 'multipleItems'.
- *                    Default: 'multipleItems'.
+ * - listingType:         Unique string. This will be saved to listing's public data on
+ *                        EditListingWizard.
+ * - label                Label for the listing type. Used as microcopy for options to select
+ *                        listing type in EditListingWizard.
+ * - transactionType      Set of configurations how this listing type will behave when transaction is
+ *                        created.
+ *   - process              Transaction process.
+ *                          The process must match one of the processes that this client app can handle
+ *                          (check src/util/transactions/transaction.js) and the process must also exists in correct
+ *                          marketplace environment.
+ *   - alias                Valid alias for the aforementioned process. This will be saved to listing's
+ *                          public data as transctionProcessAlias and transaction is initiated with this.
+ *   - unitType             Unit type is mainly used as pricing unit. This will be saved to
+ *                          transaction's protected data.
+ *                          Recommendation: don't use same unit types in completely different processes
+ *                          ('item' sold should not be priced the same as 'item' booked).
+ * - stockType            This is relevant only to listings using default-purchase process.
+ *                        If set to 'oneItem', stock management is not showed and the listing is
+ *                        considered unique (stock = 1).
+ *                        Possible values: 'oneItem' and 'multipleItems'.
+ *                        Default: 'multipleItems'.
+ * - defaultListingFields These are tied to transaction processes. Different processes have different flags.
+ *                        E.g. default-inquiry can toggle price and location to true/false value to indicate,
+ *                        whether price (or location) tab should be shown. If defaultListingFields.price is not
+ *                        explicitly set to _false_, price will be shown.
+ *                        If the location or pickup is not used, listing won't be returned with location search.
+ *                        Use keyword search as main search type if location is not enforced.
+ *                        The payoutDetails flag allows provider to bypass setting of payout details.
+ *                        Note: customers can't order listings, if provider has not set payout details! Monitor
+ *                        providers who have not set payout details and contact them to ensure that they add the details.
  */
 
 export const listingTypes = [
@@ -309,7 +318,12 @@ export const listingTypes = [
   //     alias: 'default-booking/release-1',
   //     unitType: 'day',
   //   },
+  //   defaultListingFields: {
+  //     location: true,
+  //     payoutDetails: true,
+  //   },
   // },
+
   // // Here are some examples for other listingTypes
   // // TODO: SearchPage does not work well if both booking and product selling are used at the same time
   // {
@@ -339,6 +353,24 @@ export const listingTypes = [
   //     unitType: 'item',
   //   },
   //   stockType: 'multipleItems',
+  //   defaultListingFields: {
+  //     shipping: true,
+  //     pickup: true,
+  //     payoutDetails: true,
+  //   },
+  // },
+  // {
+  //   listingType: 'inquiry',
+  //   label: 'Inquiry',
+  //   transactionType: {
+  //     process: 'default-inquiry',
+  //     alias: 'default-inquiry/release-1',
+  //     unitType: 'inquiry',
+  //   },
+  //   defaultListingFields: {
+  //     price: false,
+  //     location: true,
+  //   },
   // },
   // { option: 'jewelry', label: 'Jewelry' },
   // { option: 'plane', label: 'Plane' },

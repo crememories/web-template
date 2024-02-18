@@ -29,6 +29,9 @@ export const COMMISSION_REQUEST = 'app/CheckoutPage/COMMISSION_REQUEST';
 export const COMMISSION_SUCCESS = 'app/CheckoutPage/COMMISSION_SUCCESS';
 export const COMMISSION_ERROR = 'app/CheckoutPage/COMMISSION_ERROR';
 
+export const INITIATE_INQUIRY_REQUEST = 'app/CheckoutPage/INITIATE_INQUIRY_REQUEST';
+export const INITIATE_INQUIRY_SUCCESS = 'app/CheckoutPage/INITIATE_INQUIRY_SUCCESS';
+export const INITIATE_INQUIRY_ERROR = 'app/CheckoutPage/INITIATE_INQUIRY_ERROR';
 
 // ================ Reducer ================ //
 
@@ -43,6 +46,8 @@ const initialState = {
   confirmPaymentError: null,
   stripeCustomerFetched: false,
   comissionValue: 0,
+  initiateInquiryInProgress: false,
+  initiateInquiryError: null,
 };
 
 export default function checkoutPageReducer(state = initialState, action = {}) {
@@ -104,6 +109,12 @@ export default function checkoutPageReducer(state = initialState, action = {}) {
       console.error(payload); // eslint-disable-line no-console
       return { ...state, comissionError: payload };
 
+    case INITIATE_INQUIRY_REQUEST:
+      return { ...state, initiateInquiryInProgress: true, initiateInquiryError: null };
+    case INITIATE_INQUIRY_SUCCESS:
+      return { ...state, initiateInquiryInProgress: false };
+    case INITIATE_INQUIRY_ERROR:
+      return { ...state, initiateInquiryInProgress: false, initiateInquiryError: payload };
     default:
       return state;
   }
@@ -172,6 +183,14 @@ export const commissionSuccess = commission => ({
 });
 export const commissionError = e => ({
   type: COMMISSION_ERROR,
+  error: true,
+  payload: e,
+});
+
+export const initiateInquiryRequest = () => ({ type: INITIATE_INQUIRY_REQUEST });
+export const initiateInquirySuccess = () => ({ type: INITIATE_INQUIRY_SUCCESS });
+export const initiateInquiryError = e => ({
+  type: INITIATE_INQUIRY_ERROR,
   error: true,
   payload: e,
 });
@@ -283,9 +302,13 @@ export const confirmPayment = (transactionId, transitionName, transitionParams =
     transition: transitionName,
     params: transitionParams,
   };
+  const queryParams = {
+    include: ['booking', 'provider'],
+    expand: true,
+  };
 
   return sdk.transactions
-    .transition(bodyParams)
+    .transition(bodyParams, queryParams)
     .then(response => {
       const order = response.data.data;
       dispatch(confirmPaymentSuccess(order.id));
@@ -341,6 +364,55 @@ export const getCommission = (listingId) => (dispatch, getState, sdk) => {
     log.error(e, 'create-user-with-idp-failed', { listingId });
     dispatch(commissionError(storableError(e)));
   });
+};
+
+/**
+ * Initiate transaction against default-inquiry process
+ * Note: At this point inquiry transition is made directly against Marketplace API.
+ *       So, client app's server is not involved here unlike with transitions including payments.
+ *
+ * @param {*} inquiryParams contains listingId and protectedData
+ * @param {*} processAlias 'default-inquiry/release-1'
+ * @param {*} transitionName 'transition/inquire-without-payment'
+ * @returns
+ */
+export const initiateInquiryWithoutPayment = (inquiryParams, processAlias, transitionName) => (
+  dispatch,
+  getState,
+  sdk
+) => {
+  dispatch(initiateInquiryRequest());
+
+  if (!processAlias) {
+    const error = new Error('No transaction process attached to listing');
+    log.error(error, 'listing-process-missing', {
+      listingId: listing?.id?.uuid,
+    });
+    dispatch(initiateInquiryError(storableError(error)));
+    return Promise.reject(error);
+  }
+
+  const bodyParams = {
+    transition: transitionName,
+    processAlias,
+    params: inquiryParams,
+  };
+  const queryParams = {
+    include: ['provider'],
+    expand: true,
+  };
+
+  return sdk.transactions
+    .initiate(bodyParams, queryParams)
+    .then(response => {
+      const transactionId = response.data.data.id;
+      dispatch(initiateInquirySuccess());
+      return transactionId;
+    })
+    .catch(e => {
+      dispatch(initiateInquiryError(storableError(e)));
+      throw e;
+    });
 };
 
 /**

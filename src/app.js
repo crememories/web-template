@@ -9,6 +9,7 @@ import 'react-dates/initialize';
 import { HelmetProvider } from 'react-helmet-async';
 import { BrowserRouter, StaticRouter } from 'react-router-dom';
 import { Provider } from 'react-redux';
+import loadable from '@loadable/component';
 import difference from 'lodash/difference';
 import mapValues from 'lodash/mapValues';
 import moment from 'moment';
@@ -24,6 +25,8 @@ import { ConfigurationProvider } from './context/configurationContext';
 import { mergeConfig } from './util/configHelpers';
 import { IntlProvider } from './util/reactIntl';
 import { IncludeScripts } from './util/includeScripts';
+
+import { MaintenanceMode } from './components';
 
 // routing
 import routeConfiguration from './routing/routeConfiguration';
@@ -48,11 +51,26 @@ import defaultMessages from './translations/en.json';
 // Step 2:
 // If you are using a non-english locale with moment library,
 // you should also import time specific formatting rules for that locale
-// e.g. for French: import 'moment/locale/fr';
+// There are 2 ways to do it:
+// - you can add your preferred locale to MomentLocaleLoader or
+// - stop using MomentLocaleLoader component and directly import the locale here.
+// E.g. for French:
+// import 'moment/locale/fr';
+// const hardCodedLocale = process.env.NODE_ENV === 'test' ? 'en' : 'fr';
 
 // Step 3:
-// If you are using a non-english locale, point `messagesInLocale` to correct .json file.
-// Remove "const messagesInLocale" and add import for the correct locale:
+// The "./translations/en.json" has generic English translations
+// that should work as a default translation if some translation keys are missing
+// from the hosted translation.json (which can be edited in Console). The other files
+// (e.g. en.json) in that directory has Biketribe themed translations.
+//
+// If you are using a non-english locale, point `messagesInLocale` to correct <lang>.json file.
+// That way the priority order would be:
+//   1. hosted translation.json
+//   2. <lang>.json
+//   3. en.json
+//
+// I.e. remove "const messagesInLocale" and add import for the correct locale:
 // import messagesInLocale from './translations/fr.json';
 const messagesInLocale = {};
 
@@ -87,28 +105,105 @@ const localeMessages = isTestEnv
   ? mapValues(defaultMessages, (val, key) => key)
   : addMissingTranslations(defaultMessages, messagesInLocale);
 
-const setupLocale = appConfig => {
-  let locale = appConfig.localization.locale;
-  if (isTestEnv) {
-    // Use english as a default locale in tests
-    // This affects app.test.js and app.node.test.js tests
-    locale = 'en';
-    return;
-  }
+// For customized apps, this dynamic loading of locale files is not necessary.
+// It helps locale change from configDefault.js file or hosted configs, but customizers should probably
+// just remove this and directly import the necessary locale on step 2.
+const MomentLocaleLoader = props => {
+  const { children, locale } = props;
+  const isAlreadyImportedLocale =
+    typeof hardCodedLocale !== 'undefined' && locale === hardCodedLocale;
 
-  // Set the Moment locale globally
-  // See: http://momentjs.com/docs/#/i18n/changing-locale/
-  moment.locale(locale);
+  // Moment's built-in locale does not need loader
+  const NoLoader = props => <>{props.children()}</>;
+
+  // The default locale is en (en-US). Here we dynamically load one of the other common locales.
+  // However, the default is to include all supported locales package from moment library.
+  const MomentLocale =
+    ['en', 'en-US'].includes(locale) || isAlreadyImportedLocale
+      ? NoLoader
+      : ['fr', 'fr-FR'].includes(locale)
+      ? loadable.lib(() => import(/* webpackChunkName: "fr" */ 'moment/locale/fr'))
+      : ['de', 'de-DE'].includes(locale)
+      ? loadable.lib(() => import(/* webpackChunkName: "de" */ 'moment/locale/de'))
+      : ['es', 'es-ES'].includes(locale)
+      ? loadable.lib(() => import(/* webpackChunkName: "es" */ 'moment/locale/es'))
+      : ['fi', 'fi-FI'].includes(locale)
+      ? loadable.lib(() => import(/* webpackChunkName: "fi" */ 'moment/locale/fi'))
+      : ['nl', 'nl-NL'].includes(locale)
+      ? loadable.lib(() => import(/* webpackChunkName: "nl" */ 'moment/locale/nl'))
+      : loadable.lib(() => import(/* webpackChunkName: "locales" */ 'moment/min/locales.min'));
+
+  return (
+    <MomentLocale>
+      {() => {
+        // Set the Moment locale globally
+        // See: http://momentjs.com/docs/#/i18n/changing-locale/
+        moment.locale(locale);
+        return children;
+      }}
+    </MomentLocale>
+  );
 };
 
 const Configurations = props => {
   const { appConfig, children } = props;
   const routeConfig = routeConfiguration(appConfig.layout);
-  setupLocale(appConfig);
+  const locale = isTestEnv ? 'en' : appConfig.localization.locale;
+
   return (
     <ConfigurationProvider value={appConfig}>
-      <RouteConfigurationProvider value={routeConfig}>{children}</RouteConfigurationProvider>
+      <MomentLocaleLoader locale={locale}>
+        <RouteConfigurationProvider value={routeConfig}>{children}</RouteConfigurationProvider>
+      </MomentLocaleLoader>
     </ConfigurationProvider>
+  );
+};
+
+const MaintenanceModeError = props => {
+  const { locale, messages, helmetContext } = props;
+  return (
+    <IntlProvider locale={locale} messages={messages} textComponent="span">
+      <HelmetProvider context={helmetContext}>
+        <MaintenanceMode />
+      </HelmetProvider>
+    </IntlProvider>
+  );
+};
+
+// This displays a warning if environment variable key contains a string "SECRET"
+const EnvironmentVariableWarning = props => {
+  const suspiciousEnvKey = props.suspiciousEnvKey;
+  // https://github.com/sharetribe/flex-integration-api-examples#warning-usage-with-your-web-app--website
+  const containsINTEG = str => str.toUpperCase().includes('INTEG');
+  return (
+    <div
+      style={{
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        height: '100vh',
+      }}
+    >
+      <div style={{ width: '600px' }}>
+        <p>
+          Are you sure you want to reveal to the public web an environment variable called:{' '}
+          <b>{suspiciousEnvKey}</b>
+        </p>
+        <p>
+          All the environment variables that start with <i>REACT_APP_</i> prefix will be part of the
+          published React app that's running on a browser. Those variables are, therefore, visible
+          to anyone on the web. Secrets should only be used on a secure environment like the server.
+        </p>
+        {containsINTEG(suspiciousEnvKey) ? (
+          <p>
+            {'Note: '}
+            <span style={{ color: 'red' }}>
+              Do not use Integration API directly from the web app.
+            </span>
+          </p>
+        ) : null}
+      </div>
+    </div>
   );
 };
 
@@ -116,8 +211,34 @@ export const ClientApp = props => {
   const { store, hostedTranslations = {}, hostedConfig = {} } = props;
   const appConfig = mergeConfig(hostedConfig, defaultConfig);
 
+  // Show warning on the localhost:3000, if the environment variable key contains "SECRET"
+  if (appSettings.dev) {
+    const envVars = process.env || {};
+    const envVarKeys = Object.keys(envVars);
+    const containsSECRET = str => str.toUpperCase().includes('SECRET');
+    const suspiciousSECRETKey = envVarKeys.find(
+      key => key.startsWith('REACT_APP_') && containsSECRET(key)
+    );
+
+    if (suspiciousSECRETKey) {
+      return <EnvironmentVariableWarning suspiciousEnvKey={suspiciousSECRETKey} />;
+    }
+  }
+
+  // Show MaintenanceMode if the mandatory configurations are not available
+  if (!appConfig.hasMandatoryConfigurations) {
+    return (
+      <MaintenanceModeError
+        locale={appConfig.localization.locale}
+        messages={{ ...localeMessages, ...hostedTranslations }}
+      />
+    );
+  }
+
   // Marketplace color and branding image comes from configs
   // If set, we need to create CSS Property and set it to DOM (documentElement is selected here)
+  // This provides marketplace color for everything under <html> tag (including modals/portals)
+  // Note: This is also set on Page component to provide server-side rendering.
   const elem = window.document.documentElement;
   if (appConfig.branding.marketplaceColor) {
     elem.style.setProperty('--marketplaceColor', appConfig.branding.marketplaceColor);
@@ -138,10 +259,7 @@ export const ClientApp = props => {
           <HelmetProvider>
             <IncludeScripts config={appConfig} />
             <BrowserRouter>
-              <Routes
-                routes={routeConfiguration(appConfig.layout)}
-                logLoadDataCalls={logLoadDataCalls}
-              />
+              <Routes logLoadDataCalls={logLoadDataCalls} />
             </BrowserRouter>
           </HelmetProvider>
         </Provider>
@@ -156,6 +274,18 @@ export const ServerApp = props => {
   const { url, context, helmetContext, store, hostedTranslations = {}, hostedConfig = {} } = props;
   const appConfig = mergeConfig(hostedConfig, defaultConfig);
   HelmetProvider.canUseDOM = false;
+
+  // Show MaintenanceMode if the mandatory configurations are not available
+  if (!appConfig.hasMandatoryConfigurations) {
+    return (
+      <MaintenanceModeError
+        locale={appConfig.localization.locale}
+        messages={{ ...localeMessages, ...hostedTranslations }}
+        helmetContext={helmetContext}
+      />
+    );
+  }
+
   return (
     <Configurations appConfig={appConfig}>
       <IntlProvider
@@ -193,6 +323,7 @@ export const renderApp = (
   serverContext,
   preloadedState,
   hostedTranslations,
+  hostedConfig,
   collectChunks
 ) => {
   // Don't pass an SDK instance since we're only rendering the
@@ -212,6 +343,7 @@ export const renderApp = (
       helmetContext={helmetContext}
       store={store}
       hostedTranslations={hostedTranslations}
+      hostedConfig={hostedConfig}
     />
   );
   const body = ReactDOMServer.renderToString(WithChunks);

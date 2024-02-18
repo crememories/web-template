@@ -1,5 +1,16 @@
 import React from 'react';
-import { exact, func, node, number, objectOf, oneOf, oneOfType, shape, string } from 'prop-types';
+import {
+  exact,
+  func,
+  node,
+  number,
+  object,
+  objectOf,
+  oneOf,
+  oneOfType,
+  shape,
+  string,
+} from 'prop-types';
 
 // Primitive components that are actually used for rendering field data
 // These are essentially calling the index.js
@@ -8,8 +19,9 @@ import { H1, H2, H3, H4, H5, H6 } from '../Primitives/Heading';
 import { Ul, Ol, Li } from '../Primitives/List';
 import { Ingress } from '../Primitives/Ingress';
 import { P } from '../Primitives/P';
+import { Text } from '../Primitives/Text';
 import { Code, CodeBlock } from '../Primitives/Code';
-import { Link } from '../Primitives/Link';
+import { Link, SocialMediaLink } from '../Primitives/Link';
 import { MarkdownImage, FieldImage } from '../Primitives/Image';
 import { CustomAppearance } from '../Primitives/CustomAppearance';
 import { YoutubeEmbed } from '../Primitives/YoutubeEmbed';
@@ -25,6 +37,7 @@ import {
   exposeImageProps,
   exposeYoutubeProps,
   exposeOpenGraphData,
+  exposeSocialMediaProps,
 } from './Field.helpers';
 
 const TEXT_CONTENT = [
@@ -38,6 +51,7 @@ const TEXT_CONTENT = [
   'markdown',
   'metaTitle',
   'metaDescription',
+  'text',
 ];
 
 ////////////////////////
@@ -70,8 +84,10 @@ const defaultFieldComponents = {
     pickValidProps: exposeContentAsChildren,
     omitInvalidPropsWarning,
   },
+  text: { component: Text, pickValidProps: exposeContentAsChildren, omitInvalidPropsWarning },
   externalButtonLink: { component: Link, pickValidProps: exposeLinkProps },
   internalButtonLink: { component: Link, pickValidProps: exposeLinkProps },
+  socialMediaLink: { component: SocialMediaLink, pickValidProps: exposeSocialMediaProps },
   image: { component: FieldImage, pickValidProps: exposeImageProps },
   customAppearance: { component: CustomAppearance, pickValidProps: exposeCustomAppearanceProps },
   youtube: { component: YoutubeEmbed, pickValidProps: exposeYoutubeProps },
@@ -93,6 +109,7 @@ const defaultFieldComponents = {
         h5: H5,
         h6: H6,
         p: P,
+        span: Text,
         img: MarkdownImage,
         code: Code,
         pre: CodeBlock,
@@ -211,6 +228,12 @@ const propTypeLink = shape({
   href: string.isRequired,
 });
 
+const propTypeSocialMediaLink = shape({
+  fieldType: oneOf(['socialMediaLink']).isRequired,
+  platform: string.isRequired,
+  url: string.isRequired,
+});
+
 const propTypeImageAsset = shape({
   id: string.isRequired,
   type: oneOf(['imageAsset']).isRequired,
@@ -236,6 +259,7 @@ const propTypeCustomAppearance = shape({
   backgroundColor: string,
   textColor: string,
   backgroundImage: propTypeImageAsset,
+  backgroundImageOverlay: object,
 });
 
 const propTypeYoutube = shape({
@@ -270,6 +294,7 @@ Field.propTypes = {
   data: oneOfType([
     propTypeTextContent,
     propTypeLink,
+    propTypeSocialMediaLink,
     propTypeImage,
     propTypeCustomAppearance,
     propTypeYoutube,

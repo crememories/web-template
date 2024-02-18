@@ -10,6 +10,7 @@ import { useIntl, intlShape } from '../../util/reactIntl';
 import { metaTagProps } from '../../util/seo';
 import { canonicalRoutePath } from '../../util/routes';
 import { propTypes } from '../../util/types';
+import { apiBaseUrl } from '../../util/api';
 
 import css from './Page.module.css';
 
@@ -24,6 +25,31 @@ const twitterPageURL = siteTwitterHandle => {
     return `https://twitter.com/${siteTwitterHandle}`;
   }
   return null;
+};
+
+const webmanifestURL = marketplaceRootURL => {
+  // Note: on localhost (when running "yarn run dev"), the webmanifest is running on apiServer port
+  const baseUrl = apiBaseUrl(marketplaceRootURL);
+  return `${baseUrl}/site.webmanifest`;
+};
+
+const getFaviconVariants = config => {
+  // We add favicon through hosted configs
+  // NOTE: There's no favicon.ico file. This is an imageAsset object which is used together with <meta> tags.
+  const favicon = config.branding.favicon;
+  return favicon?.type === 'imageAsset' ? Object.values(favicon.attributes.variants) : [];
+};
+
+const getAppleTouchIconURL = config => {
+  // The appIcon is used to pick apple-touch-icon
+  // We use 180x180. I.e. we follow the example set by realfavicongenerator
+  const appIcon = config.branding.appIcon;
+  const appIconVariants =
+    appIcon?.type === 'imageAsset' ? Object.values(appIcon.attributes.variants) : [];
+  const appleTouchIconVariant = appIconVariants.find(variant => {
+    return variant.width === 180 && variant.height === 180;
+  });
+  return appleTouchIconVariant?.url;
 };
 
 class PageComponent extends Component {
@@ -116,7 +142,7 @@ class PageComponent extends Component {
     } = socialSharing || {};
 
     // Images for social media sharing
-    const defaultFacebookImageURL = config.branding.facebookImageURL;
+    const defaultFacebookImageURL = config.branding.facebookImage;
     const openGraphFallbackImages = [
       {
         name: 'facebook',
@@ -125,7 +151,7 @@ class PageComponent extends Component {
         height: 630,
       },
     ];
-    const defaultTwitterImageURL = config.branding.twitterImageURL;
+    const defaultTwitterImageURL = config.branding.twitterImage;
     const twitterFallbackImages = [
       {
         name: 'twitter',
@@ -204,8 +230,20 @@ class PageComponent extends Component {
       });
     }
 
+    const faviconVariants = getFaviconVariants(config);
+    const appleTouchIcon = getAppleTouchIconURL(config);
+
+    // Marketplace color and branding image comes from configs
+    // If set, we need to create CSS Property and set it to DOM (documentElement is selected here)
+    // Note: this is also set to <html> element in app.js to provide marketplace colors for modals/portals.
+    const styles = {
+      ['--marketplaceColor']: config.branding.marketplaceColor,
+      ['--marketplaceColorDark']: config.branding.marketplaceColorDark,
+      ['--marketplaceColorLight']: config.branding.marketplaceColorLight,
+    };
+
     return (
-      <div className={classes}>
+      <div className={classes} style={styles} id="page">
         <Helmet
           htmlAttributes={{
             lang: intl.locale,
@@ -214,6 +252,25 @@ class PageComponent extends Component {
           <title>{pageTitle}</title>
           {referrer ? <meta name="referrer" content={referrer} /> : null}
           <link rel="canonical" href={canonicalUrl} />
+
+          {faviconVariants.map(variant => {
+            return (
+              <link
+                key={`icon_${variant.width}`}
+                rel="icon"
+                type="image/png"
+                sizes={`${variant.width}x${variant.height}`}
+                href={variant.url}
+              />
+            );
+          })}
+
+          {appleTouchIcon ? (
+            <link rel="apple-touch-icon" sizes="180x180" href={appleTouchIcon} />
+          ) : null}
+
+          <link rel="manifest" href={webmanifestURL(marketplaceRootURL)} />
+
           <meta httpEquiv="Content-Type" content="text/html; charset=UTF-8" />
           <meta httpEquiv="Content-Language" content={intl.locale} />
           {metaToHead.map((metaProps, i) => (

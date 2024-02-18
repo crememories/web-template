@@ -3,6 +3,7 @@ const {
   calculateQuantityFromHours,
   calculateTotalFromLineItems,
   calculateShippingFee,
+  hasCommissionPercentage,
 } = require('./lineItemHelpers');
 const { types } = require('sharetribe-flex-sdk');
 const { Money } = types;
@@ -89,7 +90,12 @@ const getDateRangeQuantityAndLineItems = (orderData, code) => {
   return { quantity, extraLineItems: [] };
 };
 
-/** Returns collection of lineItems (max 50)
+/**
+ * Returns collection of lineItems (max 50)
+ *
+ * All the line-items dedicated to _customer_ define the "payin total".
+ * Similarly, the sum of all the line-items included for _provider_ create "payout total".
+ * Platform gets the commission, which is the difference between payin and payout totals.
  *
  * Each line items has following fields:
  * - `code`: string, mandatory, indentifies line item type (e.g. \"line-item/cleaning-fee\"), maximum length 64 characters.
@@ -107,9 +113,12 @@ const getDateRangeQuantityAndLineItems = (orderData, code) => {
  *
  * @param {Object} listing
  * @param {Object} orderData
+ * @param {Object} providerCommission
+ * @param {Object} customerCommission
  * @returns {Array} lineItems
  */
-exports.transactionLineItems = (listing, orderData, commission) => {
+
+exports.transactionLineItems = (listing, orderData, providerCommission, customerCommission) => {
   const publicData = listing.attributes.publicData;
   const unitPrice = listing.attributes.price;
   const currency = unitPrice.currency;
@@ -179,20 +188,55 @@ exports.transactionLineItems = (listing, orderData, commission) => {
     includeFor: ['customer', 'provider'],
   };
 
-  const configuredComission = commission?-commission:PROVIDER_COMMISSION_PERCENTAGE;
+  // const configuredComission = commission?-commission:PROVIDER_COMMISSION_PERCENTAGE;
 
-  // Note: extraLineItems for product selling (aka shipping fee)
-  //       is not included to commission calculation.
-  const providerCommission = {
-    code: 'line-item/provider-commission',
-    unitPrice: calculateTotalFromLineItems([order]),
-    percentage: configuredComission,
-    includeFor: ['provider'],
+
+  // Provider commission reduces the amount of money that is paid out to provider.
+  // Therefore, the provider commission line-item should have negative effect to the payout total.
+  const getNegation = percentage => {
+    return -1 * percentage;
   };
 
-  // Let's keep the base price (order) as first line item and provider's commission as last one.
+  // Note: extraLineItems for product selling (aka shipping fee)
+  // is not included in either customer or provider commission calculation.
+
+  // The provider commission is what the provider pays for the transaction, and
+  // it is the subtracted from the order price to get the provider payout:
+  // orderPrice - providerCommission = providerPayout
+  const providerCommissionMaybe = hasCommissionPercentage(providerCommission)
+    ? [
+        {
+          code: 'line-item/provider-commission',
+          unitPrice: calculateTotalFromLineItems([order]),
+          percentage: getNegation(providerCommission.percentage),
+          // percentage: configuredComission,
+          includeFor: ['provider'],
+        },
+      ]
+    : [];
+
+  // The customer commission is what the customer pays for the transaction, and
+  // it is added on top of the order price to get the customer's payin price:
+  // orderPrice + customerCommission = customerPayin
+  const customerCommissionMaybe = hasCommissionPercentage(customerCommission)
+    ? [
+        {
+          code: 'line-item/customer-commission',
+          unitPrice: calculateTotalFromLineItems([order]),
+          percentage: customerCommission.percentage,
+          includeFor: ['customer'],
+        },
+      ]
+    : [];
+
+  // Let's keep the base price (order) as first line item and provider and customer commissions as last.
   // Note: the order matters only if OrderBreakdown component doesn't recognize line-item.
-  const lineItems = [order, ...extraLineItems, providerCommission];
+  const lineItems = [
+    order,
+    ...extraLineItems,
+    ...providerCommissionMaybe,
+    ...customerCommissionMaybe,
+  ];
 
   return lineItems;
 };

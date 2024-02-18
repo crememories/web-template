@@ -22,8 +22,9 @@ import { propTypes } from '../../util/types';
 import { getListingsById } from '../../ducks/marketplaceData.duck';
 import { manageDisableScrolling, isScrollingDisabled } from '../../ducks/ui.duck';
 
-import { Footer, H3, H5, Page } from '../../components';
+import { H3, H5, Page } from '../../components';
 import TopbarContainer from '../TopbarContainer/TopbarContainer';
+import FooterContainer from '../FooterContainer/FooterContainer';
 
 import {
   groupListingFieldConfigs,
@@ -55,7 +56,6 @@ export class SearchPageComponent extends Component {
     super(props);
 
     this.state = {
-      isSearchMapOpenOnMobile: props.tab === 'map',
       isMobileModalOpen: false,
       currentQueryParams: validUrlQueryParamsFromProps(props),
     };
@@ -305,7 +305,7 @@ export class SearchPageComponent extends Component {
         schema={schema}
       >
         <TopbarContainer
-          className={topbarClasses}
+          rootClassName={topbarClasses}
           currentPage="SearchPage"
           currentSearchParams={urlQueryParams}
           categories={enumOptions}
@@ -316,7 +316,7 @@ export class SearchPageComponent extends Component {
               {availableFilters.map(config => {
                 return (
                   <FilterComponent
-                    key={`SearchFiltersMobile.${config.key}`}
+                    key={`SearchFiltersMobile.${config.scope || 'built-in'}.${config.key}`}
                     idPrefix="SearchFiltersMobile"
                     className={css.filter}
                     config={config}
@@ -359,7 +359,7 @@ export class SearchPageComponent extends Component {
                 {availableFilters.map(config => {
                   return (
                     <FilterComponent
-                      key={`SearchFiltersMobile.${config.key}`}
+                      key={`SearchFiltersMobile.${config.scope || 'built-in'}.${config.key}`}
                       idPrefix="SearchFiltersMobile"
                       config={config}
                       marketplaceCurrency={marketplaceCurrency}
@@ -409,7 +409,7 @@ export class SearchPageComponent extends Component {
             </div>
           </div>
         </div>
-        <Footer />
+        <FooterContainer />
       </Page>
     );
   }
@@ -420,7 +420,6 @@ SearchPageComponent.defaultProps = {
   pagination: null,
   searchListingsError: null,
   searchParams: {},
-  tab: 'listings',
 };
 
 SearchPageComponent.propTypes = {
@@ -431,7 +430,6 @@ SearchPageComponent.propTypes = {
   searchInProgress: bool.isRequired,
   searchListingsError: propTypes.error,
   searchParams: object,
-  tab: oneOf(['filters', 'listings', 'map']).isRequired,
 
   // from useHistory
   history: shape({

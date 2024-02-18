@@ -4,6 +4,10 @@
 // Most of the work happens in components.           //
 ///////////////////////////////////////////////////////
 
+
+// Note: These come from the layout asset nowadays by default.
+//       To use this built-in configuration, you need to remove the overwrite from configHelper.js (mergeLayouts func)
+
 // There are 4 SearchPage variants that can be used:
 // 'map' & 'grid' & 'modal' & 'mapSub'
 export const searchPage = {

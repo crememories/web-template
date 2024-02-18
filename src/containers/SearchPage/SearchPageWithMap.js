@@ -61,7 +61,7 @@ export class SearchPageComponent extends Component {
     super(props);
 
     this.state = {
-      isSearchMapOpenOnMobile: props.tab === 'map',
+      isSearchMapOpenOnMobile: false,
       isMobileModalOpen: false,
       currentQueryParams: validUrlQueryParamsFromProps(props),
       isSecondaryFiltersOpen: false,
@@ -110,13 +110,14 @@ export class SearchPageComponent extends Component {
       });
 
       const originMaybe = isOriginInUse(this.props.config) ? { origin: viewportCenter } : {};
+      const dropNonFilterParams = false;
 
       const searchParams = {
         address,
         ...originMaybe,
         bounds: viewportBounds,
         mapSearch: true,
-        ...validFilterParams(rest, listingFieldsConfig, defaultFiltersConfig),
+        ...validFilterParams(rest, listingFieldsConfig, defaultFiltersConfig, dropNonFilterParams),
       };
 
       history.push(createResourceLocatorString('SearchPage', routes, {}, searchParams));
@@ -392,7 +393,7 @@ export class SearchPageComponent extends Component {
         schema={schema}
       >
         <TopbarContainer
-          className={topbarClasses}
+          rootClassName={topbarClasses}
           currentPage="SearchPage"
           currentSearchParams={urlQueryParams}
         />
@@ -419,7 +420,7 @@ export class SearchPageComponent extends Component {
               {availableFilters.map(config => {
                 return (
                   <FilterComponent
-                    key={`SearchFiltersMobile.${config.key}`}
+                    key={`SearchFiltersMobile.${config.scope || 'built-in'}.${config.key}`}
                     idPrefix="SearchFiltersMobile"
                     config={config}
                     marketplaceCurrency={marketplaceCurrency}
@@ -447,7 +448,7 @@ export class SearchPageComponent extends Component {
                 {availablePrimaryFilters.map(config => {
                   return (
                     <FilterComponent
-                      key={`SearchFiltersPrimary.${config.key}`}
+                      key={`SearchFiltersPrimary.${config.scope || 'built-in'}.${config.key}`}
                       idPrefix="SearchFiltersPrimary"
                       config={config}
                       marketplaceCurrency={marketplaceCurrency}
@@ -475,7 +476,7 @@ export class SearchPageComponent extends Component {
                   {customSecondaryFilters.map(config => {
                     return (
                       <FilterComponent
-                        key={`SearchFiltersSecondary.${config.key}`}
+                        key={`SearchFiltersSecondary.${config.scope || 'built-in'}.${config.key}`}
                         idPrefix="SearchFiltersSecondary"
                         config={config}
                         marketplaceCurrency={marketplaceCurrency}
@@ -554,7 +555,6 @@ SearchPageComponent.defaultProps = {
   pagination: null,
   searchListingsError: null,
   searchParams: {},
-  tab: 'listings',
   activeListingId: null,
 };
 
@@ -567,7 +567,6 @@ SearchPageComponent.propTypes = {
   searchInProgress: bool.isRequired,
   searchListingsError: propTypes.error,
   searchParams: object,
-  tab: oneOf(['filters', 'listings', 'map']).isRequired,
 
   // from useHistory
   history: shape({

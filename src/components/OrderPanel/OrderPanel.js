@@ -1,12 +1,28 @@
 import React from 'react';
 import { compose } from 'redux';
 import { withRouter } from 'react-router-dom';
-import { array, bool, func, node, number, object, oneOfType, shape, string } from 'prop-types';
+import {
+  array,
+  arrayOf,
+  bool,
+  func,
+  node,
+  number,
+  object,
+  oneOfType,
+  shape,
+  string,
+} from 'prop-types';
 import loadable from '@loadable/component';
 import classNames from 'classnames';
 import omit from 'lodash/omit';
 
 import { intlShape, injectIntl, FormattedMessage } from '../../util/reactIntl';
+import {
+  displayDeliveryPickup,
+  displayDeliveryShipping,
+  displayPrice,
+} from '../../util/configHelpers';
 import {
   propTypes,
   LISTING_STATE_CLOSED,
@@ -14,13 +30,17 @@ import {
   LINE_ITEM_DAY,
   LINE_ITEM_ITEM,
   LINE_ITEM_HOUR,
+  STOCK_MULTIPLE_ITEMS,
+  STOCK_INFINITE_MULTIPLE_ITEMS,
 } from '../../util/types';
 import { formatMoney } from '../../util/currency';
 import { parse, stringify } from '../../util/urlHelpers';
 import { userDisplayNameAsString } from '../../util/data';
 import {
+  INQUIRY_PROCESS_NAME,
   getSupportedProcessesInfo,
   isBookingProcess,
+  isPurchaseProcess,
   resolveLatestProcessName,
 } from '../../transactions/transaction';
 
@@ -33,6 +53,11 @@ const BookingTimeForm = loadable(() =>
 );
 const BookingDatesForm = loadable(() =>
   import(/* webpackChunkName: "BookingDatesForm" */ './BookingDatesForm/BookingDatesForm')
+);
+const InquiryWithoutPaymentForm = loadable(() =>
+  import(
+    /* webpackChunkName: "InquiryWithoutPaymentForm" */ './InquiryWithoutPaymentForm/InquiryWithoutPaymentForm'
+  )
 );
 const ProductOrderForm = loadable(() =>
   import(/* webpackChunkName: "ProductOrderForm" */ './ProductOrderForm/ProductOrderForm')
@@ -72,7 +97,62 @@ const closeOrderModal = (history, location) => {
   history.push(`${pathname}${searchString}`, state);
 };
 
+const handleSubmit = (
+  isOwnListing,
+  isClosed,
+  isInquiryWithoutPayment,
+  onSubmit,
+  history,
+  location
+) => {
+  // TODO: currently, inquiry-process does not have any form to ask more order data.
+  // We can submit without opening any inquiry/order modal.
+  return isInquiryWithoutPayment
+    ? () => onSubmit({})
+    : () => openOrderModal(isOwnListing, isClosed, history, location);
+};
+
 const dateFormattingOptions = { month: 'short', day: 'numeric', weekday: 'short' };
+
+const PriceMaybe = props => {
+  const {
+    price,
+    publicData,
+    validListingTypes,
+    intl,
+    marketplaceCurrency,
+    showCurrencyMismatch = false,
+  } = props;
+  const { listingType, unitType } = publicData || {};
+
+  const foundListingTypeConfig = validListingTypes.find(conf => conf.listingType === listingType);
+  const showPrice = displayPrice(foundListingTypeConfig);
+  if (!showPrice || !price) {
+    return null;
+  }
+
+  // Get formatted price or currency code if the currency does not match with marketplace currency
+  const { formattedPrice, priceTitle } = priceData(price, marketplaceCurrency, intl);
+  // TODO: In CTA, we don't have space to show proper error message for a mismatch of marketplace currency
+  //       Instead, we show the currency code in place of the price
+  return showCurrencyMismatch ? (
+    <div className={css.priceContainerInCTA}>
+      <div className={css.priceValue} title={priceTitle}>
+        {formattedPrice}
+      </div>
+      <div className={css.perUnitInCTA}>
+        <FormattedMessage id="OrderPanel.perUnit" values={{ unitType }} />
+      </div>
+    </div>
+  ) : (
+    <div className={css.priceContainer}>
+      <p className={css.price}>{formatMoney(intl, price)}</p>
+      <div className={css.perUnit}>
+        <FormattedMessage id="OrderPanel.perUnit" values={{ unitType }} />
+      </div>
+    </div>
+  );
+};
 
 const OrderPanel = props => {
   const {
@@ -80,6 +160,7 @@ const OrderPanel = props => {
     className,
     titleClassName,
     listing,
+    validListingTypes,
     lineItemUnitType: lineItemUnitTypeMaybe,
     isOwnListing,
     onSubmit,
@@ -101,16 +182,18 @@ const OrderPanel = props => {
     marketplaceName,
     fetchLineItemsInProgress,
     fetchLineItemsError,
+    payoutDetailsWarning,
   } = props;
 
-  const transactionProcessAlias = listing?.attributes?.publicData?.transactionProcessAlias || '';
+  const publicData = listing?.attributes?.publicData || {};
+  const { listingType, unitType, transactionProcessAlias = '' } = publicData || {};
   const processName = resolveLatestProcessName(transactionProcessAlias.split('/')[0]);
-  const unitType = listing?.attributes?.publicData?.unitType;
   const lineItemUnitType = lineItemUnitTypeMaybe || `line-item/${unitType}`;
 
   const price = listing?.attributes?.price;
+  const isPaymentProcess = processName !== INQUIRY_PROCESS_NAME;
 
-  const showPriceMissing = !price;
+  const showPriceMissing = isPaymentProcess && !price;
   const PriceMissing = () => {
     return (
       <p className={css.error}>
@@ -118,7 +201,7 @@ const OrderPanel = props => {
       </p>
     );
   };
-  const showInvalidCurrency = price?.currency !== marketplaceCurrency;
+  const showInvalidCurrency = isPaymentProcess && price?.currency !== marketplaceCurrency;
   const InvalidCurrency = () => {
     return (
       <p className={css.error}>
@@ -140,21 +223,29 @@ const OrderPanel = props => {
 
   // The listing resource has a relationship: `currentStock`,
   // which you should include when making API calls.
+  const isPurchase = isPurchaseProcess(processName);
   const currentStock = listing.currentStock?.attributes?.quantity;
-  const isOutOfStock = lineItemUnitType === LINE_ITEM_ITEM && currentStock === 0;
+  const isOutOfStock = isPurchase && lineItemUnitType === LINE_ITEM_ITEM && currentStock === 0;
 
   // Show form only when stock is fully loaded. This avoids "Out of stock" UI by
   // default before all data has been downloaded.
-  const shouldHaveProductOrder = !isBooking && [LINE_ITEM_ITEM].includes(lineItemUnitType);
-  const showProductOrderForm = shouldHaveProductOrder && typeof currentStock === 'number';
+  const showProductOrderForm = isPurchase && typeof currentStock === 'number';
+
+  const showInquiryForm = processName === INQUIRY_PROCESS_NAME;
 
   const supportedProcessesInfo = getSupportedProcessesInfo();
   const isKnownProcess = supportedProcessesInfo.map(info => info.name).includes(processName);
 
   const { pickupEnabled, shippingEnabled } = listing?.attributes?.publicData || {};
 
+  const listingTypeConfig = validListingTypes.find(conf => conf.listingType === listingType);
+  const displayShipping = displayDeliveryShipping(listingTypeConfig);
+  const displayPickup = displayDeliveryPickup(listingTypeConfig);
+  const allowOrdersOfMultipleItems = [STOCK_MULTIPLE_ITEMS, STOCK_INFINITE_MULTIPLE_ITEMS].includes(
+    listingTypeConfig?.stockType
+  );
+
   const showClosedListingHelpText = listing.id && isClosed;
-  const { formattedPrice, priceTitle } = priceData(price, marketplaceCurrency, intl);
   const isOrderOpen = !!parse(location.search).orderOpen;
 
   const subTitleText = showClosedListingHelpText
@@ -186,14 +277,13 @@ const OrderPanel = props => {
           {subTitleText ? <div className={css.orderHelp}>{subTitleText}</div> : null}
         </div>
 
-        {price ? (
-          <div className={css.priceContainer}>
-            <p className={css.price}>{formatMoney(intl, price)}</p>
-            <div className={css.perUnit}>
-              <FormattedMessage id="OrderPanel.perUnit" values={{ unitType }} />
-            </div>
-          </div>
-        ) : null}
+        <PriceMaybe
+          price={price}
+          publicData={publicData}
+          validListingTypes={validListingTypes}
+          intl={intl}
+          marketplaceCurrency={marketplaceCurrency}
+        />
 
         <div className={css.author}>
           <AvatarSmall user={author} className={css.providerAvatar} />
@@ -230,6 +320,7 @@ const OrderPanel = props => {
             lineItems={lineItems}
             fetchLineItemsInProgress={fetchLineItemsInProgress}
             fetchLineItemsError={fetchLineItemsError}
+            payoutDetailsWarning={payoutDetailsWarning}
           />
         ) : showBookingDatesForm ? (
           <BookingDatesForm
@@ -250,6 +341,7 @@ const OrderPanel = props => {
             lineItems={lineItems}
             fetchLineItemsInProgress={fetchLineItemsInProgress}
             fetchLineItemsError={fetchLineItemsError}
+            payoutDetailsWarning={payoutDetailsWarning}
           />
         ) : showProductOrderForm ? (
           <ProductOrderForm
@@ -258,8 +350,10 @@ const OrderPanel = props => {
             price={price}
             marketplaceCurrency={marketplaceCurrency}
             currentStock={currentStock}
-            pickupEnabled={pickupEnabled}
-            shippingEnabled={shippingEnabled}
+            allowOrdersOfMultipleItems={allowOrdersOfMultipleItems}
+            pickupEnabled={pickupEnabled && displayPickup}
+            shippingEnabled={shippingEnabled && displayShipping}
+            displayDeliveryMethod={displayPickup || displayShipping}
             listingId={listing.id}
             variants={listing.attributes.publicData.variants}
             isOwnListing={isOwnListing}
@@ -269,7 +363,10 @@ const OrderPanel = props => {
             lineItems={lineItems}
             fetchLineItemsInProgress={fetchLineItemsInProgress}
             fetchLineItemsError={fetchLineItemsError}
+            payoutDetailsWarning={payoutDetailsWarning}
           />
+        ) : showInquiryForm ? (
+          <InquiryWithoutPaymentForm formId="OrderPanelInquiryForm" onSubmit={onSubmit} />
         ) : !isKnownProcess ? (
           <p className={css.errorSidebar}>
             <FormattedMessage id="OrderPanel.unknownTransactionProcess" />
@@ -277,14 +374,14 @@ const OrderPanel = props => {
         ) : null}
       </ModalInMobile>
       <div className={css.openOrderForm}>
-        <div className={css.priceContainerInCTA}>
-          <div className={css.priceValue} title={priceTitle}>
-            {formattedPrice}
-          </div>
-          <div className={css.perUnitInCTA}>
-            <FormattedMessage id="OrderPanel.perUnit" values={{ unitType }} />
-          </div>
-        </div>
+        <PriceMaybe
+          price={price}
+          publicData={publicData}
+          validListingTypes={validListingTypes}
+          intl={intl}
+          marketplaceCurrency={marketplaceCurrency}
+          showCurrencyMismatch
+        />
 
         {isClosed ? (
           <div className={css.closedListingButton}>
@@ -292,15 +389,24 @@ const OrderPanel = props => {
           </div>
         ) : (
           <PrimaryButton
-            onClick={() => openOrderModal(isOwnListing, isClosed, history, location)}
+            onClick={handleSubmit(
+              isOwnListing,
+              isClosed,
+              showInquiryForm,
+              onSubmit,
+              history,
+              location
+            )}
             disabled={isOutOfStock}
           >
             {isBooking ? (
               <FormattedMessage id="OrderPanel.ctaButtonMessageBooking" />
             ) : isOutOfStock ? (
               <FormattedMessage id="OrderPanel.ctaButtonMessageNoStock" />
-            ) : (
+            ) : isPurchase ? (
               <FormattedMessage id="OrderPanel.ctaButtonMessagePurchase" />
+            ) : (
+              <FormattedMessage id="OrderPanel.ctaButtonMessageInquiry" />
             )}
           </PrimaryButton>
         )}
@@ -315,6 +421,7 @@ OrderPanel.defaultProps = {
   titleClassName: null,
   isOwnListing: false,
   authorLink: null,
+  payoutDetailsWarning: null,
   titleDesktop: null,
   subTitle: null,
   monthlyTimeSlots: null,
@@ -327,9 +434,20 @@ OrderPanel.propTypes = {
   className: string,
   titleClassName: string,
   listing: oneOfType([propTypes.listing, propTypes.ownListing]),
+  validListingTypes: arrayOf(
+    shape({
+      listingType: string.isRequired,
+      transactionType: shape({
+        process: string.isRequired,
+        alias: string.isRequired,
+        unitType: string.isRequired,
+      }).isRequired,
+    })
+  ).isRequired,
   isOwnListing: bool,
   author: oneOfType([propTypes.user, propTypes.currentUser]).isRequired,
   authorLink: node,
+  payoutDetailsWarning: node,
   onSubmit: func.isRequired,
   title: oneOfType([node, string]).isRequired,
   titleDesktop: node,

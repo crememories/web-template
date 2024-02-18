@@ -8,7 +8,7 @@ const data = 'data:';
 const blob = 'blob:';
 const devImagesMaybe = dev ? ['*.localhost:8000'] : [];
 const baseUrl = process.env.REACT_APP_SHARETRIBE_SDK_BASE_URL || 'https://flex-api.sharetribe.com';
-// Asset Delivery API is using a different domain than other Flex APIs
+// Asset Delivery API is using a different domain than other Sharetribe APIs
 // cdn.st-api.com
 // If assetCdnBaseUrl is used to initialize SDK (for proxy purposes), then that URL needs to be in CSP
 const assetCdnBaseUrl = process.env.REACT_APP_SHARETRIBE_SDK_ASSET_CDN_BASE_URL;
@@ -32,13 +32,21 @@ const defaultDirectives = {
     'events.mapbox.com',
 
     // Google Analytics
+    // TODO: Signals support needs more work
+    // https://developers.google.com/tag-platform/security/guides/csp
     'www.googletagmanager.com',
     '*.google-analytics.com',
+    '*.analytics.google.com',
     'stats.g.doubleclick.net',
+
+    // Plausible analytics
+    'plausible.io',
+    '*.plausible.io',
 
     'fonts.googleapis.com',
 
     'sentry.io',
+    '*.sentry.io',
     '*.stripe.com',
   ],
   fontSrc: [self, data, 'assets-sharetribecom.sharetribe.com', 'fonts.gstatic.com'],
@@ -62,6 +70,9 @@ const defaultDirectives = {
     '*.googleapis.com',
     '*.ggpht.com',
 
+    // Giphy
+    '*.giphy.com',
+
     // Google Analytics
     'www.googletagmanager.com',
     'www.google.com',
@@ -71,6 +82,7 @@ const defaultDirectives = {
     // Youtube (static image)
     '*.ytimg.com',
 
+    // Stripe
     '*.stripe.com',
   ],
   scriptSrc: [

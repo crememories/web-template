@@ -10,6 +10,8 @@
 
 // Main search used in Topbar.
 // This can be either 'keywords' or 'location'.
+// Note: The mainSearch comes from the listing-search asset nowadays by default.
+//       To use this built-in configuration, you need to remove the overwrite from configHelper.js (mergeSearchConfig func)
 export const mainSearch = {
   searchType: 'keywords',
 };
@@ -19,6 +21,7 @@ export const mainSearch = {
  * These are custom configs for each filter.
  * Common properties: key, schemaType, and label.
  * Note: the order of default filters is defined in util/configHelpers.js
+ * To use this built-in configuration, you need to remove the overwrite from configHelper.js (mergeSearchConfig func)
  */
 
 export const dateRangeFilter = {
@@ -31,6 +34,10 @@ export const dateRangeFilter = {
   dateRangeMode: 'day',
 };
 
+/**
+ * Note: the order of default filters is defined in util/configHelpers.js
+ * To use this built-in configuration, you need to remove the overwrite from configHelper.js (mergeSearchConfig func)
+ */
 export const priceFilter = {
   schemaType: 'price',
   // Note: unlike most prices this is not handled in subunits
@@ -39,9 +46,9 @@ export const priceFilter = {
   step: 5,
 };
 // // This is not in use by default.
-// // Needs more thinking how it should work together with main search.
 // export const keywordsFilter = {
-//   schemaType: 'text',
+//   key: 'keywords',
+//   schemaType: 'keywords',
 // }
 
 export const sortConfig = {
@@ -65,14 +72,20 @@ export const sortConfig = {
   conflictingFilters: [],
 
   options: [
-    { key: 'createdAt', label: 'Newest' },
-    { key: '-createdAt', label: 'Oldest' },
-    { key: '-price', label: 'Lowest price' },
-    { key: 'price', label: 'Highest price' },
+    // These are default sort options
+    { key: 'createdAt', labelTranslationKey: 'SortBy.newest' },
+    { key: '-createdAt', labelTranslationKey: 'SortBy.oldest' },
+    { key: '-price', labelTranslationKey: 'SortBy.lowestPrice' },
+    { key: 'price', labelTranslationKey: 'SortBy.highestPrice' },
+    // If you add own sort options, you can also use label key: { key: 'meta_rating', label: 'Highest rated' },
 
     // The relevance is only used for keyword search, but the
     // parameter isn't sent to the Marketplace API. The key is purely
     // for handling the internal state of the sorting dropdown.
-    { key: 'relevance', label: 'Relevance', longLabel: 'Relevance (Keyword search)' },
+    {
+      key: 'relevance',
+      labelTranslationKey: 'SortBy.relevance',
+      labelTranslationKeyLong: 'SortBy.relevanceLong',
+    },
   ],
 };
