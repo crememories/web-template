@@ -1,34 +1,34 @@
 const { transactionLineItems } = require('../api-util/lineItems');
-const { getSdk, getTrustedSdk, handleError, serialize } = require('../api-util/sdk');
+const {
+  getSdk,
+  getTrustedSdk,
+  handleError,
+  serialize,
+  fetchCommission,
+} = require('../api-util/sdk');
 
 module.exports = (req, res) => {
-  const { isSpeculative, orderData, bodyParams, queryParams,commission } = req.body;
-
-  console.log('comissionValue');
-  console.log(commission);
-  console.log('req.body');
-  console.log(req.body);
-
+  const { isSpeculative, orderData, bodyParams, queryParams } = req.body;
 
   const sdk = getSdk(req, res);
   let lineItems = null;
 
-  sdk.listings
-    .show({ id: bodyParams?.params?.listingId })
-    .then(listingResponse => {
-      const listing = listingResponse.data.data;
-      const variantCheck = (bodyParams.params 
-        && bodyParams.params.stockReservationVariant 
-        && listing.attributes.publicData
-        && listing.attributes.publicData.variants);
+  const listingPromise = () => sdk.listings.show({ id: bodyParams?.params?.listingId });
 
-      if(variantCheck){
-        const variantId = bodyParams.params.stockReservationVariant - 1;
-        const variantSelected = listing.attributes.publicData.variants[variantId];
-        listing.attributes.price.amount = variantSelected.variantPrice;
-      }
-      
-      lineItems = transactionLineItems(listing, { ...orderData, ...bodyParams.params }, commission);
+  Promise.all([listingPromise(), fetchCommission(sdk)])
+    .then(([showListingResponse, fetchAssetsResponse]) => {
+      const listing = showListingResponse.data.data;
+      const commissionAsset = fetchAssetsResponse.data.data[0];
+
+      const { providerCommission, customerCommission } =
+        commissionAsset?.type === 'jsonAsset' ? commissionAsset.attributes.data : {};
+
+      lineItems = transactionLineItems(
+        listing,
+        { ...orderData, ...bodyParams.params },
+        providerCommission,
+        customerCommission
+      );
 
       return getTrustedSdk(req);
     })

@@ -2,9 +2,11 @@
 import EditListingDetailsForm from './EditListingDetailsForm';
 import defaultConfig from '../../../../config/configDefault';
 
+const noop = () => {};
 const selectableListingTypes = [
   {
     listingType: 'sell-bicycles',
+    label: 'Sell bicycles',
     transactionProcessAlias: 'default-purchase/release-1',
     unitType: 'item',
   },
@@ -23,6 +25,7 @@ export const WithInitialValues = {
     updated: false,
     updateInProgress: false,
     selectableListingTypes: selectableListingTypes,
+    onListingTypeChange: noop,
     listingConfig: defaultConfig.listing,
     initialValues: {
       title: 'Listing',
@@ -37,12 +40,14 @@ export const WithInitialValues = {
 
 const selectableListingTypes2 = [
   {
-    listingType: 'rent-bicycles',
+    listingType: 'daily-booking',
+    label: 'Daily booking',
     transactionProcessAlias: 'default-booking/release-1',
     unitType: 'day',
   },
   {
     listingType: 'sell-bicycles',
+    label: 'Sell bicycles',
     transactionProcessAlias: 'default-purchase/release-1',
     unitType: 'item',
   },
@@ -61,6 +66,7 @@ export const MultipleProcessInfos = {
     updated: false,
     updateInProgress: false,
     selectableListingTypes: selectableListingTypes2,
+    onListingTypeChange: noop,
     listingConfig: defaultConfig.listing,
   },
   group: 'page:EditListingPage',

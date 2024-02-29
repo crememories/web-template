@@ -309,6 +309,18 @@ propTypes.availabilityException = shape({
   }),
 });
 
+export const STOCK_ONE_ITEM = 'oneItem';
+export const STOCK_MULTIPLE_ITEMS = 'multipleItems';
+export const STOCK_INFINITE_ONE_ITEM = 'infiniteOneItem';
+export const STOCK_INFINITE_MULTIPLE_ITEMS = 'infiniteMultipleItems';
+export const STOCK_INFINITE_ITEMS = [STOCK_INFINITE_ONE_ITEM, STOCK_INFINITE_MULTIPLE_ITEMS];
+export const STOCK_TYPES = [
+  STOCK_ONE_ITEM,
+  STOCK_MULTIPLE_ITEMS,
+  STOCK_INFINITE_ONE_ITEM,
+  STOCK_INFINITE_MULTIPLE_ITEMS,
+];
+
 propTypes.transition = shape({
   createdAt: instanceOf(Date).isRequired,
   by: oneOf(TX_TRANSITION_ACTORS).isRequired,
@@ -504,18 +516,24 @@ propTypes.listingFieldsConfig = arrayOf(
   })
 );
 
+const sortConfigOptionWithLabel = shape({
+  key: oneOf(['createdAt', '-createdAt', 'price', '-price', 'relevance']).isRequired,
+  label: string.isRequired,
+  longLabel: string,
+});
+
+const sortConfigOptionWithTranslationKey = shape({
+  key: oneOf(['createdAt', '-createdAt', 'price', '-price', 'relevance']).isRequired,
+  labelTranslationKey: string.isRequired,
+  labelTranslationKeyLong: string,
+});
+
 propTypes.sortConfig = shape({
   active: bool,
   queryParamName: oneOf(['sort']).isRequired,
   relevanceKey: string.isRequired,
   conflictingFilters: arrayOf(string),
-  options: arrayOf(
-    shape({
-      key: oneOf(['createdAt', '-createdAt', 'price', '-price', 'relevance']).isRequired,
-      label: string.isRequired,
-      longLabel: string,
-    })
-  ),
+  options: arrayOf(oneOfType([sortConfigOptionWithLabel, sortConfigOptionWithTranslationKey])),
 });
 
 export const ERROR_CODE_TRANSACTION_LISTING_NOT_FOUND = 'transaction-listing-not-found';

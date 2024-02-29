@@ -7,11 +7,13 @@ import classNames from 'classnames';
 import { useConfiguration } from '../../../context/configurationContext';
 import { useRouteConfiguration } from '../../../context/routeConfigurationContext';
 import { FormattedMessage, intlShape, injectIntl } from '../../../util/reactIntl';
+import { displayPrice } from '../../../util/configHelpers';
 import {
   LISTING_STATE_PENDING_APPROVAL,
   LISTING_STATE_CLOSED,
   LISTING_STATE_DRAFT,
   propTypes,
+  STOCK_MULTIPLE_ITEMS,
 } from '../../../util/types';
 import { formatMoney } from '../../../util/currency';
 import { ensureOwnListing } from '../../../util/data';
@@ -23,7 +25,7 @@ import {
   createSlug,
 } from '../../../util/urlHelpers';
 import { createResourceLocatorString, findRouteByRouteName } from '../../../util/routes';
-import { isBookingProcessAlias } from '../../../transactions/transaction';
+import { isBookingProcessAlias, isPurchaseProcessAlias } from '../../../transactions/transaction';
 
 import {
   AspectRatioWrapper,
@@ -47,7 +49,7 @@ const MENU_CONTENT_OFFSET = -12;
 const MAX_LENGTH_FOR_WORDS_IN_TITLE = 7;
 
 const priceData = (price, currency, intl) => {
-  if (price && price.currency === currency) {
+  if (price?.currency === currency) {
     const formattedPrice = formatMoney(intl, price);
     return { formattedPrice, priceTitle: formattedPrice };
   } else if (price) {
@@ -190,6 +192,7 @@ const ShowOutOfStockOverlayMaybe = props => {
     slug,
     actionsInProgressListingId,
     currentListingId,
+    hasStockManagementInUse,
     onCloseListing,
     intl,
   } = props;
@@ -201,43 +204,71 @@ const ShowOutOfStockOverlayMaybe = props => {
         { listingTitle: title }
       )}
     >
-      <NamedLink
-        className={css.finishListingDraftLink}
-        name="EditListingPage"
-        params={{ id, slug, type: LISTING_PAGE_PARAM_TYPE_EDIT, tab: 'pricing-and-stock' }}
-      >
-        <FormattedMessage id="ManageListingCard.setPriceAndStock" />
-      </NamedLink>
+      {hasStockManagementInUse ? (
+        <>
+          <NamedLink
+            className={css.finishListingDraftLink}
+            name="EditListingPage"
+            params={{ id, slug, type: LISTING_PAGE_PARAM_TYPE_EDIT, tab: 'pricing-and-stock' }}
+          >
+            <FormattedMessage id="ManageListingCard.setPriceAndStock" />
+          </NamedLink>
 
-      <div className={css.closeListingTextLink}>
-        {intl.formatMessage(
-          { id: 'ManageListingCard.closeListingTextOr' },
-          {
-            closeListingLink: (
-              <InlineTextButton
-                key="closeListingLink"
-                className={css.closeListingText}
-                disabled={!!actionsInProgressListingId}
-                onClick={() => {
-                  if (!actionsInProgressListingId) {
-                    onCloseListing(currentListingId);
-                  }
-                }}
-              >
-                <FormattedMessage id="ManageListingCard.closeListingText" />
-              </InlineTextButton>
-            ),
-          }
-        )}
-      </div>
+          <div className={css.closeListingText}>
+            {intl.formatMessage(
+              { id: 'ManageListingCard.closeListingTextOr' },
+              {
+                closeListingLink: (
+                  <InlineTextButton
+                    key="closeListingLink"
+                    className={css.closeListingText}
+                    disabled={!!actionsInProgressListingId}
+                    onClick={() => {
+                      if (!actionsInProgressListingId) {
+                        onCloseListing(currentListingId);
+                      }
+                    }}
+                  >
+                    <FormattedMessage id="ManageListingCard.closeListingText" />
+                  </InlineTextButton>
+                ),
+              }
+            )}
+          </div>
+        </>
+      ) : (
+        <div className={css.closeListingText}>
+          <InlineTextButton
+            key="closeListingLink"
+            className={css.closeListingText}
+            disabled={!!actionsInProgressListingId}
+            onClick={() => {
+              if (!actionsInProgressListingId) {
+                onCloseListing(currentListingId);
+              }
+            }}
+          >
+            <FormattedMessage id="ManageListingCard.closeListingText" />
+          </InlineTextButton>
+        </div>
+      )}
     </Overlay>
   ) : null;
 };
 
 const LinkToStockOrAvailabilityTab = props => {
-  const { id, slug, editListingLinkType, isBookable, hasListingType, currentStock, intl } = props;
+  const {
+    id,
+    slug,
+    editListingLinkType,
+    isBookable,
+    hasListingType,
+    hasStockManagementInUse,
+    currentStock,
+    intl,
+  } = props;
 
-  if (!hasListingType) {
+  if (!hasListingType || !(isBookable || hasStockManagementInUse)) {
     return null;
   }
 
@@ -268,6 +299,42 @@ const LinkToStockOrAvailabilityTab = props => {
   );
 };
 
+const PriceMaybe = props => {
+  const { price, publicData, config, intl } = props;
+  const { listingType } = publicData || {};
+  const validListingTypes = config.listing.listingTypes;
+  const foundListingTypeConfig = validListingTypes.find(conf => conf.listingType === listingType);
+
+  const showPrice = displayPrice(foundListingTypeConfig);
+  if (showPrice && !price) {
+    return (
+      <div className={css.noPrice}>
+        <FormattedMessage id="ManageListingCard.priceNotSet" />
+      </div>
+    );
+  } else if (!showPrice) {
+    return null;
+  }
+
+  const isBookable = isBookingProcessAlias(publicData?.transactionProcessAlias);
+  const { formattedPrice, priceTitle } = priceData(price, config.currency, intl);
+  return (
+    <div className={css.price}>
+      <div className={css.priceValue} title={priceTitle}>
+        {formattedPrice}
+      </div>
+      {isBookable ? (
+        <div className={css.perUnit}>
+          <FormattedMessage
+            id="ManageListingCard.perUnit"
+            values={{ unitType: publicData?.unitType }}
+          />
+        </div>
+      ) : null}
+    </div>
+  );
+};
+
 export const ManageListingCardComponent = props => {
   const config = useConfiguration();
   const routeConfiguration = useRouteConfiguration();
@@ -289,20 +356,25 @@ export const ManageListingCardComponent = props => {
   const classes = classNames(rootClassName || css.root, className);
   const currentListing = ensureOwnListing(listing);
   const id = currentListing.id.uuid;
-  const { title = '', price, state } = currentListing.attributes;
+  const { title = '', price, state, publicData } = currentListing.attributes;
   const slug = createSlug(title);
   const isPendingApproval = state === LISTING_STATE_PENDING_APPROVAL;
   const isClosed = state === LISTING_STATE_CLOSED;
   const isDraft = state === LISTING_STATE_DRAFT;
 
-  const { listingType, transactionProcessAlias } = listing?.attributes?.publicData || {};
+  const { listingType, transactionProcessAlias } = publicData || {};
   const isBookable = isBookingProcessAlias(transactionProcessAlias);
+  const isProductOrder = isPurchaseProcessAlias(transactionProcessAlias);
   const hasListingType = !!listingType;
+  const validListingTypes = config.listing.listingTypes;
+  const foundListingTypeConfig = validListingTypes.find(conf => conf.listingType === listingType);
 
   const currentStock = currentListing.currentStock?.attributes?.quantity;
   const isOutOfStock = currentStock === 0;
   const showOutOfStockOverlay =
     !isBookable && isOutOfStock && !isPendingApproval && !isClosed && !isDraft;
+  const hasStockManagementInUse =
+    isProductOrder && foundListingTypeConfig?.stockType === STOCK_MULTIPLE_ITEMS;
 
   const firstImage =
     currentListing.images && currentListing.images.length > 0 ? currentListing.images[0] : null;
@@ -310,8 +382,6 @@ export const ManageListingCardComponent = props => {
   const menuItemClasses = classNames(css.menuItem, {
     [css.menuItemDisabled]: !!actionsInProgressListingId,
   });
-
-  const { formattedPrice, priceTitle } = priceData(price, config.currency, intl);
 
   const hasError = hasOpeningError || hasClosingError;
   const thisListingInProgress =
@@ -448,6 +518,7 @@ export const ManageListingCardComponent = props => {
           actionsInProgressListingId={actionsInProgressListingId}
           currentListingId={currentListing.id}
           onCloseListing={onCloseListing}
+          hasStockManagementInUse={hasStockManagementInUse}
           intl={intl}
         />
 
@@ -461,27 +532,7 @@ export const ManageListingCardComponent = props => {
       </div>
 
       <div className={css.info}>
-        <div className={css.price}>
-          {formattedPrice ? (
-            <React.Fragment>
-              <div className={css.priceValue} title={priceTitle}>
-                {formattedPrice}
-              </div>
-              {isBookable ? (
-                <div className={css.perUnit}>
-                  <FormattedMessage
-                    id="ListingCard.perUnit"
-                    values={{ unitType: listing?.attributes?.publicData?.unitType }}
-                  />
-                </div>
-              ) : null}
-            </React.Fragment>
-          ) : (
-            <div className={css.noPrice}>
-              <FormattedMessage id="ManageListingCard.priceNotSet" />
-            </div>
-          )}
-        </div>
+        <PriceMaybe price={price} publicData={publicData} config={config} intl={intl} />
 
         <div className={css.mainInfo}>
           <div className={css.titleWrapper}>
@@ -514,6 +565,7 @@ export const ManageListingCardComponent = props => {
             isBookable={isBookable}
             currentStock={currentStock}
             hasListingType={hasListingType}
+            hasStockManagementInUse={hasStockManagementInUse}
             intl={intl}
           />
         </div>

@@ -40,11 +40,16 @@ export class BookingTimeFormComponent extends Component {
     const listingId = this.props.listingId;
     const isOwnListing = this.props.isOwnListing;
 
-    // We expect values bookingStartTime and bookingEndTime to be strings
+    // Note: we expect values bookingStartTime and bookingEndTime to be strings
     // which is the default case when the value has been selected through the form
-    const isSameTime = bookingStartTime === bookingEndTime;
+    const isStartBeforeEnd = bookingStartTime < bookingEndTime;
 
-    if (bookingStartTime && bookingEndTime && !isSameTime && !this.props.fetchLineItemsInProgress) {
+    if (
+      bookingStartTime &&
+      bookingEndTime &&
+      isStartBeforeEnd &&
+      !this.props.fetchLineItemsInProgress
+    ) {
       this.props.onFetchTransactionLineItems({
         orderData: { bookingStart: startDate, bookingEnd: endDate },
         listingId,
@@ -86,6 +91,7 @@ export class BookingTimeFormComponent extends Component {
             lineItems,
             fetchLineItemsInProgress,
             fetchLineItemsError,
+            payoutDetailsWarning,
           } = fieldRenderProps;
 
           const startTime = values && values.bookingStartTime ? values.bookingStartTime : null;
@@ -168,13 +174,17 @@ export class BookingTimeFormComponent extends Component {
               </div>
 
               <p className={css.finePrint}>
-                <FormattedMessage
-                  id={
-                    isOwnListing
-                      ? 'BookingTimeForm.ownListing'
-                      : 'BookingTimeForm.youWontBeChargedInfo'
-                  }
-                />
+                {payoutDetailsWarning ? (
+                  payoutDetailsWarning
+                ) : (
+                  <FormattedMessage
+                    id={
+                      isOwnListing
+                        ? 'BookingTimeForm.ownListing'
+                        : 'BookingTimeForm.youWontBeChargedInfo'
+                    }
+                  />
+                )}
               </p>
             </Form>
           );

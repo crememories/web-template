@@ -23,7 +23,7 @@ import { propTypes } from '../../util/types';
 import { getListingsById } from '../../ducks/marketplaceData.duck';
 import { manageDisableScrolling, isScrollingDisabled } from '../../ducks/ui.duck';
 
-import { H3, H5, ModalInMobile, Page } from '../../components';
+import { H3, H5, ModalInMobile, Page, Modal, FooterSearch } from '../../components';
 import TopbarContainer from '../../containers/TopbarContainer/TopbarContainer';
 
 import { setActiveListing } from './SearchPage.duck';
@@ -41,7 +41,7 @@ import FilterComponent from './FilterComponent';
 import SearchMap from './SearchMap/SearchMap';
 import MainPanelHeader from './MainPanelHeader/MainPanelHeader';
 import SearchFiltersSecondary from './SearchFiltersSecondary/SearchFiltersSecondary';
-import SearchFiltersPrimary from './SearchFiltersPrimary/SearchFiltersPrimary';
+// import SearchFiltersPrimary from './SearchFiltersPrimary/SearchFiltersPrimary';
 import SearchFiltersMobile from './SearchFiltersMobile/SearchFiltersMobile';
 import SortBy from './SortBy/SortBy';
 import SearchResultsPanel from './SearchResultsPanel/SearchResultsPanel';
@@ -61,15 +61,20 @@ export class SearchPageComponent extends Component {
     super(props);
 
     this.state = {
-      isSearchMapOpenOnMobile: props.tab === 'map',
+      isSearchMapOpenOnMobile: false,
       isMobileModalOpen: false,
       currentQueryParams: validUrlQueryParamsFromProps(props),
       isSecondaryFiltersOpen: false,
+      isFilterModalOpen: false,
+      fullMap : false,
+      isMapShow : false
     };
 
     this.onMapMoveEnd = debounce(this.onMapMoveEnd.bind(this), SEARCH_WITH_MAP_DEBOUNCE);
     this.onOpenMobileModal = this.onOpenMobileModal.bind(this);
     this.onCloseMobileModal = this.onCloseMobileModal.bind(this);
+    this.handleOpenFilterModal = this.handleOpenFilterModal.bind(this);
+    this.handleCloseFilterModal = this.handleCloseFilterModal.bind(this);
 
     // Filter functions
     this.applyFilters = this.applyFilters.bind(this);
@@ -79,6 +84,12 @@ export class SearchPageComponent extends Component {
 
     // SortBy
     this.handleSortBy = this.handleSortBy.bind(this);
+
+    //map options
+    this.changeMapSize = this.changeMapSize.bind(this);
+    this.mapSizeEnableFullWidth = this.mapSizeEnableFullWidth.bind(this);
+    this.mapSizeDisableFullWidth = this.mapSizeDisableFullWidth.bind(this);
+    this.handleShowMap = this.handleShowMap.bind(this);
   }
 
   // Callback to determine if new search is needed
@@ -110,13 +121,14 @@ export class SearchPageComponent extends Component {
       });
 
       const originMaybe = isOriginInUse(this.props.config) ? { origin: viewportCenter } : {};
+      const dropNonFilterParams = false;
 
       const searchParams = {
         address,
         ...originMaybe,
         bounds: viewportBounds,
         mapSearch: true,
-        ...validFilterParams(rest, listingFieldsConfig, defaultFiltersConfig),
+        ...validFilterParams(rest, listingFieldsConfig, defaultFiltersConfig, dropNonFilterParams),
       };
 
       history.push(createResourceLocatorString('SearchPage', routes, {}, searchParams));
@@ -133,6 +145,14 @@ export class SearchPageComponent extends Component {
   // for example when a filter modal is opened in mobile view
   onCloseMobileModal() {
     this.setState({ isMobileModalOpen: false });
+  }
+
+  handleOpenFilterModal () {
+    this.setState({ isFilterModalOpen: true });
+  }
+  
+  handleCloseFilterModal () {
+    this.setState({ isFilterModalOpen: false });
   }
 
   // Apply the filters by redirecting to SearchPage with new filters.
@@ -229,6 +249,55 @@ export class SearchPageComponent extends Component {
       : omit(urlQueryParams, urlParam);
 
     history.push(createResourceLocatorString('SearchPage', routeConfiguration, {}, queryParams));
+  }
+
+  changeMapSize  () {
+    if(this.state.fullMap == true ){
+      this.mapSizeDisableFullWidth();
+    }else{
+      this.mapSizeEnableFullWidth();
+    }
+  }
+
+  mapSizeEnableFullWidth () {
+    this.setState({ fullMap: true });
+  }
+  mapSizeDisableFullWidth () {
+    this.setState({ fullMap: false });
+  }
+
+  handleShowMap(checked) {
+    const { history, location, config, routeConfiguration } = this.props;
+
+    this.setState({ isMapShow: checked });
+
+    if(!checked){
+      const { listingFields: listingFieldsConfig } = config?.listing || {};
+      const { defaultFilters: defaultFiltersConfig } = config?.search || {};
+
+      // parse query parameters, including a custom attribute named category
+      const { mapSearch, ...rest } = parse(location.search, {
+        latlng: ['origin'],
+        latlngBounds: ['bounds'],
+      });
+
+      const searchParams = {
+        ...validFilterParams(rest, listingFieldsConfig, defaultFiltersConfig),
+      };
+
+      history.push(createResourceLocatorString('SearchPage', routeConfiguration, {}, searchParams));
+    }
+    
+  }
+
+  // Reset all filter query parameters
+  handleResetAll(e) {
+    this.resetAll(e);
+
+    // blur event target if event is passed
+    if (e && e.currentTarget) {
+      e.currentTarget.blur();
+    }
   }
 
   render() {
@@ -382,6 +451,27 @@ export class SearchPageComponent extends Component {
       ? classNames(css.topbarBehindModal, css.topbar)
       : css.topbar;
 
+    let onlyCategorries = {};
+    config.listing.listingFields.map((list,key)=>{
+      if(list.key == 'categories'){
+        onlyCategorries = list;
+        return list;
+      }
+    });
+
+    const { enumOptions = [] } = onlyCategorries || {};
+
+    const isFilterModalOpen = this.state.isFilterModalOpen;
+
+    const mapSizeClass = this.state.fullMap ? css.mapSubFullwidth : css.mapSub;
+    console.log(mapSizeClass);
+
+    const searchResultContainer = this.state.isMapShow ? css.searchResultContainer : css.searchResultContainerWithoutMap;
+    const mapPanel = this.state.isMapShow ? css.mapPanel : css.mapPanelHidden;
+
+    console.log('this.state.isMapShow');
+    console.log(this.state.isMapShow);
+
     // N.B. openMobileMap button is sticky.
     // For some reason, stickyness doesn't work on Safari, if the element is <button>
     return (
@@ -392,12 +482,48 @@ export class SearchPageComponent extends Component {
         schema={schema}
       >
         <TopbarContainer
-          className={topbarClasses}
+          rootClassName={topbarClasses}
           currentPage="SearchPage"
           currentSearchParams={urlQueryParams}
+          categories={enumOptions}
+          searchModalOpen={this.handleOpenFilterModal}
+          handleShowMap={this.handleShowMap}
+          isMapShow={this.state.isMapShow}
         />
         <div className={css.container}>
-          <div className={css.searchResultContainer}>
+        <Modal 
+            id='isFilterModal'
+            isOpen={isFilterModalOpen}
+            containerClassName={css.modalContainer}
+            contentLabel="Minimal Modal Example"
+            onManageDisableScrolling={onManageDisableScrolling}
+            onClose={this.handleCloseFilterModal}
+          >
+            <div className={css.filterColumnContent}>
+              {availableFilters.map(config => {
+                return (
+                  <FilterComponent
+                    key={`SearchFiltersMobile.${config.key}`}
+                    idPrefix="SearchFiltersMobile"
+                    className={css.filter}
+                    config={config}
+                    marketplaceCurrency={marketplaceCurrency}
+                    urlQueryParams={urlQueryParams}
+                    initialValues={initialValues(this.props, this.state.currentQueryParams)}
+                    getHandleChangedValueFn={this.getHandleChangedValueFn}
+                    intl={intl}
+                    liveEdit
+                    showAsPopup={false}
+                    isDesktop
+                  />
+                );
+              })}
+              <button className={css.resetAllButton} onClick={e => this.handleResetAll(e)}>
+                <FormattedMessage id={'SearchFiltersMobile.resetAll'} />
+              </button>
+            </div>
+          </Modal>
+          <div className={searchResultContainer}>
             <SearchFiltersMobile
               className={css.searchFiltersMobileMap}
               urlQueryParams={validQueryParams}
@@ -419,7 +545,7 @@ export class SearchPageComponent extends Component {
               {availableFilters.map(config => {
                 return (
                   <FilterComponent
-                    key={`SearchFiltersMobile.${config.key}`}
+                    key={`SearchFiltersMobile.${config.scope || 'built-in'}.${config.key}`}
                     idPrefix="SearchFiltersMobile"
                     config={config}
                     marketplaceCurrency={marketplaceCurrency}
@@ -442,25 +568,16 @@ export class SearchPageComponent extends Component {
               searchInProgress={searchInProgress}
               searchListingsError={searchListingsError}
               noResultsInfo={noResultsInfo}
+              propsForSecondaryFiltersToggle={propsForSecondaryFiltersToggle}
+              availablePrimaryFilters={availablePrimaryFilters}
+              config={config}
+              marketplaceCurrency={marketplaceCurrency}
+              validQueryParams={validQueryParams}
+              initialValues={initialValues(this.props, this.state.currentQueryParams)}
+              getHandleChangedValueFn={this.getHandleChangedValueFn}
+              intl={intl}
+              contentPlacementOffset={FILTER_DROPDOWN_OFFSET}
             >
-              <SearchFiltersPrimary {...propsForSecondaryFiltersToggle}>
-                {availablePrimaryFilters.map(config => {
-                  return (
-                    <FilterComponent
-                      key={`SearchFiltersPrimary.${config.key}`}
-                      idPrefix="SearchFiltersPrimary"
-                      config={config}
-                      marketplaceCurrency={marketplaceCurrency}
-                      urlQueryParams={validQueryParams}
-                      initialValues={initialValues(this.props, this.state.currentQueryParams)}
-                      getHandleChangedValueFn={this.getHandleChangedValueFn}
-                      intl={intl}
-                      showAsPopup
-                      contentPlacementOffset={FILTER_DROPDOWN_OFFSET}
-                    />
-                  );
-                })}
-              </SearchFiltersPrimary>
             </MainPanelHeader>
             {isSecondaryFiltersOpen ? (
               <div className={classNames(css.searchFiltersPanel)}>
@@ -475,7 +592,7 @@ export class SearchPageComponent extends Component {
                   {customSecondaryFilters.map(config => {
                     return (
                       <FilterComponent
-                        key={`SearchFiltersSecondary.${config.key}`}
+                        key={`SearchFiltersSecondary.${config.scope || 'built-in'}.${config.key}`}
                         idPrefix="SearchFiltersSecondary"
                         config={config}
                         marketplaceCurrency={marketplaceCurrency}
@@ -511,23 +628,25 @@ export class SearchPageComponent extends Component {
                   pagination={listingsAreLoaded ? pagination : null}
                   search={parse(location.search)}
                   setActiveListing={onActivateListing}
-                  isMapVariant
+                  isMapVariant={this.state.isMapShow}
+                  fullMap={this.state.fullMap}
                 />
               </div>
             )}
           </div>
           <ModalInMobile
-            className={css.mapPanel}
+            className={mapPanel}
             id="SearchPage.map"
             isModalOpenOnMobile={this.state.isSearchMapOpenOnMobile}
             onClose={() => this.setState({ isSearchMapOpenOnMobile: false })}
             showAsModalMaxWidth={MODAL_BREAKPOINT}
             onManageDisableScrolling={onManageDisableScrolling}
+            hideClose={true}
           >
             <div className={css.mapWrapper} data-testid="searchMapContainer">
               {shouldShowSearchMap ? (
                 <SearchMap
-                  reusableContainerClassName={css.map}
+                  reusableContainerClassName={mapSizeClass}
                   activeListingId={activeListingId}
                   bounds={bounds}
                   center={origin}
@@ -535,6 +654,8 @@ export class SearchPageComponent extends Component {
                   location={location}
                   listings={listings || []}
                   onMapMoveEnd={this.onMapMoveEnd}
+                  changeMapSize={this.changeMapSize}
+                  fullMap={this.state.fullMap}
                   onCloseAsModal={() => {
                     onManageDisableScrolling('SearchPage.map', false);
                   }}
@@ -544,6 +665,13 @@ export class SearchPageComponent extends Component {
             </div>
           </ModalInMobile>
         </div>
+        <FooterSearch
+          isMapShow={this.state.isMapShow}
+          fullMap={this.state.fullMap}
+          changeMapSize={this.changeMapSize}
+          handleShowMap={this.handleShowMap}
+          showMapMobile={() => this.setState({ isSearchMapOpenOnMobile: true })}
+        />
       </Page>
     );
   }
@@ -554,7 +682,6 @@ SearchPageComponent.defaultProps = {
   pagination: null,
   searchListingsError: null,
   searchParams: {},
-  tab: 'listings',
   activeListingId: null,
 };
 
@@ -567,7 +694,6 @@ SearchPageComponent.propTypes = {
   searchInProgress: bool.isRequired,
   searchListingsError: propTypes.error,
   searchParams: object,
-  tab: oneOf(['filters', 'listings', 'map']).isRequired,
 
   // from useHistory
   history: shape({

@@ -19,36 +19,15 @@ import LoadableComponentErrorBoundary from './LoadableComponentErrorBoundary/Loa
 
 const canShowComponent = props => {
   const { isAuthenticated, route } = props;
-
   const { auth } = route;
   return !auth || isAuthenticated;
 };
-
-const userRoleAccess = props => {
-  
-  // console.log('userRoleAccess');
-
-  const { route, currentUser } = props;
-
-  const { authRole } = route;
-  if(currentUser && currentUser.attributes && currentUser.attributes.profile && currentUser.attributes.profile.metadata){
-    const { role } = currentUser.attributes.profile.metadata;
-    const access = (authRole === role);
-    return !authRole || access;
-  }
-
-  return true;
-  // console.log(authRole);
-  // console.log(!authRole);
-  // console.log(access);
-
-}
 
 const callLoadData = props => {
   const { match, location, route, dispatch, logoutInProgress, config } = props;
   const { loadData, name } = route;
   const shouldLoadData =
-    typeof loadData === 'function' && canShowComponent(props) && !logoutInProgress;  
+    typeof loadData === 'function' && canShowComponent(props) && !logoutInProgress;
 
   if (shouldLoadData) {
     dispatch(loadData(match.params, location.search, config))
@@ -146,25 +125,18 @@ class RouteComponentRenderer extends Component {
 
   render() {
     const { route, match, location, staticContext } = this.props;
-    const { component: RouteComponent, authPage = 'SignupPage', routePage = 'Home', extraProps } = route;
-
-    const userAccess = userRoleAccess(this.props);
-
+    const { component: RouteComponent, authPage = 'SignupPage', extraProps } = route;
     const canShow = canShowComponent(this.props);
-    if (!canShow || !userAccess) {
+    if (!canShow) {
       staticContext.unauthorized = true;
     }
-
-    const routeName = !canShow ? authPage : routePage;
-
-
-    return canShow && userAccess ? (
+    return canShow ? (
       <LoadableComponentErrorBoundary>
         <RouteComponent params={match.params} location={location} {...extraProps} />
       </LoadableComponentErrorBoundary>
     ) : (
       <NamedRedirect
-        name={routeName}
+        name={authPage}
         state={{ from: `${location.pathname}${location.search}${location.hash}` }}
       />
     );
@@ -190,11 +162,8 @@ RouteComponentRenderer.propTypes = {
 };
 
 const mapStateToProps = state => {
-  // console.log(state.user.currentUser.attributes.profile.metadata);
-  
   const { isAuthenticated, logoutInProgress } = state.auth;
-  const { currentUser } = state.user;
-  return { isAuthenticated, logoutInProgress, currentUser };
+  return { isAuthenticated, logoutInProgress };
 };
 const RouteComponentContainer = compose(connect(mapStateToProps))(RouteComponentRenderer);
 
@@ -210,9 +179,8 @@ const RouteComponentContainer = compose(connect(mapStateToProps))(RouteComponent
  */
 const Routes = (props, context) => {
   const routeConfiguration = useRouteConfiguration();
-
   const config = useConfiguration();
-  const { isAuthenticated, logoutInProgress } = props;
+  const { isAuthenticated, logoutInProgress, logLoadDataCalls } = props;
 
   const toRouteComponent = route => {
     const renderProps = {
@@ -221,6 +189,7 @@ const Routes = (props, context) => {
       route,
       routeConfiguration,
       config,
+      logLoadDataCalls,
     };
 
     // By default, our routes are exact.

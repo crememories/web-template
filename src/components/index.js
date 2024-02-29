@@ -9,15 +9,14 @@
  * Read more:
  * https://medium.com/visual-development/how-to-fix-nasty-circular-dependency-issues-once-and-for-all-in-javascript-typescript-a04c987cf0de
  */
+import loadable from '@loadable/component';
 
 // Icons
 export { default as IconAdd } from './IconAdd/IconAdd';
 export { default as IconArrowHead } from './IconArrowHead/IconArrowHead';
 export { default as IconBannedUser } from './IconBannedUser/IconBannedUser';
-export { default as IconCard } from './IconCard/IconCard';
 export { default as IconCheckmark } from './IconCheckmark/IconCheckmark';
 export { default as IconClose } from './IconClose/IconClose';
-export { default as IconTrash } from './IconTrash/IconTrash';
 export { default as IconDelete } from './IconDelete/IconDelete';
 export { default as IconDisputeOrder } from './IconDisputeOrder/IconDisputeOrder';
 export { default as IconEdit } from './IconEdit/IconEdit';
@@ -97,14 +96,10 @@ export { default as ModalInMobile } from './ModalInMobile/ModalInMobile';
 // Fields (for Final Form)
 export { default as FieldCheckbox } from './FieldCheckbox/FieldCheckbox';
 export { default as FieldCurrencyInput } from './FieldCurrencyInput/FieldCurrencyInput';
-export { default as FieldDateInput } from './FieldDateInput/FieldDateInput';
-export { default as FieldDateRangeController } from './FieldDateRangeController/FieldDateRangeController';
-export { default as FieldDateRangeInput } from './FieldDateRangeInput/FieldDateRangeInput';
 export { default as FieldRadioButton } from './FieldRadioButton/FieldRadioButton';
 export { default as FieldReviewRating } from './FieldReviewRating/FieldReviewRating';
 export { default as FieldSelect } from './FieldSelect/FieldSelect';
 export { default as FieldTextInput } from './FieldTextInput/FieldTextInput';
-export { default as FieldIntegerInput } from './FieldIntegerInput/FieldIntegerInput';
 // Fields that use other Fields
 export { default as FieldBoolean } from './FieldBoolean/FieldBoolean';
 export { default as FieldCheckboxGroup } from './FieldCheckboxGroup/FieldCheckboxGroup';
@@ -112,6 +107,11 @@ export { default as FieldPhoneNumberInput } from './FieldPhoneNumberInput/FieldP
 export { default as LocationAutocompleteInput, FieldLocationAutocompleteInput } from './LocationAutocompleteInput/LocationAutocompleteInput';
 // Fields and inputs using old naming pattern
 export { default as StripeBankAccountTokenInputField } from './StripeBankAccountTokenInputField/StripeBankAccountTokenInputField';
+// Fields wrapping react-dates
+// NOTE: these are code-splitted since the library is heavy and needed only on couple of pages
+export const FieldDateInput = loadable(() => import(/* webpackChunkName: "FieldDateInput" */ './FieldDateInput/FieldDateInput'));
+export const FieldDateRangeController = loadable(() => import(/* webpackChunkName: "FieldDateRangeController" */ './FieldDateRangeController/FieldDateRangeController'));
+export const FieldDateRangeInput = loadable(() => import(/* webpackChunkName: "FieldDateRangeInput" */ './FieldDateRangeInput/FieldDateRangeInput'));
 
 // Tab navigation
 export { default as TabNav } from './TabNav/TabNav';
@@ -133,7 +133,6 @@ export { default as Reviews } from './Reviews/Reviews';
 export { default as SavedCardDetails } from './SavedCardDetails/SavedCardDetails';
 export { default as StripeConnectAccountStatusBox } from './StripeConnectAccountStatusBox/StripeConnectAccountStatusBox';
 export { default as StripePaymentAddress } from './StripePaymentAddress/StripePaymentAddress';
-export { default as UserCard } from './UserCard/UserCard';
 
 // Forms
 export { default as StripeConnectAccountForm } from './StripeConnectAccountForm/StripeConnectAccountForm';
@@ -142,8 +141,8 @@ export { default as StripeConnectAccountForm } from './StripeConnectAccountForm/
 // Page sections and modal content wrappers //
 //////////////////////////////////////////////
 
-export { default as LayoutComposer, LayoutSingleColumn, LayoutSingleColumnMidle, LayoutSideNavigation } from './LayoutComposer';
+export { default as LayoutComposer, LayoutSingleColumn, LayoutSideNavigation } from './LayoutComposer';
+export { default as MaintenanceMode } from './MaintenanceMode/MaintenanceMode';
 export { default as ModalMissingInformation } from './ModalMissingInformation/ModalMissingInformation';
-export { default as Footer } from './Footer/Footer';
+
 export { default as FooterSearch } from './FooterSearch/FooterSearch';
-export { default as Topbar } from './Topbar/Topbar';

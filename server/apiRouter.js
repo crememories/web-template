@@ -15,10 +15,6 @@ const loginAs = require('./api/login-as');
 const transactionLineItems = require('./api/transaction-line-items');
 const initiatePrivileged = require('./api/initiate-privileged');
 const transitionPrivileged = require('./api/transition-privileged');
-const adminUsers = require('./api-flex/admin-users');
-const adminUser = require('./api-flex/admin-user');
-const adminUserUpdate = require('./api-flex/admin-user-update');
-const adminGetListingOwner = require('./api-flex/admin-get-listing-owner');
 
 const createUserWithIdp = require('./api/auth/createUserWithIdp');
 
@@ -58,10 +54,6 @@ router.get('/login-as', loginAs);
 router.post('/transaction-line-items', transactionLineItems);
 router.post('/initiate-privileged', initiatePrivileged);
 router.post('/transition-privileged', transitionPrivileged);
-router.post('/admin-users', adminUsers);
-router.post('/admin-user', adminUser);
-router.post('/admin-user-update', adminUserUpdate);
-router.post('/admin-get-listing-owner', adminGetListingOwner);
 
 // Create user with identity provider (e.g. Facebook or Google)
 // This endpoint is called to create a new user after user has confirmed
@@ -75,7 +67,7 @@ router.get('/auth/facebook', authenticateFacebook);
 
 // This is the route for callback URL the user is redirected after authenticating
 // with Facebook. In this route a Passport.js custom callback is used for calling
-// loginWithIdp endpoint in Flex API to authenticate user to Flex
+// loginWithIdp endpoint in Sharetribe Auth API to authenticate user to the marketplace
 router.get('/auth/facebook/callback', authenticateFacebookCallback);
 
 // Google authentication endpoints
@@ -85,7 +77,7 @@ router.get('/auth/google', authenticateGoogle);
 
 // This is the route for callback URL the user is redirected after authenticating
 // with Google. In this route a Passport.js custom callback is used for calling
-// loginWithIdp endpoint in Flex API to authenticate user to Flex
+// loginWithIdp endpoint in Sharetribe Auth API to authenticate user to the marketplace
 router.get('/auth/google/callback', authenticateGoogleCallback);
 
 module.exports = router;

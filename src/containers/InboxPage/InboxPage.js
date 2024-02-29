@@ -14,6 +14,7 @@ import {
   LINE_ITEM_NIGHT,
   LINE_ITEM_HOUR,
   LISTING_UNIT_TYPES,
+  STOCK_MULTIPLE_ITEMS,
 } from '../../util/types';
 import { subtractTime } from '../../util/dates';
 import {
@@ -34,7 +35,6 @@ import {
   Page,
   PaginationLinks,
   TabNav,
-  Footer,
   IconSpinner,
   TimeRange,
   UserDisplayName,
@@ -42,6 +42,7 @@ import {
 } from '../../components';
 
 import TopbarContainer from '../../containers/TopbarContainer/TopbarContainer';
+import FooterContainer from '../../containers/FooterContainer/FooterContainer';
 import NotFoundPage from '../../containers/NotFoundPage/NotFoundPage';
 
 import { stateDataShape, getStateData } from './InboxPage.stateData';
@@ -114,7 +115,14 @@ BookingTimeInfoMaybe.propTypes = {
 };
 
 export const InboxItem = props => {
-  const { transactionRole, tx, intl, stateData, isBooking, stockType = 'multipleItems' } = props;
+  const {
+    transactionRole,
+    tx,
+    intl,
+    stateData,
+    isBooking,
+    stockType = STOCK_MULTIPLE_ITEMS,
+  } = props;
   const { customer, provider, listing } = tx;
   const { processName, processState, actionNeeded, isSaleNotification, isFinal } = stateData;
   const isCustomer = transactionRole === TX_TRANSITION_ACTOR_CUSTOMER;
@@ -123,7 +131,7 @@ export const InboxItem = props => {
   const hasPricingData = lineItems.length > 0;
   const unitLineItem = getUnitLineItem(lineItems);
   const quantity = hasPricingData && !isBooking ? unitLineItem.quantity.toString() : null;
-  const showStock = stockType === 'multipleItems' || (quantity && unitLineItem.quantity > 1);
+  const showStock = stockType === STOCK_MULTIPLE_ITEMS || (quantity && unitLineItem.quantity > 1);
 
   const otherUser = isCustomer ? provider : customer;
   const otherUserDisplayName = <UserDisplayName user={otherUser} intl={intl} />;
@@ -287,7 +295,6 @@ export const InboxPageComponent = props => {
         sideNavClassName={css.navigation}
         topbar={
           <TopbarContainer
-            className={css.topbar}
             mobileRootClassName={css.mobileTopbar}
             desktopClassName={css.desktopTopbar}
             currentPage="InboxPage"
@@ -301,7 +308,7 @@ export const InboxPageComponent = props => {
             <TabNav rootClassName={css.tabs} tabRootClassName={css.tab} tabs={tabs} />{' '}
           </>
         }
-        footer={<Footer />}
+        footer={<FooterContainer />}
       >
         {fetchOrdersOrSalesError ? (
           <p className={css.error}>

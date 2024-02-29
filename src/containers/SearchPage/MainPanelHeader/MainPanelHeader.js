@@ -4,10 +4,14 @@ import classNames from 'classnames';
 
 import { FormattedMessage } from '../../../util/reactIntl';
 
+import SearchFiltersPrimary from '../SearchFiltersPrimary/SearchFiltersPrimary';
+import FilterComponent from '../FilterComponent';
+
 import css from './MainPanelHeader.module.css';
 
 const MainPanelHeader = props => {
   const {
+    intl,
     rootClassName,
     className,
     children,
@@ -17,14 +21,20 @@ const MainPanelHeader = props => {
     resultsCount,
     searchInProgress,
     noResultsInfo,
+    propsForSecondaryFiltersToggle,
+    availablePrimaryFilters,
+    marketplaceCurrency,
+    initialValues,
+    getHandleChangedValueFn,
+    contentPlacementOffset,
+    validQueryParams
   } = props;
 
   const classes = classNames(rootClassName || css.root, className);
 
   return (
     <div className={classes}>
-      <div className={css.searchOptions}>
-        <div className={css.searchResultSummary}>
+      <div className={css.searchResultSummary}>
           <span className={css.resultsFound}>
             {searchInProgress ? (
               <FormattedMessage id="MainPanelHeader.loadingResults" />
@@ -36,6 +46,25 @@ const MainPanelHeader = props => {
             )}
           </span>
         </div>
+      <div className={css.searchOptions}>
+        <SearchFiltersPrimary {...propsForSecondaryFiltersToggle}>
+          {availablePrimaryFilters.map(config => {
+            return (
+              <FilterComponent
+                key={`SearchFiltersPrimary.${config.key}`}
+                idPrefix="SearchFiltersPrimary"
+                config={config}
+                marketplaceCurrency={marketplaceCurrency}
+                urlQueryParams={validQueryParams}
+                initialValues={initialValues}
+                getHandleChangedValueFn={getHandleChangedValueFn}
+                intl={intl}
+                showAsPopup
+                contentPlacementOffset={contentPlacementOffset}
+              />
+            );
+          })}
+        </SearchFiltersPrimary>
         {isSortByActive ? (
           <div className={css.sortyByWrapper}>
             <span className={css.sortyBy}>

@@ -102,7 +102,7 @@ const ImageCarousel = props => {
     const itemsDots = items.map((img, i) => {
       const activeSliderDot = currentIndex == i ? css.activeSliderDot : null;
       const classForDot = classNames( activeSliderDot ,css.sliderDot)
-      return (<span className={classForDot}></span>);
+      return (<span key={i} className={classForDot}></span>);
     });
     
     const latestTransition = currentIndex < items.length -2 ? (currentIndex-2) * 11 : (items.length -5) * 11;

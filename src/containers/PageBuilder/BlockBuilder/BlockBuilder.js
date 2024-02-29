@@ -3,6 +3,8 @@ import { arrayOf, func, node, oneOf, shape, string } from 'prop-types';
 
 // Block components
 import BlockDefault from './BlockDefault';
+import BlockFooter from './BlockFooter';
+import BlockSocialMediaLink from './BlockSocialMediaLink';
 
 ///////////////////////////////////////////
 // Mapping of block types and components //
@@ -10,6 +12,8 @@ import BlockDefault from './BlockDefault';
 
 const defaultBlockComponents = {
   defaultBlock: { component: BlockDefault },
+  footerBlock: { component: BlockFooter },
+  socialMediaLink: { component: BlockSocialMediaLink },
 };
 
 ////////////////////
@@ -17,7 +21,7 @@ const defaultBlockComponents = {
 ////////////////////
 
 const BlockBuilder = props => {
-  const { blocks, options, ...otherProps } = props;
+  const { blocks, sectionId, options, ...otherProps } = props;
 
   // Extract block & field component mappings from props
   // If external mapping has been included for fields
@@ -36,14 +40,24 @@ const BlockBuilder = props => {
 
   return (
     <>
-      {blocks.map(block => {
+      {blocks.map((block, index) => {
         const config = components[block.blockType];
         const Block = config?.component;
+        const blockId = block.blockId || `${sectionId}-block-${index + 1}`;
+
         if (Block) {
-          return <Block key={block.blockId} {...block} {...blockOptionsMaybe} {...otherProps} />;
+          return (
+            <Block
+              key={`${blockId}_i${index}`}
+              {...block}
+              blockId={blockId}
+              {...blockOptionsMaybe}
+              {...otherProps}
+            />
+          );
         } else {
           // If the block type is unknown, the app can't know what to render
-          console.warn(`Unknown block type (${block.blockType}) detected.`);
+          console.warn(`Unknown block type (${block.blockType}) detected inside (${sectionId}).`);
           return null;
         }
       })}
@@ -52,8 +66,9 @@ const BlockBuilder = props => {
 };
 
 const propTypeBlock = shape({
-  blockId: string.isRequired,
-  blockType: oneOf(['defaultBlock']).isRequired,
+  blockId: string,
+  blockName: string,
+  blockType: oneOf(['defaultBlock', 'footerBlock', 'socialMediaLink']).isRequired,
   // Plus all kind of unknown fields.
   // BlockBuilder doesn't really need to care about those
 });

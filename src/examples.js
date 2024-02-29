@@ -31,7 +31,6 @@ import * as FieldRangeSlider from './components/FieldRangeSlider/FieldRangeSlide
 import * as FieldReviewRating from './components/FieldReviewRating/FieldReviewRating.example';
 import * as FieldSelect from './components/FieldSelect/FieldSelect.example';
 import * as FieldTextInput from './components/FieldTextInput/FieldTextInput.example';
-import * as Footer from './components/Footer/Footer.example';
 import * as IconAdd from './components/IconAdd/IconAdd.example';
 import * as IconBannedUser from './components/IconBannedUser/IconBannedUser.example';
 import * as IconCheckmark from './components/IconCheckmark/IconCheckmark.example';
@@ -53,6 +52,8 @@ import * as IconSocialMediaInstagram from './components/IconSocialMediaInstagram
 import * as IconSocialMediaTwitter from './components/IconSocialMediaTwitter/IconSocialMediaTwitter.example';
 import * as IconSpinner from './components/IconSpinner/IconSpinner.example';
 import * as IconSuccess from './components/IconSuccess/IconSuccess.example';
+import * as Logo from './components/Logo/Logo.example';
+import * as LinkedLogo from './components/Logo/LinkedLogo.example';
 import * as ListingCard from './components/ListingCard/ListingCard.example';
 import * as LocationAutocompleteInput from './components/LocationAutocompleteInput/LocationAutocompleteInput.example';
 import * as Map from './components/Map/Map.example';
@@ -79,7 +80,6 @@ import * as TabNav from './components/TabNav/TabNav.example';
 import * as TabNavHorizontal from './components/TabNavHorizontal/TabNavHorizontal.example';
 import * as Tabs from './components/Tabs/Tabs.example';
 import * as TimeRange from './components/TimeRange/TimeRange.example';
-import * as UserCard from './components/UserCard/UserCard.example';
 import * as UserDisplayName from './components/UserDisplayName/UserDisplayName.example';
 import * as LayoutComposer from './components/LayoutComposer/LayoutComposer.example';
 
@@ -111,6 +111,7 @@ import * as EmailVerificationForm from './containers/EmailVerificationPage/Email
 import * as InquiryForm from './containers/ListingPage/InquiryForm/InquiryForm.example';
 import * as ImageCarousel from './containers/ListingPage/ImageCarousel/ImageCarousel.example';
 import * as ListingImageGallery from './containers/ListingPage/ListingImageGallery/ListingImageGallery.example';
+import * as UserCard from './containers/ListingPage/UserCard/UserCard.example';
 import * as PasswordRecoveryForm from './containers/PasswordRecoveryPage/PasswordRecoveryForm/PasswordRecoveryForm.example';
 import * as PasswordResetForm from './containers/PasswordResetPage/PasswordResetForm/PasswordResetForm.example';
 import * as ManageListingCard from './containers/ManageListingsPage/ManageListingCard/ManageListingCard.example';
@@ -164,7 +165,6 @@ export {
   FilterForm,
   FilterPlain,
   FilterPopup,
-  Footer,
   IconAdd,
   IconBannedUser,
   IconCheckmark,
@@ -191,10 +191,12 @@ export {
   KeywordFilter,
   LandingPage,
   LayoutComposer,
+  LinkedLogo,
   ListingCard,
   ListingImageGallery,
   LocationAutocompleteInput,
   LoginForm,
+  Logo,
   ManageListingCard,
   Map,
   Markdown,

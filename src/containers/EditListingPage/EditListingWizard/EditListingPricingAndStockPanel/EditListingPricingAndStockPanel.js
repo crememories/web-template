@@ -1,10 +1,10 @@
-import React from 'react';
-import PropTypes, { arrayOf, number, shape } from 'prop-types';
+import React, { useState } from 'react';
+import PropTypes, { arrayOf, number, oneOf, shape } from 'prop-types';
 import classNames from 'classnames';
 
 // Import configs and util modules
 import { FormattedMessage } from '../../../../util/reactIntl';
-import { LISTING_STATE_DRAFT } from '../../../../util/types';
+import { LISTING_STATE_DRAFT, STOCK_INFINITE_ITEMS, STOCK_TYPES } from '../../../../util/types';
 import { types as sdkTypes } from '../../../../util/sdkLoader';
 
 // Import shared components
@@ -15,22 +15,44 @@ import EditListingPricingAndStockForm from './EditListingPricingAndStockForm';
 import css from './EditListingPricingAndStockPanel.module.css';
 
 const { Money } = sdkTypes;
+const BILLIARD = 1000000000000000;
 
-const getInitialValues = params => {
-  const { listing } = params;
+const getListingTypeConfig = (publicData, listingTypes) => {
+  const selectedListingType = publicData.listingType;
+  return listingTypes.find(conf => conf.listingType === selectedListingType);
+};
+
+const getInitialValues = props => {
+  const { listing, listingTypes } = props;
   const isPublished = listing?.id && listing?.attributes?.state !== LISTING_STATE_DRAFT;
   const price = listing?.attributes?.price;
   const currentStock = listing?.currentStock;
 
+  const publicData = listing?.attributes?.publicData;
+  const listingTypeConfig = getListingTypeConfig(publicData, listingTypes);
+  const hasInfiniteStock = STOCK_INFINITE_ITEMS.includes(listingTypeConfig?.stockType);
+
   // The listing resource has a relationship: `currentStock`,
   // which you should include when making API calls.
+  // Note: infinite stock is refilled to billiard using "stockUpdateMaybe"
   const currentStockQuantity = currentStock?.attributes?.quantity;
-  const stock = currentStockQuantity != null ? currentStockQuantity : isPublished ? 0 : 1;
+  const stock =
+    currentStockQuantity != null
+      ? currentStockQuantity
+      : isPublished
+      ? 0
+      : hasInfiniteStock
+      ? BILLIARD
+      : 1;
+  const stockTypeInfinity = [];
 
-  return { price, stock };
+  return { price, stock, stockTypeInfinity };
 };
 
 const EditListingPricingAndStockPanel = props => {
+  // State is needed since re-rendering would overwrite the values during XHR call.
+  const [state, setState] = useState({ initialValues: getInitialValues(props) });
+
   const {
     className,
     rootClassName,
@@ -42,44 +64,26 @@ const EditListingPricingAndStockPanel = props => {
     ready,
     onSubmit,
     submitButtonText,
-    actionAddBtnText,
     panelUpdated,
     updateInProgress,
     errors,
   } = props;
 
   const classes = classNames(rootClassName || css.root, className);
-  const initialValues = getInitialValues(props);
+  const initialValues = state.initialValues;
 
   // Form needs to know data from listingType
   const publicData = listing?.attributes?.publicData;
-  const selectedListingType = publicData.listingType;
   const unitType = publicData.unitType;
-  const listingTypeConfig = listingTypes.find(conf => conf.listingType === selectedListingType);
+  const listingTypeConfig = getListingTypeConfig(publicData, listingTypes);
+
+  const hasInfiniteStock = STOCK_INFINITE_ITEMS.includes(listingTypeConfig?.stockType);
 
   const isPublished = listing?.id && listing?.attributes?.state !== LISTING_STATE_DRAFT;
   const priceCurrencyValid =
-    initialValues.price instanceof Money
+    marketplaceCurrency && initialValues.price instanceof Money
       ? initialValues.price?.currency === marketplaceCurrency
-      : true;
-
-
-  // configure already added variants 
-  const variants = publicData.variants;
-  const pricingVariant = [];
-  const variantKeys = variants ? Object.keys(variants) : null;
-
-  if(variantKeys && priceCurrencyValid){
-    variantKeys.forEach( key => {
-      const variantLabel = variants[key].variantLabel;
-      const variantPrice = new Money;
-      variantPrice.amount = variants[key].variantPrice;
-      variantPrice.currency = initialValues.price.currency;
-      pricingVariant[pricingVariant.length] = {variantPrice,variantLabel}
-    });
-
-    initialValues.pricingVariant = pricingVariant;
-  }
+      : !!marketplaceCurrency;
 
   return (
     <div className={classes}>
@@ -101,34 +105,27 @@ const EditListingPricingAndStockPanel = props => {
           className={css.form}
           initialValues={initialValues}
           onSubmit={values => {
-            const { price, stock } = values;
+            const { price, stock, stockTypeInfinity } = values;
 
-            // configured options for add variant price with descriptions
-            const variantsValues = values.pricingVariant;
-            const variantsUpdate = {};
-            
-            if(typeof variantsValues == "object"){
-              const valuesKeys = Object.keys(variantsValues);
-              valuesKeys.forEach((element) => {
-                  const curVariant = variantsValues[element];
-                  if(curVariant.variantPrice && curVariant.variantPrice.amount){
-                    const variantPrice = curVariant.variantPrice.amount;
-                    const variantLabel = curVariant.variantLabel;
-                    variantsUpdate[element] = {variantPrice,variantLabel};
-                  }
-              });
-            }
-
-            // Update stock only if the value has changed.
+            // Update stock only if the value has changed, or stock is infinity in stockType,
+            // but not current stock is a small number (might happen with old listings)
             // NOTE: this is going to be used on a separate call to API
             // in EditListingPage.duck.js: sdk.stock.compareAndSet();
 
+            const hasStockTypeInfinityChecked = stockTypeInfinity?.[0] === 'infinity';
             const hasNoCurrentStock = listing?.currentStock?.attributes?.quantity == null;
             const hasStockQuantityChanged = stock && stock !== initialValues.stock;
             // currentStockQuantity is null or undefined, return null - otherwise use the value
             const oldTotal = hasNoCurrentStock ? null : initialValues.stock;
             const stockUpdateMaybe =
-              hasNoCurrentStock || hasStockQuantityChanged
+              hasInfiniteStock && (hasNoCurrentStock || hasStockTypeInfinityChecked)
+                ? {
+                    stockUpdate: {
+                      oldTotal,
+                      newTotal: BILLIARD,
+                    },
+                  }
+                : hasNoCurrentStock || hasStockQuantityChanged
                 ? {
                     stockUpdate: {
                       oldTotal,
@@ -141,8 +138,16 @@ const EditListingPricingAndStockPanel = props => {
             const updateValues = {
               price,
               ...stockUpdateMaybe,
-              publicData: { variants:variantsUpdate },
             };
+            // Save the initialValues to state
+            // Otherwise, re-rendering would overwrite the values during XHR call.
+            setState({
+              initialValues: {
+                price,
+                stock: stockUpdateMaybe?.stockUpdate?.newTotal || stock,
+                stockTypeInfinity,
+              },
+            });
             onSubmit(updateValues);
           }}
           listingMinimumPriceSubUnits={listingMinimumPriceSubUnits}
@@ -150,7 +155,6 @@ const EditListingPricingAndStockPanel = props => {
           listingType={listingTypeConfig}
           unitType={unitType}
           saveActionMsg={submitButtonText}
-          variantLabel={actionAddBtnText}
           disabled={disabled}
           ready={ready}
           updated={panelUpdated}
@@ -159,7 +163,10 @@ const EditListingPricingAndStockPanel = props => {
         />
       ) : (
         <div className={css.priceCurrencyInvalid}>
-          <FormattedMessage id="EditListingPricingAndStockPanel.listingPriceCurrencyInvalid" />
+          <FormattedMessage
+            id="EditListingPricingAndStockPanel.listingPriceCurrencyInvalid"
+            values={{ marketplaceCurrency }}
+          />
         </div>
       )}
     </div>
@@ -184,7 +191,7 @@ EditListingPricingAndStockPanel.propTypes = {
   listingMinimumPriceSubUnits: number.isRequired,
   listingTypes: arrayOf(
     shape({
-      stockType: string,
+      stockType: oneOf(STOCK_TYPES),
     })
   ).isRequired,
 

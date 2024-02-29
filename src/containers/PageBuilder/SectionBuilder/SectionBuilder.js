@@ -7,6 +7,7 @@ import SectionArticle from './SectionArticle';
 import SectionCarousel from './SectionCarousel';
 import SectionColumns from './SectionColumns';
 import SectionFeatures from './SectionFeatures';
+import SectionHero from './SectionHero';
 
 // Styles
 // Note: these contain
@@ -14,6 +15,7 @@ import SectionFeatures from './SectionFeatures';
 // - dark theme overrides
 // TODO: alternatively, we could consider more in-place way of theming components
 import css from './SectionBuilder.module.css';
+import SectionFooter from './SectionFooter';
 
 // These are shared classes.
 // Use these to have consistent styles between different section components
@@ -35,6 +37,8 @@ const defaultSectionComponents = {
   carousel: { component: SectionCarousel },
   columns: { component: SectionColumns },
   features: { component: SectionFeatures },
+  footer: { component: SectionFooter },
+  hero: { component: SectionHero },
 };
 
 //////////////////////
@@ -57,29 +61,52 @@ const SectionBuilder = props => {
     return config?.component;
   };
 
+  // Generate unique ids for sections if operator has managed to create duplicates
+  // E.g. "foobar", "foobar1", and "foobar2"
+  const sectionIds = [];
+  const getUniqueSectionId = (sectionId, index) => {
+    const candidate = sectionId || `section-${index + 1}`;
+    if (sectionIds.includes(candidate)) {
+      let sequentialCandidate = `${candidate}1`;
+      for (let i = 2; sectionIds.includes(sequentialCandidate); i++) {
+        sequentialCandidate = `${candidate}${i}`;
+      }
+      return getUniqueSectionId(sequentialCandidate, index);
+    } else {
+      sectionIds.push(candidate);
+      return candidate;
+    }
+  };
+
   return (
     <>
       {sections.map((section, index) => {
         const Section = getComponent(section.sectionType);
         // If the default "dark" theme should be applied (when text color is white).
         // By default, this information is stored to customAppearance field
-        const isDarkTheme = section?.appearance?.textColor === 'white';
+        const isDarkTheme =
+          section?.appearance?.fieldType === 'customAppearance' &&
+          section?.appearance?.textColor === 'white';
         const classes = classNames({ [css.darkTheme]: isDarkTheme });
+        const sectionId = getUniqueSectionId(section.sectionId, index);
 
         if (Section) {
           return (
             <Section
-              key={`${section.sectionId}_${index}`}
+              key={`${sectionId}_i${index}`}
               className={classes}
               defaultClasses={DEFAULT_CLASSES}
               isInsideContainer={isInsideContainer}
               options={otherOption}
               {...section}
+              sectionId={sectionId}
             />
           );
         } else {
           // If the section type is unknown, the app can't know what to render
-          console.warn(`Unknown section type (${section.sectionType}) detected.`);
+          console.warn(
+            `Unknown section type (${section.sectionType}) detected using sectionName (${section.sectionName}).`
+          );
           return null;
         }
       })}
@@ -88,8 +115,9 @@ const SectionBuilder = props => {
 };
 
 const propTypeSection = shape({
-  sectionId: string.isRequired,
-  sectionType: oneOf(['article', 'carousel', 'columns', 'features']).isRequired,
+  sectionId: string,
+  sectionName: string,
+  sectionType: oneOf(['article', 'carousel', 'columns', 'features', 'hero']).isRequired,
   // Plus all kind of unknown fields.
   // BlockBuilder doesn't really need to care about those
 });

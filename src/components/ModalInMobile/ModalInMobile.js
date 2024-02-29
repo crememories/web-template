@@ -63,7 +63,6 @@ class ModalInMobileComponent extends Component {
     if (onClose) {
       onClose(event);
     }
-    this.props.handleShowMap();
   }
 
   render() {
@@ -77,7 +76,6 @@ class ModalInMobileComponent extends Component {
       onManageDisableScrolling,
       viewport,
       usePortal,
-      hideClose,
     } = this.props;
 
     const isMobileLayout = viewport.width <= showAsModalMaxWidth;
@@ -101,7 +99,6 @@ class ModalInMobileComponent extends Component {
         isOpen={isOpen}
         isClosedClassName={closedClassName}
         onClose={this.handleClose}
-        hideClose={hideClose}
         closeButtonMessage={closeButtonMessage}
         onManageDisableScrolling={onManageDisableScrolling}
         usePortal={usePortal && isOpen}
