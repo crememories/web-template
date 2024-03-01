@@ -191,6 +191,7 @@ const handleSubmit = (values, process, props, stripe, submitting, setSubmitting)
     pageData,
     setPageData,
     sessionStorageKey,
+    comissionValue
   } = props;
   const { card, message, paymentMethod: selectedPaymentMethod, formValues } = values;
   const { saveAfterOnetimePayment: saveAfterOnetimePaymentRaw } = formValues;
@@ -229,6 +230,7 @@ const handleSubmit = (values, process, props, stripe, submitting, setSubmitting)
     isPaymentFlowUseSavedCard: selectedPaymentFlow === USE_SAVED_CARD,
     isPaymentFlowPayAndSaveCard: selectedPaymentFlow === PAY_AND_SAVE_FOR_LATER_USE,
     setPageData,
+    comissionValue
   };
 
   const shippingDetails = getShippingDetailsMaybe(formValues);
@@ -293,6 +295,7 @@ const onStripeInitialized = (stripe, process, props) => {
 };
 
 export const CheckoutPageWithPayment = props => {
+  console.log(props);
   const [submitting, setSubmitting] = useState(false);
   // Initialized stripe library is saved to state - if it's needed at some point here too.
   const [stripe, setStripe] = useState(null);
@@ -516,6 +519,7 @@ CheckoutPageWithPayment.defaultProps = {
   transaction: null,
   currentUser: null,
   paymentIntent: null,
+  comissionValue: null,
 };
 
 CheckoutPageWithPayment.propTypes = {

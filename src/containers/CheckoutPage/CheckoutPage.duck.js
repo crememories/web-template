@@ -1,5 +1,5 @@
 import pick from 'lodash/pick';
-import { initiatePrivileged, transitionPrivileged } from '../../util/api';
+import { initiatePrivileged, transitionPrivileged, getListingOwnerAdmin } from '../../util/api';
 import { denormalisedResponseEntities } from '../../util/data';
 import { storableError } from '../../util/errors';
 import * as log from '../../util/log';
@@ -29,6 +29,10 @@ export const INITIATE_INQUIRY_REQUEST = 'app/CheckoutPage/INITIATE_INQUIRY_REQUE
 export const INITIATE_INQUIRY_SUCCESS = 'app/CheckoutPage/INITIATE_INQUIRY_SUCCESS';
 export const INITIATE_INQUIRY_ERROR = 'app/CheckoutPage/INITIATE_INQUIRY_ERROR';
 
+export const COMMISSION_REQUEST = 'app/CheckoutPage/COMMISSION_REQUEST';
+export const COMMISSION_SUCCESS = 'app/CheckoutPage/COMMISSION_SUCCESS';
+export const COMMISSION_ERROR = 'app/CheckoutPage/COMMISSION_ERROR';
+
 // ================ Reducer ================ //
 
 const initialState = {
@@ -43,6 +47,7 @@ const initialState = {
   stripeCustomerFetched: false,
   initiateInquiryInProgress: false,
   initiateInquiryError: null,
+  comissionValue: 0,
 };
 
 export default function checkoutPageReducer(state = initialState, action = {}) {
@@ -102,6 +107,14 @@ export default function checkoutPageReducer(state = initialState, action = {}) {
       return { ...state, initiateInquiryInProgress: false };
     case INITIATE_INQUIRY_ERROR:
       return { ...state, initiateInquiryInProgress: false, initiateInquiryError: payload };
+
+    case COMMISSION_REQUEST:
+      return { ...state, comissionValue: false };
+    case COMMISSION_SUCCESS:
+      return { ...state, comissionValue: payload };
+    case COMMISSION_ERROR:
+      console.error(payload); // eslint-disable-line no-console
+      return { ...state, comissionError: payload };
 
     default:
       return state;
@@ -172,6 +185,17 @@ export const initiateInquiryError = e => ({
   payload: e,
 });
 
+export const commissionRequest = () => ({ type: COMMISSION_REQUEST });
+export const commissionSuccess = commission => ({ 
+  type: COMMISSION_SUCCESS,
+  payload: { commission },  
+});
+export const commissionError = e => ({
+  type: COMMISSION_ERROR,
+  error: true,
+  payload: e,
+});
+
 /* ================ Thunks ================ */
 
 export const initiateOrder = (
@@ -179,7 +203,8 @@ export const initiateOrder = (
   processAlias,
   transactionId,
   transitionName,
-  isPrivilegedTransition
+  isPrivilegedTransition,
+  commission
 ) => (dispatch, getState, sdk) => {
   dispatch(initiateOrderRequest());
 
@@ -240,7 +265,7 @@ export const initiateOrder = (
 
   if (isTransition && isPrivilegedTransition) {
     // transition privileged
-    return transitionPrivileged({ isSpeculative: false, orderData, bodyParams, queryParams })
+    return transitionPrivileged({ isSpeculative: false, orderData, bodyParams, queryParams, commission })
       .then(handleSucces)
       .catch(handleError);
   } else if (isTransition) {
@@ -251,7 +276,7 @@ export const initiateOrder = (
       .catch(handleError);
   } else if (isPrivilegedTransition) {
     // initiate privileged
-    return initiatePrivileged({ isSpeculative: false, orderData, bodyParams, queryParams })
+    return initiatePrivileged({ isSpeculative: false, orderData, bodyParams, queryParams, commission })
       .then(handleSucces)
       .catch(handleError);
   } else {
@@ -365,6 +390,32 @@ export const initiateInquiryWithoutPayment = (inquiryParams, processAlias, trans
     });
 };
 
+// getCommission is a comission for listing creator
+export const getCommission = (listingId) => (dispatch, getState, sdk) => {
+  dispatch(commissionRequest());
+
+  console.log('response.attributes.profile.metadata.commission');
+  console.log(listingId);
+
+  return getListingOwnerAdmin(listingId)
+  .then(res => {
+    return res;
+  })
+  .then(response => {
+    // dispatch(addMarketplaceEntities(response));
+    // dispatch(commissionSuccess(response));
+    if(response.attributes.profile.metadata && response.attributes.profile.metadata.commission){
+      console.log('response.attributes.profile.metadata.commission');
+      console.log(response.attributes.profile.metadata.commission);
+      dispatch(commissionSuccess(response.attributes.profile.metadata.commission));
+    }
+  })
+  .catch(e => {
+    log.error(e, 'create-user-with-idp-failed', { listingId });
+    dispatch(commissionError(storableError(e)));
+  });
+};
+
 /**
  * Initiate or transition the speculative transaction with the given
  * booking details
@@ -383,7 +434,8 @@ export const speculateTransaction = (
   processAlias,
   transactionId,
   transitionName,
-  isPrivilegedTransition
+  isPrivilegedTransition,
+  commission
 ) => (dispatch, getState, sdk) => {
   dispatch(speculateTransactionRequest());
 

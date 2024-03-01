@@ -35,6 +35,8 @@ const SearchPageWithGrid = loadable(() => import(/* webpackChunkName: "SearchPag
 const StripePayoutPage = loadable(() => import(/* webpackChunkName: "StripePayoutPage" */ '../containers/StripePayoutPage/StripePayoutPage'));
 const TermsOfServicePage = loadable(() => import(/* webpackChunkName: "TermsOfServicePage" */ '../containers/TermsOfServicePage/TermsOfServicePage'));
 const TransactionPage = loadable(() => import(/* webpackChunkName: "TransactionPage" */ '../containers/TransactionPage/TransactionPage'));
+const CommissionPage = loadable(() => import(/* webpackChunkName: "CommissionPage" */ '../containers/CommissionPage/CommissionPage'));
+const EditCommission = loadable(() => import(/* webpackChunkName: "EditCommission" */ '../containers/CommissionPage/EditCommission/EditCommission'));
 
 // Styleguide helps you to review current components and develop new ones
 const StyleguidePage = loadable(() => import(/* webpackChunkName: "StyleguidePage" */ '../containers/StyleguidePage/StyleguidePage'));
@@ -379,6 +381,26 @@ const routeConfiguration = (layoutConfig) => {
       path: '/preview',
       name: 'PreviewResolverPage',
       component: PreviewResolverPage ,
+    },
+    {
+      path: '/Commission',
+      name: 'Commission',
+      auth: true,
+      authRole:'admin',
+      authPage: 'LoginPage',
+      routePage: 'Home',
+      component: CommissionPage,
+      loadData: pageDataLoadingAPI.CommissionPage.loadData,
+    },
+    {
+      path: '/EditCommission/:id/',
+      name: 'EditCommission',
+      auth: true,
+      authRole:'admin',
+      authPage: 'LoginPage',
+      routePage: 'Home',
+      component: EditCommission,
+      loadData: pageDataLoadingAPI.EditCommission.loadData,
     },
   ];
 };

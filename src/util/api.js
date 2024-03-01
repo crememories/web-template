@@ -144,3 +144,28 @@ export const transitionPrivileged = body => {
 export const createUserWithIdp = body => {
   return post('/api/auth/create-user-with-idp', body);
 };
+
+
+// admin without description yet
+//
+export const getUsersAdmin = body => {
+  return post('/api/admin-users', body);
+};
+
+// admin without description yet
+//
+export const getUserAdmin = body => {
+  return post('/api/admin-user', body);
+};
+
+// admin without description yet
+//
+export const updateUsersAdmin = body => {
+  return post('/api/admin-user-update', body);
+};
+
+// admin without description yet
+//
+export const getListingOwnerAdmin = body => {
+  return post('/api/admin-get-listing-owner', body);
+};

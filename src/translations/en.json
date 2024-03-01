@@ -944,6 +944,7 @@
   "TopbarDesktop.profileSettingsLink": "Profile settings",
   "TopbarDesktop.signup": "Sign up",
   "TopbarDesktop.yourListingsLink": "Your listings",
+  "TopbarDesktop.Commission": "Manage Commission",
   "TopbarMobileMenu.accountSettingsLink": "Account settings",
   "TopbarMobileMenu.greeting": "Hello {displayName}",
   "TopbarMobileMenu.inboxLink": "Inbox",
@@ -1087,5 +1088,15 @@
   "UserDisplayName.deleted": "Deleted user",
   "UserNav.accountSettings": "Account settings",
   "UserNav.profileSettings": "Profile settings",
-  "UserNav.yourListings": "Your listings"
+  "UserNav.yourListings": "Your listings",
+  "CommissionPage.desktopHeading": "Commission details",
+  "CommissionPage.schemaTitle": "Commission details: {marketplaceName}",
+  "CommissionPage.usersTitle": "All users ({count})",
+  "EditCommission.desktopHeading": "Edit Commission",
+  "EditCommission.schemaTitle": "Edit Commission: {marketplaceName}",
+  "EditCommissionForm.title": "Edit Commission for {userName}",
+  "EditCommissionForm.saveCommission": "Update Commission",
+  "FieldCommissionInput.CommisionMinValue": "This should be bigger then {minValue}",
+  "FieldCommissionInput.CommisionMaxValue": "This should be smaller then {maxValue}",
+  "FieldCommissionInput.CommisionRequired": "Commision is required."
 }

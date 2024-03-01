@@ -30,6 +30,7 @@ import {
   confirmPayment,
   sendMessage,
   initiateInquiryWithoutPayment,
+  getCommission,
 } from './CheckoutPage.duck';
 
 import CustomTopbar from './CustomTopbar';
@@ -69,9 +70,16 @@ const EnhancedCheckoutPage = props => {
       transaction,
       fetchSpeculatedTransaction,
       fetchStripeCustomer,
+      fetchCommission,
+      comissionValue
     } = props;
     const initialData = { orderData, listing, transaction };
     const data = handlePageData(initialData, STORAGE_KEY, history);
+
+    if(data?.listing?.id){
+      fetchCommission(data.listing.id);
+    }
+
     setPageData(data || {});
     setIsDataLoaded(true);
 
@@ -170,6 +178,7 @@ const mapStateToProps = state => {
     initiateInquiryError,
     initiateOrderError,
     confirmPaymentError,
+    comissionValue,
   } = state.CheckoutPage;
   const { currentUser } = state.user;
   const { confirmCardPaymentError, paymentIntent, retrievePaymentIntentError } = state.stripe;
@@ -189,14 +198,16 @@ const mapStateToProps = state => {
     confirmPaymentError,
     paymentIntent,
     retrievePaymentIntentError,
+    comissionValue,
   };
 };
 
 const mapDispatchToProps = dispatch => ({
   dispatch,
-  fetchSpeculatedTransaction: (params, processAlias, txId, transitionName, isPrivileged) =>
-    dispatch(speculateTransaction(params, processAlias, txId, transitionName, isPrivileged)),
+  fetchSpeculatedTransaction: (params, processAlias, txId, transitionName, isPrivileged, commission) =>
+    dispatch(speculateTransaction(params, processAlias, txId, transitionName, isPrivileged, commission)),
   fetchStripeCustomer: () => dispatch(stripeCustomer()),
+  fetchCommission: (listing) => dispatch(getCommission(listing)),
   onInquiryWithoutPayment: (params, processAlias, transitionName) =>
     dispatch(initiateInquiryWithoutPayment(params, processAlias, transitionName)),
   onInitiateOrder: (params, processAlias, transactionId, transitionName, isPrivileged) =>

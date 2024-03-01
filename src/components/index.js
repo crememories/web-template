@@ -141,8 +141,10 @@ export { default as StripeConnectAccountForm } from './StripeConnectAccountForm/
 // Page sections and modal content wrappers //
 //////////////////////////////////////////////
 
-export { default as LayoutComposer, LayoutSingleColumn, LayoutSideNavigation } from './LayoutComposer';
+export { default as LayoutComposer, LayoutSingleColumn, LayoutSideNavigation, LayoutSingleColumnMidle } from './LayoutComposer';
 export { default as MaintenanceMode } from './MaintenanceMode/MaintenanceMode';
 export { default as ModalMissingInformation } from './ModalMissingInformation/ModalMissingInformation';
 
+export { default as Footer } from './Footer/Footer';
 export { default as FooterSearch } from './FooterSearch/FooterSearch';
+export { default as Topbar } from './Topbar/Topbar';

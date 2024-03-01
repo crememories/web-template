@@ -5,6 +5,8 @@ import classNames from 'classnames';
 import { FormattedMessage, intlShape } from '../../../../util/reactIntl';
 import { ACCOUNT_SETTINGS_PAGES } from '../../../../routing/routeConfiguration';
 import { propTypes } from '../../../../util/types';
+import { AccessRole } from '../../../../util/roles';
+
 import {
   Avatar,
   InlineTextButton,
@@ -17,6 +19,7 @@ import {
 } from '../../../../components';
 
 import TopbarSearchForm from '../TopbarSearchForm/TopbarSearchForm';
+import TopbarSearchFormCommission from '../TopbarSearchFormCommission/TopbarSearchFormCommission';
 
 import css from './TopbarDesktop.module.css';
 
@@ -41,24 +44,39 @@ const TopbarDesktop = props => {
     setMounted(true);
   }, []);
 
+  const isAccess = AccessRole(props,'admin');
+
   const marketplaceName = appConfig.marketplaceName;
   const authenticatedOnClientSide = mounted && isAuthenticated;
   const isAuthenticatedOrJustHydrated = isAuthenticated || !mounted;
+  const isAuthenticatedAndAccess = isAuthenticated && isAccess;
 
   const classes = classNames(rootClassName || css.root, className);
 
+  const isCommissionPage = currentPage == 'CommissionPage'? true : false;
+
   const search = (
-    <TopbarSearchForm
-      className={css.searchLink}
-      desktopInputRoot={css.topbarSearchWithLeftPadding}
-      onSubmit={onSearchSubmit}
-      initialValues={initialSearchFormValues}
-      appConfig={appConfig}
-    />
+    isCommissionPage ? (
+      <TopbarSearchFormCommission
+        className={css.searchLink}
+        desktopInputRoot={css.topbarSearchWithLeftPadding}
+        onSubmit={onSearchSubmit}
+        initialValues={initialSearchFormValues}
+        appConfig={appConfig}
+      />
+    ):(
+      <TopbarSearchForm
+        className={css.searchLink}
+        desktopInputRoot={css.topbarSearchWithLeftPadding}
+        onSubmit={onSearchSubmit}
+        initialValues={initialSearchFormValues}
+        appConfig={appConfig}
+      />
+    )
   );
-
+  
   const notificationDot = notificationCount > 0 ? <div className={css.notificationDot} /> : null;
-
+  
   const inboxLink = authenticatedOnClientSide ? (
     <NamedLink
       className={css.inboxLink}
@@ -137,6 +155,14 @@ const TopbarDesktop = props => {
     </NamedLink>
   );
 
+  const manageCommission = !isAuthenticatedAndAccess ? null : (
+    <NamedLink className={css.createListingLink} params={{ sort: 'asc' }} name="Commission">
+        <span className={css.createListing}>
+          <FormattedMessage id="TopbarDesktop.Commission" />
+        </span>
+      </NamedLink>
+  );
+
   return (
     <nav className={classes}>
       <LinkedLogo
@@ -145,6 +171,7 @@ const TopbarDesktop = props => {
         alt={intl.formatMessage({ id: 'TopbarDesktop.logo' }, { marketplaceName })}
       />
       {search}
+      {manageCommission}
       <NamedLink className={css.createListingLink} name="NewListingPage">
         <span className={css.createListing}>
           <FormattedMessage id="TopbarDesktop.createListing" />
