@@ -8,7 +8,9 @@ const {
 } = require('../api-util/sdk');
 
 module.exports = (req, res) => {
-  const { isSpeculative, orderData, bodyParams, queryParams } = req.body;
+  const { isSpeculative, orderData, bodyParams, queryParams, commission } = req.body;
+
+  console.log(req.body);
 
   const sdk = getSdk(req, res);
   let lineItems = null;
@@ -23,10 +25,12 @@ module.exports = (req, res) => {
       const { providerCommission, customerCommission } =
         commissionAsset?.type === 'jsonAsset' ? commissionAsset.attributes.data : {};
 
+      const newProviderComission = commission ? commission : providerCommission;
+
       lineItems = transactionLineItems(
         listing,
         { ...orderData, ...bodyParams.params },
-        providerCommission,
+        newProviderComission,
         customerCommission
       );
 

@@ -94,7 +94,9 @@ const getOrderParams = (pageData, shippingDetails, optionalPaymentParams, config
   return orderParams;
 };
 
-const fetchSpeculatedTransactionIfNeeded = (orderParams, pageData, fetchSpeculatedTransaction) => {
+const fetchSpeculatedTransactionIfNeeded = (orderParams, pageData, fetchSpeculatedTransaction, comissionValue) => {
+  console.log('fetchSpeculatedTransactionIfNeeded');
+  console.log(comissionValue);
   const tx = pageData ? pageData.transaction : null;
   const pageDataListing = pageData.listing;
   const processName =
@@ -125,7 +127,8 @@ const fetchSpeculatedTransactionIfNeeded = (orderParams, pageData, fetchSpeculat
       processAlias,
       transactionId,
       requestTransition,
-      isPrivileged
+      isPrivileged,
+      comissionValue
     );
   }
 };
@@ -151,6 +154,7 @@ export const loadInitialDataForStripePayments = ({
   fetchSpeculatedTransaction,
   fetchStripeCustomer,
   config,
+  comissionValue
 }) => {
   // Fetch currentUser with stripeCustomer entity
   // Note: since there's need for data loading in "componentWillMount" function,
@@ -164,7 +168,7 @@ export const loadInitialDataForStripePayments = ({
   const optionalPaymentParams = {};
   const orderParams = getOrderParams(pageData, shippingDetails, optionalPaymentParams, config);
 
-  fetchSpeculatedTransactionIfNeeded(orderParams, pageData, fetchSpeculatedTransaction);
+  fetchSpeculatedTransactionIfNeeded(orderParams, pageData, fetchSpeculatedTransaction, comissionValue);
 };
 
 const handleSubmit = (values, process, props, stripe, submitting, setSubmitting) => {
@@ -295,7 +299,6 @@ const onStripeInitialized = (stripe, process, props) => {
 };
 
 export const CheckoutPageWithPayment = props => {
-  console.log(props);
   const [submitting, setSubmitting] = useState(false);
   // Initialized stripe library is saved to state - if it's needed at some point here too.
   const [stripe, setStripe] = useState(null);

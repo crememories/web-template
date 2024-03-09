@@ -216,7 +216,7 @@ export const processCheckoutWithPayment = (orderParams, extraPaymentParams) => {
         : process.transitions.REQUEST_PAYMENT;
     const isPrivileged = process.isPrivileged(requestTransition);
 
-    const commission = comissionValue && comissionValue.commission ? comissionValue.commission : false;
+    const commission = comissionValue ? comissionValue : false;
 
     // If paymentIntent exists, order has been initiated previously.
     const orderPromise = hasPaymentIntents

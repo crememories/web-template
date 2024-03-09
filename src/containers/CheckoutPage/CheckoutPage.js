@@ -91,6 +91,7 @@ const EnhancedCheckoutPage = props => {
         fetchSpeculatedTransaction,
         fetchStripeCustomer,
         config,
+        comissionValue
       });
     }
   }, []);
@@ -210,8 +211,8 @@ const mapDispatchToProps = dispatch => ({
   fetchCommission: (listing) => dispatch(getCommission(listing)),
   onInquiryWithoutPayment: (params, processAlias, transitionName) =>
     dispatch(initiateInquiryWithoutPayment(params, processAlias, transitionName)),
-  onInitiateOrder: (params, processAlias, transactionId, transitionName, isPrivileged) =>
-    dispatch(initiateOrder(params, processAlias, transactionId, transitionName, isPrivileged)),
+  onInitiateOrder: (params, processAlias, transactionId, transitionName, isPrivileged, commission) =>
+    dispatch(initiateOrder(params, processAlias, transactionId, transitionName, isPrivileged, commission)),
   onRetrievePaymentIntent: params => dispatch(retrievePaymentIntent(params)),
   onConfirmCardPayment: params => dispatch(confirmCardPayment(params)),
   onConfirmPayment: (transactionId, transitionName, transitionParams) =>

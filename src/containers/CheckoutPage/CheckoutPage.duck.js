@@ -186,9 +186,9 @@ export const initiateInquiryError = e => ({
 });
 
 export const commissionRequest = () => ({ type: COMMISSION_REQUEST });
-export const commissionSuccess = commission => ({ 
+export const commissionSuccess = percentage => ({ 
   type: COMMISSION_SUCCESS,
-  payload: { commission },  
+  payload: { percentage },  
 });
 export const commissionError = e => ({
   type: COMMISSION_ERROR,
@@ -496,7 +496,7 @@ export const speculateTransaction = (
 
   if (isTransition && isPrivilegedTransition) {
     // transition privileged
-    return transitionPrivileged({ isSpeculative: true, orderData, bodyParams, queryParams })
+    return transitionPrivileged({ isSpeculative: true, orderData, bodyParams, queryParams, commission })
       .then(handleSuccess)
       .catch(handleError);
   } else if (isTransition) {
@@ -507,7 +507,7 @@ export const speculateTransaction = (
       .catch(handleError);
   } else if (isPrivilegedTransition) {
     // initiate privileged
-    return initiatePrivileged({ isSpeculative: true, orderData, bodyParams, queryParams })
+    return initiatePrivileged({ isSpeculative: true, orderData, bodyParams, queryParams, commission })
       .then(handleSuccess)
       .catch(handleError);
   } else {
