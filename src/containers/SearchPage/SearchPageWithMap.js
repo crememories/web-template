@@ -464,13 +464,11 @@ export class SearchPageComponent extends Component {
     const isFilterModalOpen = this.state.isFilterModalOpen;
 
     const mapSizeClass = this.state.fullMap ? css.mapSubFullwidth : css.mapSub;
-    console.log(mapSizeClass);
 
     const searchResultContainer = this.state.isMapShow ? css.searchResultContainer : css.searchResultContainerWithoutMap;
     const mapPanel = this.state.isMapShow ? css.mapPanel : css.mapPanelHidden;
 
-    console.log('this.state.isMapShow');
-    console.log(this.state.isMapShow);
+    console.log(searchResultContainer);
 
     // N.B. openMobileMap button is sticky.
     // For some reason, stickyness doesn't work on Safari, if the element is <button>

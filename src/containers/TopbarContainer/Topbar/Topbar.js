@@ -173,8 +173,6 @@ class TopbarComponent extends Component {
 
     } = this.props;
 
-    console.log(this.props);
-
     const { mobilemenu, mobilesearch, keywords, address, origin, bounds } = parse(location.search, {
       latlng: ['origin'],
       latlngBounds: ['bounds'],

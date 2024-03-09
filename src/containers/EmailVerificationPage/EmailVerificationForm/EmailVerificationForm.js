@@ -83,7 +83,7 @@ const EmailVerificationFormComponent = props => (
           </div>
 
           <div className={css.bottomWrapper}>
-            <NamedLink className={css.submitButton} name="LandingPage">
+            <NamedLink className={css.submitButton} name="Home">
               <FormattedMessage id="EmailVerificationForm.successButtonText" />
             </NamedLink>
           </div>
@@ -108,7 +108,7 @@ const EmailVerificationFormComponent = props => (
           </div>
 
           <div className={css.bottomWrapper}>
-            <NamedLink className={css.submitButton} name="LandingPage">
+            <NamedLink className={css.submitButton} name="Home">
               <FormattedMessage id="EmailVerificationForm.successButtonText" />
             </NamedLink>
           </div>

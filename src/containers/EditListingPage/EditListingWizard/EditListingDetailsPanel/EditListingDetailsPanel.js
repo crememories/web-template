@@ -33,14 +33,16 @@ const getTransactionInfo = (listingTypes, existingListingTypeInfo = {}, inlcudeL
   if (listingType && transactionProcessAlias && unitType) {
     return { listingType, transactionProcessAlias, unitType };
   } else if (listingTypes.length === 1) {
-    const { listingType: type, label, transactionType } = listingTypes[0];
+    const { listingType: type, label, transactionType, categories } = listingTypes[0];
     const { alias, unitType: configUnitType } = transactionType;
     const labelMaybe = inlcudeLabel ? { label: label || type } : {};
+    const categoryMaybe = categories ? { categories: categories } : {};
     return {
       listingType: type,
       transactionProcessAlias: alias,
       unitType: configUnitType,
       ...labelMaybe,
+      ...categoryMaybe,
     };
   }
   return {};

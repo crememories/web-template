@@ -117,7 +117,13 @@ const FieldSelectListingType = props => {
 
 // Add collect data for listing fields (both publicData and privateData) based on configuration
 const AddListingFields = props => {
-  const { listingType, listingFieldsConfig, intl } = props;
+  const { listingType, listingFieldsConfig, intl, typeCategory } = props;
+
+  console.log('AddListingFields');
+  console.log(typeCategory);
+  
+  const { label } = typeCategory;
+
   const fields = listingFieldsConfig.reduce((pickedFields, fieldConfig) => {
     const { key, includeForListingTypes, schemaType, scope } = fieldConfig || {};
     const namespacedKey = scope === 'public' ? `pub_${key}` : `priv_${key}`;
@@ -127,6 +133,14 @@ const AddListingFields = props => {
       includeForListingTypes == null || includeForListingTypes.includes(listingType);
     const isProviderScope = ['public', 'private'].includes(scope);
 
+    const isLabel = label ? label.toLowerCase() : label;
+    const defaultVal = fieldConfig.key == 'categories' ? isLabel : null;
+    const disabled = fieldConfig.key == 'categories' ? true : false;
+
+    console.log('categories');
+    console.log(fieldConfig);
+    console.log(defaultVal);
+
     return isKnownSchemaType && isTargetListingType && isProviderScope
       ? [
           ...pickedFields,
@@ -134,6 +148,8 @@ const AddListingFields = props => {
             key={namespacedKey}
             name={namespacedKey}
             fieldConfig={fieldConfig}
+            defaultVal={defaultVal}
+            disabled={disabled}
             defaultRequiredMessage={intl.formatMessage({
               id: 'EditListingDetailsForm.defaultRequiredMessage',
             })}
@@ -172,9 +188,18 @@ const EditListingDetailsFormComponent = props => (
         fetchErrors,
         listingFieldsConfig,
         values,
+        onProcessChange
       } = formRenderProps;
 
       const { listingType } = values;
+
+      const listingTypeCategories = selectableListingTypes.filter((e) => e.listingType === listingType);
+      const typeCategory = listingTypeCategories.length ? listingTypeCategories.reduce((prev, current) => prev.concat(current)) : {};
+
+      values.pub_categories = typeCategory.label ? typeCategory.label.toLowerCase() : typeCategory.label;
+
+      console.log('values.categories');
+      console.log(values.pub_categories);
 
       const titleRequiredMessage = intl.formatMessage({
         id: 'EditListingDetailsForm.titleRequired',
@@ -204,6 +229,7 @@ const EditListingDetailsFormComponent = props => (
             name="listingType"
             listingTypes={selectableListingTypes}
             hasExistingListingType={hasExistingListingType}
+            onProcessChange={onProcessChange}
             onListingTypeChange={onListingTypeChange}
             formApi={formApi}
             intl={intl}
@@ -244,6 +270,7 @@ const EditListingDetailsFormComponent = props => (
           <AddListingFields
             listingType={listingType}
             listingFieldsConfig={listingFieldsConfig}
+            typeCategory={typeCategory}
             intl={intl}
           />
 

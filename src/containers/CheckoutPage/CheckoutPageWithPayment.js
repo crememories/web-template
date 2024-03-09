@@ -95,8 +95,6 @@ const getOrderParams = (pageData, shippingDetails, optionalPaymentParams, config
 };
 
 const fetchSpeculatedTransactionIfNeeded = (orderParams, pageData, fetchSpeculatedTransaction, comissionValue) => {
-  console.log('fetchSpeculatedTransactionIfNeeded');
-  console.log(comissionValue);
   const tx = pageData ? pageData.transaction : null;
   const pageDataListing = pageData.listing;
   const processName =

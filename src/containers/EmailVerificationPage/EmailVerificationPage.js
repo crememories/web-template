@@ -69,7 +69,7 @@ export const EmailVerificationPageComponent = props => {
   // If the verify API call is successfull and the user has verified email
   // We can redirect user forward from email verification page.
   if (isVerified && user && user.attributes.emailVerified) {
-    return <NamedRedirect name="LandingPage" />;
+    return <NamedRedirect name="Home" />;
   }
 
   return (

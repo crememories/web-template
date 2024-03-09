@@ -187,6 +187,26 @@
   }
 }
 
+.searchResultContainerWithoutMap {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 2px 0 0 0;
+
+  @media (--viewportMedium) {
+    padding: 0;
+    /**
+     * .container is using flexbox,
+     * This specifies that searchResultContainer is taking 60% from the viewport width
+     */
+    flex-basis: 50%;
+  }
+
+  @media (--viewportLarge) {
+    flex-basis: 100%;
+  }
+}
+
 .error {
   color: var(--colorFail);
 }

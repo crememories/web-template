@@ -394,9 +394,6 @@ export const initiateInquiryWithoutPayment = (inquiryParams, processAlias, trans
 export const getCommission = (listingId) => (dispatch, getState, sdk) => {
   dispatch(commissionRequest());
 
-  console.log('response.attributes.profile.metadata.commission');
-  console.log(listingId);
-
   return getListingOwnerAdmin(listingId)
   .then(res => {
     return res;
@@ -405,8 +402,6 @@ export const getCommission = (listingId) => (dispatch, getState, sdk) => {
     // dispatch(addMarketplaceEntities(response));
     // dispatch(commissionSuccess(response));
     if(response.attributes.profile.metadata && response.attributes.profile.metadata.commission){
-      console.log('response.attributes.profile.metadata.commission');
-      console.log(response.attributes.profile.metadata.commission);
       dispatch(commissionSuccess(response.attributes.profile.metadata.commission));
     }
   })
