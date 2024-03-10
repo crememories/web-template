@@ -212,8 +212,11 @@ export const initiateOrder = (
   // initiate.
   const isTransition = !!transactionId;
 
-  const { deliveryMethod, quantity, bookingDates, ...otherOrderParams } = orderParams;
+  const { deliveryMethod, quantity, variant, bookingDates, ...otherOrderParams } = orderParams;
+  console.log('initiateOrder');
+  console.log(orderParams);
   const quantityMaybe = quantity ? { stockReservationQuantity: quantity } : {};
+  const variantMaybe = quantity ? { stockReservationVariant: variant } : {};
   const bookingParamsMaybe = bookingDates || {};
 
   // Parameters only for client app's server
@@ -223,6 +226,7 @@ export const initiateOrder = (
   const transitionParams = {
     ...quantityMaybe,
     ...bookingParamsMaybe,
+    ...variantMaybe,
     ...otherOrderParams,
   };
 
@@ -438,8 +442,11 @@ export const speculateTransaction = (
   // initiate.
   const isTransition = !!transactionId;
 
-  const { deliveryMethod, quantity, bookingDates, ...otherOrderParams } = orderParams;
+  const { deliveryMethod, quantity, variant, bookingDates, ...otherOrderParams } = orderParams;
+  console.log('initiateOrder');
+  console.log(orderParams);
   const quantityMaybe = quantity ? { stockReservationQuantity: quantity } : {};
+  const variantMaybe = quantity ? { stockReservationVariant: variant } : {};
   const bookingParamsMaybe = bookingDates || {};
 
   // Parameters only for client app's server
@@ -449,6 +456,7 @@ export const speculateTransaction = (
   const transitionParams = {
     ...quantityMaybe,
     ...bookingParamsMaybe,
+    ...variantMaybe,
     ...otherOrderParams,
     cardToken: 'CheckoutPage_speculative_card_token',
   };

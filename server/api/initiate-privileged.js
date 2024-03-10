@@ -10,6 +10,9 @@ const {
 module.exports = (req, res) => {
   const { isSpeculative, orderData, bodyParams, queryParams, commission } = req.body;
 
+  console.log('comissionValue');
+  console.log(commission);
+  console.log('req.body');
   console.log(req.body);
 
   const sdk = getSdk(req, res);
@@ -21,6 +24,32 @@ module.exports = (req, res) => {
     .then(([showListingResponse, fetchAssetsResponse]) => {
       const listing = showListingResponse.data.data;
       const commissionAsset = fetchAssetsResponse.data.data[0];
+      const variantCheck = (bodyParams.params 
+        && bodyParams.params.stockReservationVariant 
+        && listing.attributes.publicData
+        && listing.attributes.publicData.variants);
+
+      console.log('listing');
+      console.log(listing);
+      console.log('bodyParams.params');
+      console.log(bodyParams.params);
+      console.log('bodyParams.params.stockReservationVariant');
+      console.log(bodyParams.params.stockReservationVariant);
+      console.log('listing.attributes.publicData');
+      console.log(listing.attributes.publicData);
+      console.log('listing.attributes.publicData.variants');
+      console.log(listing.attributes.publicData.variants);
+
+      if(variantCheck){
+        const variantId = bodyParams.params.stockReservationVariant - 1;
+        const variantSelected = listing.attributes.publicData.variants[variantId];
+        listing.attributes.price.amount = variantSelected.variantPrice;
+      }
+
+      console.log('variantCheck');
+      console.log(variantCheck);
+      console.log('listing - after');
+      console.log(listing);
 
       const { providerCommission, customerCommission } =
         commissionAsset?.type === 'jsonAsset' ? commissionAsset.attributes.data : {};

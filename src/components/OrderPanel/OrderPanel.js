@@ -355,6 +355,7 @@ const OrderPanel = props => {
             shippingEnabled={shippingEnabled && displayShipping}
             displayDeliveryMethod={displayPickup || displayShipping}
             listingId={listing.id}
+            variants={listing.attributes.publicData.variants}
             isOwnListing={isOwnListing}
             marketplaceName={marketplaceName}
             onFetchTransactionLineItems={onFetchTransactionLineItems}

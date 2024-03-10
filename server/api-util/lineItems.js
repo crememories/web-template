@@ -130,6 +130,14 @@ exports.transactionLineItems = (listing, orderData, providerCommission, customer
    * - includedFor
    */
 
+  // custom variants prices
+  if( orderData.variantId ){
+    const variantId = orderData.variantId-1;
+    const variantData = publicData.variants[variantId];
+    const variantPrice = variantData.variantPrice;
+    unitPrice.amount = variantPrice;
+  }
+  
   // Unit type needs to be one of the following:
   // day, night, hour or item
   const unitType = publicData.unitType;

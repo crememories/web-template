@@ -23,6 +23,8 @@ import {
   FieldTextInput,
 } from '../../../../components';
 
+import EditListingPricingVariant from './EditListingPricingVariant';
+
 // Import modules from this directory
 import css from './EditListingPricingAndStockForm.module.css';
 
@@ -117,7 +119,10 @@ export const EditListingPricingAndStockFormComponent = props => (
         updateInProgress,
         fetchErrors,
         values,
+        variantLabel,
       } = formRenderProps;
+
+      const variants = {};
 
       const priceValidators = getPriceValidators(
         listingMinimumPriceSubUnits,
@@ -139,10 +144,15 @@ export const EditListingPricingAndStockFormComponent = props => (
       const submitInProgress = updateInProgress;
       const submitDisabled = invalid || disabled || submitInProgress;
       const { updateListingError, showListingsError, setStockError } = fetchErrors || {};
+      const variantAdd = variantLabel;
 
       const stockErrorMessage = isOldTotalMismatchStockError(setStockError)
         ? intl.formatMessage({ id: 'EditListingPricingAndStockForm.oldStockTotalWasOutOfSync' })
         : intl.formatMessage({ id: 'EditListingPricingAndStockForm.stockUpdateFailed' });
+
+      const handleAddField = (e) => {
+        formRenderProps.form.mutators.push("pricingVariant",Math.random());
+      };
 
       return (
         <Form onSubmit={handleSubmit} className={classes}>
@@ -199,15 +209,34 @@ export const EditListingPricingAndStockFormComponent = props => (
           )}
           {setStockError ? <p className={css.error}>{stockErrorMessage}</p> : null}
 
-          <Button
-            className={css.submitButton}
-            type="submit"
-            inProgress={submitInProgress}
-            disabled={submitDisabled}
-            ready={submitReady}
-          >
-            {saveActionMsg}
-          </Button>
+          <EditListingPricingVariant
+            variants={variants}
+            intl={intl}
+            marketplaceCurrency={marketplaceCurrency}
+            priceValidators={priceValidators}
+          > 
+          </EditListingPricingVariant>
+
+          <div className={css.actionButtons}>
+            <Button
+              className={css.submitButton}
+              type="button"
+              onClick={handleAddField}
+            >
+              {variantAdd}
+            </Button>
+
+            <Button
+              className={css.submitButton}
+              type="submit"
+              inProgress={submitInProgress}
+              disabled={submitDisabled}
+              ready={submitReady}
+            >
+              {saveActionMsg}
+            </Button>
+          </div>
+
         </Form>
       );
     }}

@@ -245,6 +245,12 @@ export const mapInputsToStripeAccountKeys = (country, values) => {
       return {
         account_number: cleanedString(values[CLABE]),
       };
+
+    case 'IN':
+      return {
+        routing_number: cleanedString(values[ROUTING_NUMBER]),
+        account_number: cleanedString(values[ACCOUNT_NUMBER]),
+      };
     default:
       throw new Error(`Not supported country (${country}) given to validator`);
   }

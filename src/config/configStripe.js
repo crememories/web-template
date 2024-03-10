@@ -149,6 +149,15 @@ export const supportedCountries = [
     },
   },
   {
+    // India
+    code: 'IN',
+    currency: 'INR',
+    accountConfig: {
+      routingNumber: true,
+      accountNumber: true,
+    },
+  },
+  {
     // Ireland
     code: 'IE',
     currency: 'EUR',

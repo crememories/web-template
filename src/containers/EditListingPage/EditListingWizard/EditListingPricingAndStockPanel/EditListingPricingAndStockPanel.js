@@ -64,6 +64,7 @@ const EditListingPricingAndStockPanel = props => {
     ready,
     onSubmit,
     submitButtonText,
+    actionAddBtnText,
     panelUpdated,
     updateInProgress,
     errors,
@@ -84,6 +85,23 @@ const EditListingPricingAndStockPanel = props => {
     marketplaceCurrency && initialValues.price instanceof Money
       ? initialValues.price?.currency === marketplaceCurrency
       : !!marketplaceCurrency;
+
+  // configure already added variants 
+  const variants = publicData.variants;
+  const pricingVariant = [];
+  const variantKeys = variants ? Object.keys(variants) : null;
+
+  if(variantKeys && priceCurrencyValid){
+    variantKeys.forEach( key => {
+      const variantLabel = variants[key].variantLabel;
+      const variantPrice = new Money;
+      variantPrice.amount = variants[key].variantPrice;
+      variantPrice.currency = initialValues.price.currency;
+      pricingVariant[pricingVariant.length] = {variantPrice,variantLabel}
+    });
+
+    initialValues.pricingVariant = pricingVariant;
+  }
 
   return (
     <div className={classes}>
@@ -106,6 +124,22 @@ const EditListingPricingAndStockPanel = props => {
           initialValues={initialValues}
           onSubmit={values => {
             const { price, stock, stockTypeInfinity } = values;
+
+            // configured options for add variant price with descriptions
+            const variantsValues = values.pricingVariant;
+            const variantsUpdate = {};
+            
+            if(typeof variantsValues == "object"){
+              const valuesKeys = Object.keys(variantsValues);
+              valuesKeys.forEach((element) => {
+                  const curVariant = variantsValues[element];
+                  if(curVariant.variantPrice && curVariant.variantPrice.amount){
+                    const variantPrice = curVariant.variantPrice.amount;
+                    const variantLabel = curVariant.variantLabel;
+                    variantsUpdate[element] = {variantPrice,variantLabel};
+                  }
+              });
+            }
 
             // Update stock only if the value has changed, or stock is infinity in stockType,
             // but not current stock is a small number (might happen with old listings)
@@ -138,6 +172,7 @@ const EditListingPricingAndStockPanel = props => {
             const updateValues = {
               price,
               ...stockUpdateMaybe,
+              publicData: { variants:variantsUpdate },
             };
             // Save the initialValues to state
             // Otherwise, re-rendering would overwrite the values during XHR call.
@@ -155,6 +190,7 @@ const EditListingPricingAndStockPanel = props => {
           listingType={listingTypeConfig}
           unitType={unitType}
           saveActionMsg={submitButtonText}
+          variantLabel={actionAddBtnText}
           disabled={disabled}
           ready={ready}
           updated={panelUpdated}
