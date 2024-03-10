@@ -2,7 +2,7 @@ const { transactionLineItems } = require('../api-util/lineItems');
 const { getSdk, getTrustedSdk, handleError, serialize } = require('../api-util/sdk');
 
 module.exports = (req, res) => {
-  const { isSpeculative, orderData, bodyParams, queryParams,commission } = req.body;
+  const { isSpeculative, orderData, bodyParams, queryParams, commission } = req.body;
 
   console.log('comissionValue');
   console.log(commission);

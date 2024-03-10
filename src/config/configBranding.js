@@ -1,8 +1,8 @@
 import logoImageDesktop from '../assets/8ad209b0-aaf7-46f9-a094-70a25b65de9c.png';
 import logoImageMobile from '../assets/8ad209b0-aaf7-46f9-a094-70a25b65de9c.png';
 import brandImage from '../assets/CreMemories-background-1440.png';
-import facebookImage from '../assets/CreMemories-Facebook-1200x630.jpg';
-import twitterImage from '../assets/CreMemoriesTwitter-600x314.png';
+import facebookImage from '../assets/Open-Graph-for-memorial-Market.jpg';
+import twitterImage from '../assets/Open-Graph-for-memorial-Market.jpg';
 
 /////////////////////////////////////////////////////////
 // This file contains configs that affect branding     //
