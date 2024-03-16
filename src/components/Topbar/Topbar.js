@@ -271,9 +271,6 @@ class TopbarComponent extends Component {
       />
     );
 
-    console.log('categories');
-    console.log(categories);
-
     const topbarCategoriesContent = categories?(
       <div>
         <TopbarCategories

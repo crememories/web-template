@@ -74,9 +74,6 @@ const TopbarCategories = props => {
     handleShowMap,
     isMapShow,
   } = props;
-
-  console.log('categories');
-  console.log(categories);
   
   const [mounted, setMounted] = useState(false);
   const isAccess = AccessRole(props,'admin');
