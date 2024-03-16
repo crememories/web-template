@@ -69,7 +69,7 @@ export const SocialLoginButtonsMaybe = props => {
     const fromParam = from ? `from=${from}` : '';
 
     // Default route where user is returned after successfull authentication
-    const defaultReturn = pathByRouteName('LandingPage', routeConfiguration);
+    const defaultReturn = pathByRouteName('Home', routeConfiguration);
     const defaultReturnParam = defaultReturn ? `&defaultReturn=${defaultReturn}` : '';
 
     // Route for confirming user data before creating a new user
