@@ -184,7 +184,7 @@
   padding: 18px 24px 18px 16px;
   background-color: var(--colorWhite);
   box-shadow: var(--boxShadowTop);
-  display: flex;
+  /* display: flex; */
 
   /* Contain repainting to this component only */
   /* 3D painting container helps scrolling */
@@ -197,6 +197,13 @@
   @media (--viewportLarge) {
     display: none;
   }
+}
+.orderContainer {
+  display: flex;
+}
+
+.contact{
+  margin-top: 20px;
 }
 
 .priceContainerInCTA,

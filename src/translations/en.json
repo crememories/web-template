@@ -639,6 +639,7 @@
   "ProductOrderForm.selectQuantityOption": "Select...",
   "ProductOrderForm.selectQuantityVariantOption": "Select variant",
   "ProductOrderForm.shippingOption": "Shipping",
+  "ProductOrderForm.askAQusetion": "Ask a question",
   "ProfilePage.desktopHeading": "Hello, I'm {name}.",
   "ProfilePage.editProfileLinkDesktop": "Edit profile",
   "ProfilePage.editProfileLinkMobile": "Edit",

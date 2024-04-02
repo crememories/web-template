@@ -4,7 +4,7 @@
 }
 
 .pageRoot {
-  padding-bottom: 90px;
+  padding-bottom: 130px;
 
   @media (--viewportLarge) {
     padding-bottom: 0;

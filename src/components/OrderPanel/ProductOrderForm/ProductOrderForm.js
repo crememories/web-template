@@ -14,6 +14,7 @@ import {
   FieldTextInput,
   InlineTextButton,
   PrimaryButton,
+  SecondaryButton,
   H3,
   H6,
 } from '../../../components';
@@ -340,6 +341,16 @@ const renderForm = formRenderProps => {
           )}
         </PrimaryButton>
       </div>
+
+      <div className={css.contact}>
+        <SecondaryButton
+          onClick={onClickContactUser}
+          enforcePagePreloadFor="SignupPage"
+        >
+          <FormattedMessage id="ProductOrderForm.askAQusetion" />
+        </SecondaryButton>
+      </div>
+      
       <p className={css.finePrint}>
         {payoutDetailsWarning ? (
           payoutDetailsWarning
