@@ -246,7 +246,8 @@ const applySortParams = (sortParams, usersData) => {
 export const searchUsers = (searchParams, config) => (dispatch, getState, sdk) => {
   dispatch(searchUsersRequest(searchParams));
 
-  return getUsersAdmin()
+  let params = {};
+  return getUsersAdmin(params)
   .then(res => {
     return res;
   })

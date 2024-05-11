@@ -11,7 +11,7 @@ const { screen, userEvent } = testingLibrary;
 const noop = () => null;
 
 describe('EditListingDetailsForm', () => {
-  test('Check that shipping fees can be given and submit button activates', () => {
+  it('Check that shipping fees can be given and submit button activates', () => {
     const saveActionMsg = 'Save details';
 
     const selectableListingTypes = [
@@ -77,6 +77,7 @@ describe('EditListingDetailsForm', () => {
       <EditListingDetailsForm
         intl={fakeIntl}
         dispatch={noop}
+        onListingTypeChange={noop}
         onSubmit={v => v}
         saveActionMsg={saveActionMsg}
         updated={false}

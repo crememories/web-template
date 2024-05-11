@@ -263,15 +263,19 @@ CommissionPageComponent.propTypes = {
 
 const mapStateToProps = state => {
   const { currentUser } = state.user;
+
+  console.log('state');
+  console.log(state);
+  console.log(state.CommissionPage);
   
   const {
     users,
     listingData,
   } = state.CommissionPage;
 
-  // console.log('state');
-  // console.log(state);
-  // console.log(state.CommissionPage);
+  console.log('state');
+  console.log(state);
+  console.log(state.CommissionPage);
 
   const getOwnListing = id => {
     const ref = { id, type: 'ownListing' };

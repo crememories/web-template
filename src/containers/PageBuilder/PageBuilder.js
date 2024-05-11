@@ -1,7 +1,8 @@
 import React from 'react';
 
-import { Footer as FooterContent, IconSpinner, LayoutComposer } from '../../components/index.js';
+import { IconSpinner, LayoutComposer } from '../../components/index.js';
 import TopbarContainer from '../../containers/TopbarContainer/TopbarContainer.js';
+import FooterContainer from '../FooterContainer/FooterContainer.js';
 
 import { validProps } from './Field';
 
@@ -52,7 +53,7 @@ const getMetadata = (meta, schemaType, fieldOptions) => {
 const LoadingSpinner = () => {
   return (
     <div className={css.loading}>
-      <IconSpinner />
+      <IconSpinner delay={600} />
     </div>
   );
 };
@@ -116,14 +117,14 @@ const PageBuilder = props => {
                 <TopbarContainer />
               </Topbar>
               <Main as="main" className={css.main}>
-                {inProgress ? (
+                {sections.length === 0 && inProgress ? (
                   <LoadingSpinner />
                 ) : (
                   <SectionBuilder sections={sections} options={options} />
                 )}
               </Main>
               <Footer>
-                <FooterContent />
+                <FooterContainer />
               </Footer>
             </>
           );

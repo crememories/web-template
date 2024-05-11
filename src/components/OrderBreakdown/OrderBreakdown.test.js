@@ -41,7 +41,7 @@ const exampleTransaction = params => {
 };
 
 describe('OrderBreakdown', () => {
-  test('data for product has base price, shipping fee and total', () => {
+  it('shows base price, shipping fee and total to customer (product)', () => {
     render(
       <OrderBreakdownComponent
         userRole="customer"
@@ -92,14 +92,14 @@ describe('OrderBreakdown', () => {
     expect(totalPayIn.getByText('30')).toBeInTheDocument();
   });
 
-  test('data for booking has base price, booking dates and total', () => {
+  it('shows base price, booking dates, customer-commission and total to customer (booking)', () => {
     render(
       <OrderBreakdownComponent
         userRole="customer"
         currency="USD"
         marketplaceName={marketplaceName}
         transaction={exampleTransaction({
-          payinTotal: new Money(2000, 'USD'),
+          payinTotal: new Money(2200, 'USD'),
           payoutTotal: new Money(2000, 'USD'),
           lineItems: [
             {
@@ -108,6 +108,13 @@ describe('OrderBreakdown', () => {
               quantity: new Decimal(2),
               lineTotal: new Money(2000, 'USD'),
               unitPrice: new Money(1000, 'USD'),
+              reversal: false,
+            },
+            {
+              code: 'line-item/customer-commission',
+              includeFor: ['customer'],
+              lineTotal: new Money(200, 'USD'),
+              unitPrice: new Money(200, 'USD'),
               reversal: false,
             },
           ],
@@ -141,14 +148,20 @@ describe('OrderBreakdown', () => {
     const lineItemBasePrice = within(unitPriceXQuantity.parentNode.parentNode);
     expect(lineItemBasePrice.getByText('20')).toBeInTheDocument();
 
+    // Commission
+    const commission = screen.getByText('OrderBreakdown.commission');
+    expect(commission).toBeInTheDocument();
+    const lineItemCommission = within(commission.parentNode.parentNode);
+    expect(lineItemCommission.getByText('2')).toBeInTheDocument();
+
     // Total
     const total = screen.getByText('OrderBreakdown.total');
     expect(total).toBeInTheDocument();
     const totalPayIn = within(total.parentNode.parentNode);
-    expect(totalPayIn.getByText('20')).toBeInTheDocument();
+    expect(totalPayIn.getByText('22')).toBeInTheDocument();
   });
 
-  test('data for provider booking has base price, provider-commission and total', () => {
+  it('shows base price, provider-commission and total to provider (booking)', () => {
     render(
       <OrderBreakdownComponent
         userRole="provider"

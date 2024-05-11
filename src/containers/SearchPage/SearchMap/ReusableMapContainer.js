@@ -30,6 +30,7 @@ class ReusableMapContainer extends React.Component {
       this.el = window.reusableSearchMapElement;
       this.el.id = 'search-map';
       this.el.classList.add(mapLayoutClassName);
+      this.initialClass = mapLayoutClassName;
     }
 
     this.mountNode = null;
@@ -52,6 +53,12 @@ class ReusableMapContainer extends React.Component {
   }
 
   renderSearchMap() {
+
+    if(this.initialClass != this.props.className){
+      this.el.classList.remove(this.initialClass);
+      this.el.classList.add(this.props.className);
+      this.initialClass = this.props.className;
+    }
     // Prepare rendering child (MapWithGoogleMap component) to new location
     // We need to add translations (IntlProvider) for map overlay components
     //

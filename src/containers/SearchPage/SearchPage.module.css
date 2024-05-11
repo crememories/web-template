@@ -7,6 +7,12 @@
 }
 
 .topbar {
+  width: 100%;
+
+  /* Top Bar's drop shadow should always be visible */
+  z-index: var(--zIndexTopbar);
+  position: relative;
+
   @media (--viewportMedium) {
     position: fixed;
     top: 0;
@@ -161,23 +167,6 @@
   }
 }
 
-.layoutWrapperMainModal {
-  /* Expand to the full remaining width of the viewport */
-  flex-grow: 1;
-  display: flex;
-  flex-direction: column;
-  padding: 0 24px 0 24px;
-
-  @media (--viewportLarge) {
-    /**
-     * Calculate right padding to match Footer right border
-     * and left padding together with border should be 60px.
-     */
-    padding: 80px;
-  }
-
-}
-
 .searchResultContainer {
   flex-grow: 1;
   display: flex;
@@ -197,6 +186,7 @@
     flex-basis: 62.5%;
   }
 }
+
 .searchResultContainerWithoutMap {
   flex-grow: 1;
   display: flex;
@@ -243,7 +233,7 @@
   }
 
   @media (--viewportLarge) {
-    padding: 14px 36px 0 36px;
+    padding: 23px 36px 0 36px;
   }
 }
 
@@ -317,9 +307,6 @@
     flex-basis: 37.5%;
   }
 }
-.mapPanelHidden{
-  display: none;
-}
 
 .mapWrapper {
   width: 100%;
@@ -344,6 +331,10 @@
   @media (--viewportLarge) {
     width: 37.5vw;
   }
+}
+
+.mapPanelHidden{
+  display: none;
 }
 
 .mapSub {

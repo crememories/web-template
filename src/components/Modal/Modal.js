@@ -129,7 +129,6 @@ export class ModalComponent extends Component {
       isClosedClassName,
       isOpen,
       usePortal,
-      hideClose
     } = this.props;
 
     const closeModalMessage = intl.formatMessage({ id: 'Modal.closeModal' });
@@ -170,7 +169,7 @@ export class ModalComponent extends Component {
       <div className={classes}>
         <div className={scrollLayerClasses}>
           <div className={containerClasses}>
-            {hideClose ? '' : closeBtn}
+            {closeBtn}
             <div className={classNames(contentClassName || css.content)}>{children}</div>
           </div>
         </div>
@@ -206,7 +205,6 @@ ModalComponent.defaultProps = {
   isOpen: false,
   onClose: null,
   usePortal: false,
-  hideClose: false
 };
 
 const { bool, func, node, string } = PropTypes;

@@ -20,6 +20,7 @@ import {
 import { timestampToDate } from '../../util/dates';
 import { createSlug } from '../../util/urlHelpers';
 import {
+  INQUIRY_PROCESS_NAME,
   TX_TRANSITION_ACTOR_CUSTOMER as CUSTOMER,
   TX_TRANSITION_ACTOR_PROVIDER as PROVIDER,
   resolveLatestProcessName,
@@ -37,7 +38,6 @@ import {
   NamedLink,
   NamedRedirect,
   Page,
-  Footer,
   UserDisplayName,
   OrderBreakdown,
   OrderPanel,
@@ -45,6 +45,7 @@ import {
 } from '../../components';
 
 import TopbarContainer from '../../containers/TopbarContainer/TopbarContainer';
+import FooterContainer from '../../containers/FooterContainer/FooterContainer';
 
 import { getStateData } from './TransactionPage.stateData';
 import ActivityFeed from './ActivityFeed/ActivityFeed';
@@ -449,6 +450,7 @@ export const TransactionPageComponent = props => {
           fetchMessagesInProgress={fetchMessagesInProgress}
         />
       }
+      isInquiryProcess={processName === INQUIRY_PROCESS_NAME}
       config={config}
       {...orderBreakdownMaybe}
       orderPanel={
@@ -482,6 +484,7 @@ export const TransactionPageComponent = props => {
           lineItems={lineItems}
           fetchLineItemsInProgress={fetchLineItemsInProgress}
           fetchLineItemsError={fetchLineItemsError}
+          validListingTypes={config.listing.listingTypes}
           marketplaceCurrency={config.currency}
           dayCountAvailableForBooking={config.stripe.dayCountAvailableForBooking}
           marketplaceName={config.marketplaceName}
@@ -497,7 +500,7 @@ export const TransactionPageComponent = props => {
       title={intl.formatMessage({ id: 'TransactionPage.schemaTitle' }, { title: listingTitle })}
       scrollingDisabled={scrollingDisabled}
     >
-      <LayoutSingleColumn topbar={<TopbarContainer />} footer={<Footer />}>
+      <LayoutSingleColumn topbar={<TopbarContainer />} footer={<FooterContainer />}>
         <div className={css.root}>{panel}</div>
         <ReviewModal
           id="ReviewOrderModal"

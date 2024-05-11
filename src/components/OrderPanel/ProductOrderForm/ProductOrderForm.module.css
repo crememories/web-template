@@ -71,6 +71,10 @@
   }
 }
 
+.contact{
+  margin-top: 20px;
+}
+
 .finePrint {
   composes: marketplaceTinyFontStyles from global;
   text-align: center;

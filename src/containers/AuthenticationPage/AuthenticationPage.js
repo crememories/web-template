@@ -5,7 +5,7 @@ import { connect } from 'react-redux';
 import { withRouter, Redirect } from 'react-router-dom';
 import Cookies from 'js-cookie';
 import classNames from 'classnames';
-import { isEmpty } from 'lodash';
+import isEmpty from 'lodash/isEmpty';
 
 import { useConfiguration } from '../../context/configurationContext';
 import { useRouteConfiguration } from '../../context/routeConfigurationContext';
@@ -31,12 +31,12 @@ import {
   LinkTabNavHorizontal,
   SocialLoginButton,
   ResponsiveBackgroundImageContainer,
-  Footer,
   Modal,
   LayoutSingleColumn,
 } from '../../components';
 
 import TopbarContainer from '../../containers/TopbarContainer/TopbarContainer';
+import FooterContainer from '../../containers/FooterContainer/FooterContainer';
 
 import TermsAndConditions from './TermsAndConditions/TermsAndConditions';
 import ConfirmSignupForm from './ConfirmSignupForm/ConfirmSignupForm';
@@ -69,7 +69,7 @@ export const SocialLoginButtonsMaybe = props => {
     const fromParam = from ? `from=${from}` : '';
 
     // Default route where user is returned after successfull authentication
-    const defaultReturn = pathByRouteName('LandingPage', routeConfiguration);
+    const defaultReturn = pathByRouteName('Home', routeConfiguration);
     const defaultReturnParam = defaultReturn ? `&defaultReturn=${defaultReturn}` : '';
 
     // Route for confirming user data before creating a new user
@@ -137,6 +137,7 @@ export const AuthenticationForms = props => {
     from,
     submitLogin,
     loginError,
+    idpAuthError,
     signupError,
     authInProgress,
     submitSignup,
@@ -182,6 +183,12 @@ export const AuthenticationForms = props => {
     </div>
   );
 
+  const idpAuthErrorMessage = (
+    <div className={css.error}>
+      <FormattedMessage id="AuthenticationPage.idpAuthFailed" />
+    </div>
+  );
+
   const signupErrorMessage = (
     <div className={css.error}>
       {isSignupEmailTakenError(signupError) ? (
@@ -192,11 +199,14 @@ export const AuthenticationForms = props => {
     </div>
   );
 
-  // eslint-disable-next-line no-confusing-arrow
-  const errorMessage = (error, message) => (error ? message : null);
-  const loginOrSignupError = isLogin
-    ? errorMessage(loginError, loginErrorMessage)
-    : errorMessage(signupError, signupErrorMessage);
+  const loginOrSignupError =
+    isLogin && !!idpAuthError
+      ? idpAuthErrorMessage
+      : isLogin && !!loginError
+      ? loginErrorMessage
+      : !!signupError
+      ? signupErrorMessage
+      : null;
 
   return (
     <div className={css.content}>
@@ -298,6 +308,7 @@ export const AuthenticationOrConfirmInfoForm = props => {
     submitSingupWithIdp,
     authInProgress,
     loginError,
+    idpAuthError,
     signupError,
     confirmError,
     termsAndConditions,
@@ -320,6 +331,7 @@ export const AuthenticationOrConfirmInfoForm = props => {
       showGoogleLogin={showGoogleLogin}
       from={from}
       loginError={loginError}
+      idpAuthError={idpAuthError}
       signupError={signupError}
       submitLogin={submitLogin}
       authInProgress={authInProgress}
@@ -444,13 +456,13 @@ export const AuthenticationPageComponent = props => {
       <LayoutSingleColumn
         mainColumnClassName={css.layoutWrapperMain}
         topbar={<TopbarContainer className={topbarClasses} />}
-        footer={<Footer />}
+        footer={<FooterContainer />}
       >
         <ResponsiveBackgroundImageContainer
           className={css.root}
           childrenWrapperClassName={css.contentContainer}
           as="section"
-          image={config.branding.brandImageURL}
+          image={config.branding.brandImage}
           sizes="100%"
           useOverlay
         >
@@ -474,6 +486,7 @@ export const AuthenticationPageComponent = props => {
               submitSingupWithIdp={submitSingupWithIdp}
               authInProgress={authInProgress}
               loginError={loginError}
+              idpAuthError={authError}
               signupError={signupError}
               confirmError={confirmError}
               termsAndConditions={

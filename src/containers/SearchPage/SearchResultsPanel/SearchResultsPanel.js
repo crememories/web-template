@@ -36,9 +36,9 @@ const SearchResultsPanel = props => {
       const panelLargeWidth = 62.5;
       return [
         '(max-width: 767px) 100vw',
-        `(max-width: 1023px) ${panelMediumWidth / 2}vw`,
-        `(max-width: 1920px) ${panelLargeWidth / 3}vw`,
-        `${panelLargeWidth / 4}vw`,
+        `(max-width: 1023px) ${panelMediumWidth}vw`,
+        `(max-width: 1920px) ${panelLargeWidth / 2}vw`,
+        `${panelLargeWidth / 3}vw`,
       ].join(', ');
     } else {
       // Panel width relative to the viewport
@@ -61,7 +61,6 @@ const SearchResultsPanel = props => {
           <ListingCard
             className={css.listingCard}
             key={l.id.uuid}
-            carouselKey={l.id.uuid}
             listing={l}
             renderSizes={cardRenderSizes(isMapVariant)}
             setActiveListing={setActiveListing}
@@ -81,7 +80,7 @@ SearchResultsPanel.defaultProps = {
   pagination: null,
   rootClassName: null,
   search: null,
-  isMapVariant: false,
+  isMapVariant: true,
 };
 
 SearchResultsPanel.propTypes = {

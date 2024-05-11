@@ -46,7 +46,7 @@ const getTouchCoordinates = nativeEvent => {
 
 // Get correct geocoding variant: geocoderGoogleMaps or geocoderMapbox
 const getGeocoderVariant = mapProvider => {
-  const isGoogleMapsInUse = mapProvider === 'GOOGLE_MAPS';
+  const isGoogleMapsInUse = mapProvider === 'googleMaps';
   return isGoogleMapsInUse ? geocoderGoogleMaps : geocoderMapbox;
 };
 
@@ -544,13 +544,14 @@ class LocationAutocompleteInputImplementation extends Component {
               inputRef(node);
             }
           }}
+          data-testid="location-search"
         />
         {renderPredictions ? (
           <LocationPredictionsList
             rootClassName={predictionsClass}
             predictions={predictions}
             currentLocationId={geocoderVariant.CURRENT_LOCATION_ID}
-            isGoogleMapsInUse={config.maps.mapProvider === 'GOOGLE_MAPS'}
+            isGoogleMapsInUse={config.maps.mapProvider === 'googleMaps'}
             geocoder={this.getGeocoder()}
             highlightedIndex={this.state.highlightedIndex}
             onSelectStart={this.handlePredictionsSelectStart}

@@ -25,10 +25,13 @@ export const STRIPE_CUSTOMER_REQUEST = 'app/CheckoutPage/STRIPE_CUSTOMER_REQUEST
 export const STRIPE_CUSTOMER_SUCCESS = 'app/CheckoutPage/STRIPE_CUSTOMER_SUCCESS';
 export const STRIPE_CUSTOMER_ERROR = 'app/CheckoutPage/STRIPE_CUSTOMER_ERROR';
 
+export const INITIATE_INQUIRY_REQUEST = 'app/CheckoutPage/INITIATE_INQUIRY_REQUEST';
+export const INITIATE_INQUIRY_SUCCESS = 'app/CheckoutPage/INITIATE_INQUIRY_SUCCESS';
+export const INITIATE_INQUIRY_ERROR = 'app/CheckoutPage/INITIATE_INQUIRY_ERROR';
+
 export const COMMISSION_REQUEST = 'app/CheckoutPage/COMMISSION_REQUEST';
 export const COMMISSION_SUCCESS = 'app/CheckoutPage/COMMISSION_SUCCESS';
 export const COMMISSION_ERROR = 'app/CheckoutPage/COMMISSION_ERROR';
-
 
 // ================ Reducer ================ //
 
@@ -42,6 +45,8 @@ const initialState = {
   initiateOrderError: null,
   confirmPaymentError: null,
   stripeCustomerFetched: false,
+  initiateInquiryInProgress: false,
+  initiateInquiryError: null,
   comissionValue: 0,
 };
 
@@ -95,6 +100,13 @@ export default function checkoutPageReducer(state = initialState, action = {}) {
     case STRIPE_CUSTOMER_ERROR:
       console.error(payload); // eslint-disable-line no-console
       return { ...state, stripeCustomerFetchError: payload };
+
+    case INITIATE_INQUIRY_REQUEST:
+      return { ...state, initiateInquiryInProgress: true, initiateInquiryError: null };
+    case INITIATE_INQUIRY_SUCCESS:
+      return { ...state, initiateInquiryInProgress: false };
+    case INITIATE_INQUIRY_ERROR:
+      return { ...state, initiateInquiryInProgress: false, initiateInquiryError: payload };
 
     case COMMISSION_REQUEST:
       return { ...state, comissionValue: false };
@@ -165,10 +177,18 @@ export const stripeCustomerError = e => ({
   payload: e,
 });
 
+export const initiateInquiryRequest = () => ({ type: INITIATE_INQUIRY_REQUEST });
+export const initiateInquirySuccess = () => ({ type: INITIATE_INQUIRY_SUCCESS });
+export const initiateInquiryError = e => ({
+  type: INITIATE_INQUIRY_ERROR,
+  error: true,
+  payload: e,
+});
+
 export const commissionRequest = () => ({ type: COMMISSION_REQUEST });
-export const commissionSuccess = commission => ({ 
+export const commissionSuccess = percentage => ({ 
   type: COMMISSION_SUCCESS,
-  payload: { commission },  
+  payload: { percentage },  
 });
 export const commissionError = e => ({
   type: COMMISSION_ERROR,
@@ -193,6 +213,8 @@ export const initiateOrder = (
   const isTransition = !!transactionId;
 
   const { deliveryMethod, quantity, variant, bookingDates, ...otherOrderParams } = orderParams;
+  console.log('initiateOrder');
+  console.log(orderParams);
   const quantityMaybe = quantity ? { stockReservationQuantity: quantity } : {};
   const variantMaybe = quantity ? { stockReservationVariant: variant } : {};
   const bookingParamsMaybe = bookingDates || {};
@@ -239,7 +261,6 @@ export const initiateOrder = (
       ...transactionIdMaybe,
       listingId: orderParams.listingId.uuid,
       ...quantityMaybe,
-      ...variantMaybe,
       ...bookingParamsMaybe,
       ...orderData,
     });
@@ -248,7 +269,7 @@ export const initiateOrder = (
 
   if (isTransition && isPrivilegedTransition) {
     // transition privileged
-    return transitionPrivileged({ isSpeculative: false, orderData, bodyParams, queryParams })
+    return transitionPrivileged({ isSpeculative: false, orderData, bodyParams, queryParams, commission })
       .then(handleSucces)
       .catch(handleError);
   } else if (isTransition) {
@@ -283,9 +304,13 @@ export const confirmPayment = (transactionId, transitionName, transitionParams =
     transition: transitionName,
     params: transitionParams,
   };
+  const queryParams = {
+    include: ['booking', 'provider'],
+    expand: true,
+  };
 
   return sdk.transactions
-    .transition(bodyParams)
+    .transition(bodyParams, queryParams)
     .then(response => {
       const order = response.data.data;
       dispatch(confirmPaymentSuccess(order.id));
@@ -320,12 +345,59 @@ export const sendMessage = params => (dispatch, getState, sdk) => {
   }
 };
 
+/**
+ * Initiate transaction against default-inquiry process
+ * Note: At this point inquiry transition is made directly against Marketplace API.
+ *       So, client app's server is not involved here unlike with transitions including payments.
+ *
+ * @param {*} inquiryParams contains listingId and protectedData
+ * @param {*} processAlias 'default-inquiry/release-1'
+ * @param {*} transitionName 'transition/inquire-without-payment'
+ * @returns
+ */
+export const initiateInquiryWithoutPayment = (inquiryParams, processAlias, transitionName) => (
+  dispatch,
+  getState,
+  sdk
+) => {
+  dispatch(initiateInquiryRequest());
+
+  if (!processAlias) {
+    const error = new Error('No transaction process attached to listing');
+    log.error(error, 'listing-process-missing', {
+      listingId: listing?.id?.uuid,
+    });
+    dispatch(initiateInquiryError(storableError(error)));
+    return Promise.reject(error);
+  }
+
+  const bodyParams = {
+    transition: transitionName,
+    processAlias,
+    params: inquiryParams,
+  };
+  const queryParams = {
+    include: ['provider'],
+    expand: true,
+  };
+
+  return sdk.transactions
+    .initiate(bodyParams, queryParams)
+    .then(response => {
+      const transactionId = response.data.data.id;
+      dispatch(initiateInquirySuccess());
+      return transactionId;
+    })
+    .catch(e => {
+      dispatch(initiateInquiryError(storableError(e)));
+      throw e;
+    });
+};
+
 // getCommission is a comission for listing creator
 export const getCommission = (listingId) => (dispatch, getState, sdk) => {
   dispatch(commissionRequest());
 
-  dispatch(commissionSuccess(44));
-  
   return getListingOwnerAdmin(listingId)
   .then(res => {
     return res;
@@ -356,14 +428,13 @@ export const getCommission = (listingId) => (dispatch, getState, sdk) => {
  * pricing info for the booking breakdown to get a proper estimate for
  * the price with the chosen information.
  */
-
 export const speculateTransaction = (
   orderParams,
   processAlias,
   transactionId,
   transitionName,
   isPrivilegedTransition,
-  commission,
+  commission
 ) => (dispatch, getState, sdk) => {
   dispatch(speculateTransactionRequest());
 
@@ -372,6 +443,8 @@ export const speculateTransaction = (
   const isTransition = !!transactionId;
 
   const { deliveryMethod, quantity, variant, bookingDates, ...otherOrderParams } = orderParams;
+  console.log('initiateOrder');
+  console.log(orderParams);
   const quantityMaybe = quantity ? { stockReservationQuantity: quantity } : {};
   const variantMaybe = quantity ? { stockReservationVariant: variant } : {};
   const bookingParamsMaybe = bookingDates || {};
@@ -382,8 +455,8 @@ export const speculateTransaction = (
   // Parameters for Marketplace API
   const transitionParams = {
     ...quantityMaybe,
-    ...variantMaybe,
     ...bookingParamsMaybe,
+    ...variantMaybe,
     ...otherOrderParams,
     cardToken: 'CheckoutPage_speculative_card_token',
   };
@@ -418,7 +491,6 @@ export const speculateTransaction = (
     log.error(e, 'speculate-transaction-failed', {
       listingId: transitionParams.listingId.uuid,
       ...quantityMaybe,
-      ...variantMaybe,
       ...bookingParamsMaybe,
       ...orderData,
     });
@@ -427,7 +499,7 @@ export const speculateTransaction = (
 
   if (isTransition && isPrivilegedTransition) {
     // transition privileged
-    return transitionPrivileged({ isSpeculative: true, orderData, bodyParams, queryParams })
+    return transitionPrivileged({ isSpeculative: true, orderData, bodyParams, queryParams, commission })
       .then(handleSuccess)
       .catch(handleError);
   } else if (isTransition) {
@@ -438,16 +510,9 @@ export const speculateTransaction = (
       .catch(handleError);
   } else if (isPrivilegedTransition) {
     // initiate privileged
-    return getListingOwnerAdmin(orderParams.listingId).then((response)=>{
-
-      const commission = response.attributes.profile.metadata && 
-      response.attributes.profile.metadata.commission ? 
-      response.attributes.profile.metadata.commission : false;
-      
-      return initiatePrivileged({ isSpeculative: true, orderData, bodyParams, queryParams, commission })
+    return initiatePrivileged({ isSpeculative: true, orderData, bodyParams, queryParams, commission })
       .then(handleSuccess)
       .catch(handleError);
-    })
   } else {
     // initiate non-privileged
     return sdk.transactions
@@ -470,4 +535,3 @@ export const stripeCustomer = () => (dispatch, getState, sdk) => {
       dispatch(stripeCustomerError(storableError(e)));
     });
 };
-

@@ -65,12 +65,6 @@ const getPageDataLoadingAPI = () => {
     ProfilePage: {
       loadData: ProfilePageLoader,
     },
-    CommissionPage: {
-      loadData: CommissionPageLoader,
-    },
-    EditCommission: {
-      loadData: EditCommissionLoader,
-    },
     SearchPage: {
       loadData: SearchPageLoader,
     },
@@ -83,6 +77,12 @@ const getPageDataLoadingAPI = () => {
     TransactionPage: {
       loadData: TransactionPageLoader,
       setInitialValues: TransactionPageInitialValues,
+    },
+    CommissionPage: {
+      loadData: CommissionPageLoader,
+    },
+    EditCommission: {
+      loadData: EditCommissionLoader,
     },
   };
 };

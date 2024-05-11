@@ -35,6 +35,15 @@ const EditListingPricingVariant = props => {
                     <IconTrash rootClassName={css.IconTrash} />
                   </button>
                   </h2>
+
+                  <FieldTextInput 
+                  id={`${name}.variantLabel`}
+                  name={`${name}.variantLabel`}
+                  className={css.input} 
+                  label={props.intl.formatMessage({ id: 'EditListingPricingForm.labelProductVariant' })}
+                  placeholder={props.intl.formatMessage({ id: 'EditListingPricingForm.labelProductPlaceholderVariant' })}
+                  type="text"
+                  />
                   
                   <FieldCurrencyInput 
                   id={`${name}.variantPrice`}
@@ -44,15 +53,6 @@ const EditListingPricingVariant = props => {
                   placeholder={props.intl.formatMessage({ id: 'EditListingPricingForm.pricePerProductPlaceholderVariant' })}
                   currencyConfig={appSettings.getCurrencyFormatting(marketplaceCurrency)}
                   validate={props.priceValidators}
-                  />
-                  
-                  <FieldTextInput 
-                  id={`${name}.variantLabel`}
-                  name={`${name}.variantLabel`}
-                  className={css.input} 
-                  label={props.intl.formatMessage({ id: 'EditListingPricingForm.labelProductVariant' })}
-                  placeholder={props.intl.formatMessage({ id: 'EditListingPricingForm.labelProductPlaceholderVariant' })}
-                  type="text"
                   />
                   
                 </div>

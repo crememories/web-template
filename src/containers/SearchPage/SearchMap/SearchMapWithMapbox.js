@@ -17,6 +17,8 @@ import SearchMapGroupLabel from '../SearchMapGroupLabel/SearchMapGroupLabel';
 import { groupedByCoordinates, reducedToArray } from './SearchMap.helpers';
 import css from './SearchMapWithMapbox.module.css';
 
+import SearchShowFulscreenMap from './SearchShowFulscreenMap';
+
 export const LABEL_HANDLE = 'SearchMapLabel';
 export const INFO_CARD_HANDLE = 'SearchMapInfoCard';
 export const SOURCE_AUTOCOMPLETE = 'autocomplete';
@@ -245,11 +247,16 @@ class SearchMapWithMapbox extends Component {
     this.state = { mapContainer: null, isMapReady: false };
     this.viewportBounds = null;
 
+    this.changeMapSize = props.changeMapSize;
+    this.fullMap = props.fullMap;
+    this.fullMapButton = null;
+
     this.onMount = this.onMount.bind(this);
     this.onMoveend = this.onMoveend.bind(this);
     this.initializeMap = this.initializeMap.bind(this);
     this.handleDoubleClickOnInfoCard = this.handleDoubleClickOnInfoCard.bind(this);
     this.handleMobilePinchZoom = this.handleMobilePinchZoom.bind(this);
+    this.changeMapSizeAction = this.changeMapSizeAction.bind(this);
   }
 
   componentDidUpdate(prevProps) {
@@ -283,6 +290,8 @@ class SearchMapWithMapbox extends Component {
     } else if (prevProps.mapComponentRefreshToken !== this.props.mapComponentRefreshToken) {
       /* Notify parent component that Mapbox map is loaded */
       this.props.onMapLoad(this.map);
+      this.fullMapButton.actionSwithc(this.fullMap);
+      this.map.resize();
     }
   }
 
@@ -334,6 +343,11 @@ class SearchMapWithMapbox extends Component {
     }
   }
 
+  changeMapSizeAction() {
+    this.props.changeMapSize();
+    return this.props.fullMap;
+  }
+
   initializeMap() {
     const { offsetHeight, offsetWidth } = this.state.mapContainer;
     const hasDimensions = offsetHeight > 0 && offsetWidth > 0;
@@ -345,8 +359,11 @@ class SearchMapWithMapbox extends Component {
       });
       window.mapboxMap = this.map;
 
+      this.fullMapButton = new SearchShowFulscreenMap(this);
+      this.map.addControl(this.fullMapButton, "top-left");
+
       var nav = new window.mapboxgl.NavigationControl({ showCompass: false });
-      this.map.addControl(nav, 'top-left');
+      this.map.addControl(nav, 'top-right');
 
       this.map.on('moveend', this.onMoveend);
 

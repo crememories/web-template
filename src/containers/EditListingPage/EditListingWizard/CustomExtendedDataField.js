@@ -148,18 +148,21 @@ const CustomFieldBoolean = props => {
  */
 const CustomExtendedDataField = props => {
   const intl = useIntl();
-  const { enumOptions = [], schemaType } = props?.fieldConfig || {};
+  const { enumOptions = [], schemaType, key } = props?.fieldConfig || {};
+
+  const custChemaType = (key == 'boatLength' || key == 'boatMaxCapacity') ? SCHEMA_TYPE_LONG : schemaType;
+
   const renderFieldComponent = (FieldComponent, props) => <FieldComponent {...props} intl={intl} />;
 
-  return schemaType === SCHEMA_TYPE_ENUM && enumOptions
+  return custChemaType === SCHEMA_TYPE_ENUM && enumOptions
     ? renderFieldComponent(CustomFieldEnum, props)
-    : schemaType === SCHEMA_TYPE_MULTI_ENUM && enumOptions
+    : custChemaType === SCHEMA_TYPE_MULTI_ENUM && enumOptions
     ? renderFieldComponent(CustomFieldMultiEnum, props)
-    : schemaType === SCHEMA_TYPE_TEXT
+    : custChemaType === SCHEMA_TYPE_TEXT
     ? renderFieldComponent(CustomFieldText, props)
-    : schemaType === SCHEMA_TYPE_LONG
+    : custChemaType === SCHEMA_TYPE_LONG
     ? renderFieldComponent(CustomFieldLong, props)
-    : schemaType === SCHEMA_TYPE_BOOLEAN
+    : custChemaType === SCHEMA_TYPE_BOOLEAN
     ? renderFieldComponent(CustomFieldBoolean, props)
     : null;
 };

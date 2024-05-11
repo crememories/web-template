@@ -22,9 +22,11 @@ const isSafeNumber = decimalValue => {
 // See: https://stripe.com/docs/currencies
 const subUnitDivisors = {
   AUD: 100,
+  BGN: 100,
   CAD: 100,
   CHF: 100,
   CNY: 100,
+  CZK: 100,
   DKK: 100,
   EUR: 100,
   GBP: 100,
@@ -34,9 +36,12 @@ const subUnitDivisors = {
   MXN: 100,
   NOK: 100,
   NZD: 100,
+  PLN: 100,
+  RON: 100,
   SEK: 100,
   SGD: 100,
   USD: 100,
+  INR: 100,
 };
 
 // Get the minor unit divisor for the given currency

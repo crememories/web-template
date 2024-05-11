@@ -4,10 +4,13 @@
 // Most of the work happens in components.           //
 ///////////////////////////////////////////////////////
 
-// There are 4 SearchPage variants that can be used:
-// 'map' & 'grid' & 'modal' & 'mapSub'
+// Note: These come from the layout asset nowadays by default.
+//       To use this built-in configuration, you need to remove the overwrite from configHelper.js (mergeLayouts func)
+
+// There are 2 SearchPage variants that can be used:
+// 'map' & 'grid'
 export const searchPage = {
-  variantType: 'mapsub',
+  variantType: 'map',
 };
 
 // ListingPage has 2 layout options: 'coverPhoto' and 'carousel'.

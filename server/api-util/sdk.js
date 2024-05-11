@@ -8,6 +8,11 @@ const CLIENT_ID = process.env.REACT_APP_SHARETRIBE_SDK_CLIENT_ID;
 const CLIENT_SECRET = process.env.SHARETRIBE_SDK_CLIENT_SECRET;
 const USING_SSL = process.env.REACT_APP_SHARETRIBE_USING_SSL === 'true';
 const TRANSIT_VERBOSE = process.env.REACT_APP_SHARETRIBE_SDK_TRANSIT_VERBOSE === 'true';
+const MAX_SOCKETS = process.env.MAX_SOCKETS;
+const MAX_SOCKETS_DEFAULT = 10;
+
+const BASE_URL = process.env.REACT_APP_SHARETRIBE_SDK_BASE_URL;
+const ASSET_CDN_BASE_URL = process.env.REACT_APP_SHARETRIBE_SDK_ASSET_CDN_BASE_URL;
 
 // Application type handlers for JS SDK.
 //
@@ -23,11 +28,20 @@ const typeHandlers = [
 ];
 exports.typeHandlers = typeHandlers;
 
-const baseUrlMaybe = process.env.REACT_APP_SHARETRIBE_SDK_BASE_URL
-  ? { baseUrl: process.env.REACT_APP_SHARETRIBE_SDK_BASE_URL }
-  : null;
-const httpAgent = new http.Agent({ keepAlive: true });
-const httpsAgent = new https.Agent({ keepAlive: true });
+const baseUrlMaybe = BASE_URL ? { baseUrl: BASE_URL } : {};
+const assetCdnBaseUrlMaybe = ASSET_CDN_BASE_URL ? { assetCdnBaseUrl: ASSET_CDN_BASE_URL } : {};
+
+// maxSockets is Infinity by default in Node.js
+// This makes it possible to alter that through environment variable.
+// Note: this is only affecting http agents created here.
+const maxSockets = MAX_SOCKETS ? parseInt(MAX_SOCKETS, 10) : MAX_SOCKETS_DEFAULT;
+
+// Instantiate HTTP(S) Agents with keepAlive set to true.
+// This will reduce the request time for consecutive requests by
+// reusing the existing TCP connection, thus eliminating the time used
+// for setting up new TCP connections.
+const httpAgent = new http.Agent({ keepAlive: true, maxSockets });
+const httpsAgent = new https.Agent({ keepAlive: true, maxSockets });
 
 const memoryStore = token => {
   const store = sharetribeSdk.tokenStore.memoryStore();
@@ -77,6 +91,8 @@ exports.handleError = (res, error) => {
   }
 };
 
+// The access token is read from cookie (request) and potentially saved into the cookie (response).
+// This keeps session updated between server and browser even if the token is re-issued.
 exports.getSdk = (req, res) => {
   return sharetribeSdk.createInstance({
     transitVerbose: TRANSIT_VERBOSE,
@@ -91,9 +107,11 @@ exports.getSdk = (req, res) => {
     }),
     typeHandlers,
     ...baseUrlMaybe,
+    ...assetCdnBaseUrlMaybe,
   });
 };
 
+// Trusted token is powerful, it should not be passed away from the server.
 exports.getTrustedSdk = req => {
   const userToken = getUserToken(req);
 
@@ -129,5 +147,42 @@ exports.getTrustedSdk = req => {
       typeHandlers,
       ...baseUrlMaybe,
     });
+  });
+};
+
+// Fetch commission asset with 'latest' alias.
+exports.fetchCommission = sdk => {
+  return sdk
+    .assetsByAlias({ paths: ['transactions/commission.json'], alias: 'latest' })
+    .then(response => {
+      // Let's throw an error if we can't fetch commission for some reason
+      const commissionAsset = response?.data?.data?.[0];
+      if (!commissionAsset) {
+        const message = 'Insufficient pricing configuration set.';
+        const error = new Error(message);
+        error.status = 400;
+        error.statusText = message;
+        error.data = {};
+        throw error;
+      }
+      return response;
+    });
+};
+
+// Fetch branding asset with 'latest' alias.
+// This is needed for generating webmanifest on server-side.
+exports.fetchBranding = sdk => {
+  return sdk.assetsByAlias({ paths: ['design/branding.json'], alias: 'latest' }).then(response => {
+    // Let's throw an error if we can't fetch branding for some reason
+    const brandingAsset = response?.data?.data?.[0];
+    if (!brandingAsset) {
+      const message = 'Branding configuration was not available.';
+      const error = new Error(message);
+      error.status = 400;
+      error.statusText = message;
+      error.data = {};
+      throw error;
+    }
+    return response;
   });
 };
