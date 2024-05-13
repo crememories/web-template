@@ -69,6 +69,7 @@ export class TransactionPanelComponent extends Component {
     this.onSendMessageFormBlur = this.onSendMessageFormBlur.bind(this);
     this.onMessageSubmit = this.onMessageSubmit.bind(this);
     this.scrollToMessage = this.scrollToMessage.bind(this);
+    this.offerModalOpen = this.offerModalOpen.bind(this);
   }
 
   componentDidMount() {
@@ -113,6 +114,10 @@ export class TransactionPanelComponent extends Component {
         behavior: 'smooth',
       });
     }
+  }
+
+  offerModalOpen(){
+    console.log('offerModalOpen');
   }
 
   render() {
@@ -187,6 +192,8 @@ export class TransactionPanelComponent extends Component {
     const deliveryMethod = protectedData?.deliveryMethod || 'none';
 
     const classes = classNames(rootClassName || css.root, className);
+
+    const ifCanSpecialOffer = isProvider;
 
     return (
       <div className={classes}>
@@ -289,6 +296,8 @@ export class TransactionPanelComponent extends Component {
                   { id: 'TransactionPanel.sendMessagePlaceholder' },
                   { name: otherUserDisplayNameString }
                 )}
+                ifCanSpecialOffer={ifCanSpecialOffer}
+                offerModalOpen={this.offerModalOpen}
                 inProgress={sendMessageInProgress}
                 sendMessageError={sendMessageError}
                 onFocus={this.onSendMessageFormFocus}

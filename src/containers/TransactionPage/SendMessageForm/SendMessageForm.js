@@ -69,11 +69,20 @@ class SendMessageFormComponent extends Component {
             invalid,
             form,
             formId,
+
+            
+            ifCanSpecialOffer,
+            offerModalOpen,
+            invalidListing,
+            offerInProgress,
           } = formRenderProps;
+
+          console.log(formRenderProps);
 
           const classes = classNames(rootClassName || css.root, className);
           const submitInProgress = inProgress;
           const submitDisabled = invalid || submitInProgress;
+          const offerDisabled = invalidListing || offerInProgress
           return (
             <Form className={classes} onSubmit={values => handleSubmit(values, form)}>
               <FieldTextInput
@@ -86,6 +95,20 @@ class SendMessageFormComponent extends Component {
                 onBlur={this.handleBlur}
               />
               <div className={css.submitContainer}>
+                {ifCanSpecialOffer ? (
+                  <SecondaryButtonInline
+                    className={css.offerButton}
+                    inProgress={submitInProgress}
+                    type="button"
+                    onClick={offerModalOpen}
+                    disabled={offerDisabled}
+                    // onFocus={this.handleFocus}
+                    // onBlur={this.handleBlur}
+                  >
+                    <FormattedMessage id="SendMessageForm.sendSpecialOffer" />
+                  </SecondaryButtonInline>
+                ) : null }
+
                 <div className={css.errorContainer}>
                   {sendMessageError ? (
                     <p className={css.error}>
@@ -93,6 +116,7 @@ class SendMessageFormComponent extends Component {
                     </p>
                   ) : null}
                 </div>
+                
                 <SecondaryButtonInline
                   className={css.submitButton}
                   inProgress={submitInProgress}
@@ -120,6 +144,7 @@ SendMessageFormComponent.defaultProps = {
   onFocus: () => null,
   onBlur: () => null,
   sendMessageError: null,
+  ifCanSpecialOffer: null
 };
 
 SendMessageFormComponent.propTypes = {
@@ -132,6 +157,7 @@ SendMessageFormComponent.propTypes = {
   onFocus: func,
   onBlur: func,
   sendMessageError: propTypes.error,
+  ifCanSpecialOffer: bool,
 
   // from injectIntl
   intl: intlShape.isRequired,

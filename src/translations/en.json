@@ -729,6 +729,7 @@
   "SelectSingleFilter.popupClear": "Clear",
   "SendMessageForm.sendFailed": "Failed to send. Please try again.",
   "SendMessageForm.sendMessage": "Send message",
+  "SendMessageForm.sendSpecialOffer": "Send Special Offer",
   "ShippingDetails.addressLine1Label": "Street address",
   "ShippingDetails.addressLine1Placeholder": "123 Example Street",
   "ShippingDetails.addressLine1Required": "Street address is required.",
