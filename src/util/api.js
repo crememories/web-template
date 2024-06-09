@@ -169,3 +169,9 @@ export const updateUsersAdmin = body => {
 export const getListingOwnerAdmin = body => {
   return post('/api/admin-get-listing-owner', body);
 };
+
+// admin without description yet
+//
+export const specialOffer = body => {
+  return post('/api/special-offer', body);
+};

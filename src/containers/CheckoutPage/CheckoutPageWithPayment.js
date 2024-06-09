@@ -74,6 +74,8 @@ const getOrderParams = (pageData, shippingDetails, optionalPaymentParams, config
 
   const variant = pageData.orderData?.variant;
   const variantMaybe = variant ? { variant } : {};
+  const specialOfferId = pageData.orderData?.specialOfferId;
+  const specialOfferMaybe = specialOfferId ? { specialOfferId } : {};
 
   const { listingType, unitType } = pageData?.listing?.attributes?.publicData || {};
   const protectedDataMaybe = {
@@ -91,6 +93,7 @@ const getOrderParams = (pageData, shippingDetails, optionalPaymentParams, config
     ...deliveryMethodMaybe,
     ...quantityMaybe,
     ...variantMaybe,
+    ...specialOfferMaybe,
     ...bookingDatesMaybe(pageData.orderData?.bookingDates),
     ...protectedDataMaybe,
     ...optionalPaymentParams,

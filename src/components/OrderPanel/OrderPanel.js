@@ -190,6 +190,13 @@ const OrderPanel = props => {
   const processName = resolveLatestProcessName(transactionProcessAlias.split('/')[0]);
   const lineItemUnitType = lineItemUnitTypeMaybe || `line-item/${unitType}`;
 
+  const specialOfferId = new URLSearchParams(props.location.search).get("specialOffer");
+  const specialOfferData = listing?.attributes?.publicData[specialOfferId];
+
+  if(specialOfferData){
+    listing.attributes.price.amount = specialOfferData.price;
+  }
+
   const price = listing?.attributes?.price;
   const isPaymentProcess = processName !== INQUIRY_PROCESS_NAME;
 
@@ -326,6 +333,7 @@ const OrderPanel = props => {
             fetchLineItemsInProgress={fetchLineItemsInProgress}
             fetchLineItemsError={fetchLineItemsError}
             payoutDetailsWarning={payoutDetailsWarning}
+            specialOfferId={specialOfferId}
           />
         ) : showBookingDatesForm ? (
           <BookingDatesForm
@@ -347,6 +355,7 @@ const OrderPanel = props => {
             fetchLineItemsInProgress={fetchLineItemsInProgress}
             fetchLineItemsError={fetchLineItemsError}
             payoutDetailsWarning={payoutDetailsWarning}
+            specialOfferId={specialOfferId}
           />
         ) : showProductOrderForm ? (
           <ProductOrderForm
@@ -369,6 +378,7 @@ const OrderPanel = props => {
             fetchLineItemsInProgress={fetchLineItemsInProgress}
             fetchLineItemsError={fetchLineItemsError}
             payoutDetailsWarning={payoutDetailsWarning}
+            specialOfferId={specialOfferId}
           />
         ) : showInquiryForm ? (
           <InquiryWithoutPaymentForm formId="OrderPanelInquiryForm" onSubmit={onSubmit} />

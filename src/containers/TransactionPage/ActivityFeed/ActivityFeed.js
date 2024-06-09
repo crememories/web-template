@@ -6,6 +6,16 @@ import classNames from 'classnames';
 import { FormattedMessage, injectIntl, intlShape } from '../../../util/reactIntl';
 import { formatDateWithProximity } from '../../../util/dates';
 import { propTypes } from '../../../util/types';
+import { formatMoney } from '../../../util/currency';
+
+import { types as sdkTypes } from '../../../util/sdkLoader';
+import { createSlug } from '../../../util/urlHelpers';
+
+import { pathByRouteName, findRouteByRouteName } from '../../../util/routes';
+import { useRouteConfiguration } from '../../../context/routeConfigurationContext';
+
+const { Money } = sdkTypes;
+
 import {
   getProcess,
   getUserTxRole,
@@ -14,7 +24,7 @@ import {
   TX_TRANSITION_ACTOR_SYSTEM,
 } from '../../../transactions/transaction';
 
-import { Avatar, InlineTextButton, ReviewRating, UserDisplayName } from '../../../components';
+import { Avatar, InlineTextButton, Button, ReviewRating, UserDisplayName, NamedLink } from '../../../components';
 
 import { stateDataShape } from '../TransactionPage.stateData';
 
@@ -74,6 +84,88 @@ const Review = props => {
 Review.propTypes = {
   content: string.isRequired,
   rating: number.isRequired,
+};
+
+const createLink = (listingTitle,listingId) =>{
+  const routeConfiguration = useRouteConfiguration();
+  let path = '';
+  if(listingTitle){
+    const pathParams = { id: listingId, slug: createSlug(listingTitle)};
+    path = pathByRouteName('ListingPage', routeConfiguration, pathParams);
+  }
+
+  return path;
+}
+
+const OfferLink = props => {
+  const { message, formattedDate, intl, marketplaceCurrency } = props;
+  const messageData = JSON.parse(message.attributes.content);
+  const ownerName = message.sender?.attributes?.profile?.displayName;
+
+  const price = messageData.price ? new Money(messageData.price.amount, messageData.price.currency) : null;
+  const unitPrice = price ? formatMoney(intl, price) : null;
+  const listingTitle = messageData.listingTitle;
+  const listingId = messageData.listingId?.uuid;
+  const specialOfferId = message.id?.uuid;
+
+  const path = createLink(listingTitle,listingId) + '?specialOffer=' + specialOfferId;
+
+  return (
+    <div className={css.offer}>
+      <Avatar className={css.avatar} user={message.sender} />
+      <div className={css.offerContainer}>
+        <div><FormattedMessage id="TransactionPage.ActivityFeed.received-offer" values={{ owner: ownerName }}  /></div>
+        <div>
+          <p className={css.messageDate} ><FormattedMessage id="TransactionPage.ActivityFeed.received-offer-price" /></p>
+          {unitPrice}
+        </div>
+
+        <a href={path}>
+        <Button className={css.acceptOffer}>
+          <FormattedMessage id="TransactionPage.ActivityFeed.accept-offer" />
+        </Button>
+          {/* <p className={css.messageContent}>{messageData.message}</p> */}
+        </a>
+        <p className={css.messageDate}>{formattedDate}</p>
+      </div>
+    </div>
+  );
+};
+
+OfferLink.propTypes = {
+  message: propTypes.message.isRequired,
+  formattedDate: string.isRequired,
+  intl: intlShape.isRequired,
+  marketplaceCurrency: string.isRequired
+};
+
+const OwnOfferLink = props => {
+  const { message, formattedDate, intl, marketplaceCurrency } = props;
+  const messageData = JSON.parse(message.attributes.content);
+  const ownerName = message.sender?.attributes?.profile?.displayName;
+
+  const price = messageData.price ? new Money(messageData.price.amount, messageData.price.currency) : null;
+  const unitPrice = price ? formatMoney(intl, price) : null;
+
+  return (
+    <div className={css.ownOffer}>
+      <div className={css.offerContainer}>
+        <div><FormattedMessage id="TransactionPage.ActivityFeed.sended-offer" /></div>
+          <div>
+            <p className={css.messageDate} ><FormattedMessage id="TransactionPage.ActivityFeed.received-offer-price" /></p>
+            {unitPrice}
+          </div>
+        <p className={css.ownMessageDate}>{formattedDate}</p>
+      </div>
+    </div>
+  );
+};
+
+OwnOfferLink.propTypes = {
+  message: propTypes.message.isRequired,
+  formattedDate: string.isRequired,
+  intl: intlShape.isRequired,
+  marketplaceCurrency: string.isRequired
 };
 
 const TransitionMessage = props => {
@@ -164,7 +256,29 @@ const ReviewComponentMaybe = props => {
   return null;
 };
 
+function isJsonString(str) {
+  try {
+      JSON.parse(str);
+  } catch (e) {
+      return false;
+  }
+  return true;
+}
+
 const isMessage = item => item && item.type === 'message';
+
+const isOffer = item => {
+  const content = item?.attributes?.content;
+
+  if(content && isJsonString(content)){
+    const messageData = JSON.parse(content);
+    const type = messageData?.type;
+
+    return type == 'offer';
+  }
+
+  return false;
+};
 
 // Compare function for sorting an array containing messages and transitions
 const compareItems = (a, b) => {
@@ -197,6 +311,7 @@ export const ActivityFeedComponent = props => {
     onOpenReviewModal,
     onShowOlderMessages,
     intl,
+    marketplaceCurrency,
   } = props;
   const classes = classNames(rootClassName || css.root, className);
   const processName = stateData.processName;
@@ -223,6 +338,31 @@ export const ActivityFeedComponent = props => {
       <OwnMessage message={message} formattedDate={formattedDate} />
     ) : (
       <Message message={message} formattedDate={formattedDate} />
+    );
+
+    return (
+      <li id={`msg-${message.id.uuid}`} key={message.id.uuid} className={css.messageItem}>
+        {messageComponent}
+      </li>
+    );
+  };
+
+  const offerListItem = message => {
+    const formattedDate = formatDateWithProximity(message.attributes.createdAt, intl, todayString);
+    const isOwnMessage = currentUser?.id && message?.sender?.id?.uuid === currentUser.id?.uuid;
+
+    const messageComponent = isOwnMessage ? (
+      <OwnOfferLink message={message} 
+      formattedDate={formattedDate} 
+      intl={intl}
+      marketplaceCurrency={marketplaceCurrency}
+      />
+    ) : (
+      <OfferLink message={message} 
+      formattedDate={formattedDate} 
+      intl={intl}
+      marketplaceCurrency={marketplaceCurrency}
+      />
     );
 
     return (
@@ -301,7 +441,9 @@ export const ActivityFeedComponent = props => {
         </li>
       ) : null}
       {items.map(item => {
-        if (isMessage(item)) {
+        if (isOffer(item)) {
+          return offerListItem(item);
+        } else if (isMessage(item)){
           return messageListItem(item);
         } else {
           return transitionListItem(item);
@@ -332,6 +474,8 @@ ActivityFeedComponent.propTypes = {
 
   // from injectIntl
   intl: intlShape.isRequired,
+
+  marketplaceCurrency: string.isRequired,
 };
 
 const ActivityFeed = injectIntl(ActivityFeedComponent);

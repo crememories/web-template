@@ -988,6 +988,10 @@
   "TransactionPage.ActivityFeed.reviewLink": "Laissez un avis sur {otherUsersName}.",
   "TransactionPage.ActivityFeed.showOlderMessages": "Voir plus",
   "TransactionPage.ActivityFeed.today": "Aujourd'hui",
+  "TransactionPage.ActivityFeed.received-offer": "{owner} Envoyez-vous une offre spéciale",
+  "TransactionPage.ActivityFeed.sended-offer": "Vous envoyez une offre spéciale",
+  "TransactionPage.ActivityFeed.received-offer-price": "Prix ​​total",
+  "TransactionPage.ActivityFeed.accept-offer": "Accepter l'offre",
   "TransactionPage.default-booking.customer.accepted.title": "Votre demande de réservation a été acceptée !",
   "TransactionPage.default-booking.customer.canceled.title": "Votre réservation a été annulée.",
   "TransactionPage.default-booking.customer.declined.title": "Votre demande de réservation a été refusée.",
@@ -1104,5 +1108,7 @@
   "EditCommissionForm.saveCommission": "Update Commission",
   "FieldCommissionInput.CommisionMinValue": "This should be bigger then {minValue}",
   "FieldCommissionInput.CommisionMaxValue": "This should be smaller then {maxValue}",
-  "FieldCommissionInput.CommisionRequired": "Commision is required."
+  "FieldCommissionInput.CommisionRequired": "Une commission est requise.",
+  "SpecialOffer.sendSpecialOfferTitle": "Envoyer à {custumer} une offre spéciale",
+  "SpecialOffer.sendSpecialOfferListing": "Détails de l'annonce"
 }

@@ -72,12 +72,10 @@ class SendMessageFormComponent extends Component {
 
             
             ifCanSpecialOffer,
-            offerModalOpen,
+            openOfferModal,
             invalidListing,
             offerInProgress,
           } = formRenderProps;
-
-          console.log(formRenderProps);
 
           const classes = classNames(rootClassName || css.root, className);
           const submitInProgress = inProgress;
@@ -100,7 +98,7 @@ class SendMessageFormComponent extends Component {
                     className={css.offerButton}
                     inProgress={submitInProgress}
                     type="button"
-                    onClick={offerModalOpen}
+                    onClick={openOfferModal}
                     disabled={offerDisabled}
                     // onFocus={this.handleFocus}
                     // onBlur={this.handleBlur}

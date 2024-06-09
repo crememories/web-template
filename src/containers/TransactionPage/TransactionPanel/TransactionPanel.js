@@ -25,6 +25,7 @@ import FeedSection from './FeedSection';
 import ActionButtonsMaybe from './ActionButtonsMaybe';
 import DiminishedActionButtonMaybe from './DiminishedActionButtonMaybe';
 import PanelHeading from './PanelHeading';
+import SpecialOffer from '../SpecialOffer/SpecialOffer';
 
 import css from './TransactionPanel.module.css';
 
@@ -61,6 +62,7 @@ export class TransactionPanelComponent extends Component {
     super(props);
     this.state = {
       sendMessageFormFocused: false,
+      specialOfferShowing: false,
     };
     this.isMobSaf = false;
     this.sendMessageFormName = 'TransactionPanel.SendMessageForm';
@@ -69,7 +71,9 @@ export class TransactionPanelComponent extends Component {
     this.onSendMessageFormBlur = this.onSendMessageFormBlur.bind(this);
     this.onMessageSubmit = this.onMessageSubmit.bind(this);
     this.scrollToMessage = this.scrollToMessage.bind(this);
-    this.offerModalOpen = this.offerModalOpen.bind(this);
+    this.openOfferModal = this.openOfferModal.bind(this);
+    this.closeOfferModal = this.closeOfferModal.bind(this);
+    this.onSpecialOfferSubmit = this.onSpecialOfferSubmit.bind(this);
   }
 
   componentDidMount() {
@@ -105,6 +109,29 @@ export class TransactionPanelComponent extends Component {
       });
   }
 
+  onSpecialOfferSubmit(values, form){
+    const message = 'testPaymant';
+    const { transactionId, onSendOffer, config, listing, customer } = this.props;
+
+    const newPrice = values?.price;
+
+    const offerDetaisl = {
+      listing,
+      newPrice,
+      customer,
+    }
+
+    onSendOffer(transactionId, offerDetaisl, config)
+    .then(messageId => {
+      this.closeOfferModal();
+      // form.reset();
+      // this.scrollToMessage(messageId);
+    })
+    .catch(e => {
+      // Ignore, Redux handles the error
+    });
+  }
+
   scrollToMessage(messageId) {
     const selector = `#msg-${messageId.uuid}`;
     const el = document.querySelector(selector);
@@ -116,8 +143,12 @@ export class TransactionPanelComponent extends Component {
     }
   }
 
-  offerModalOpen(){
-    console.log('offerModalOpen');
+  openOfferModal(){
+    this.setState({ specialOfferShowing: true });
+  }
+
+  closeOfferModal(){
+    this.setState({ specialOfferShowing: false });
   }
 
   render() {
@@ -146,6 +177,8 @@ export class TransactionPanelComponent extends Component {
       orderBreakdown,
       orderPanel,
       config,
+      onManageDisableScrolling,
+      marketplaceCurrency
     } = this.props;
 
     const isCustomer = transactionRole === 'customer';
@@ -297,7 +330,7 @@ export class TransactionPanelComponent extends Component {
                   { name: otherUserDisplayNameString }
                 )}
                 ifCanSpecialOffer={ifCanSpecialOffer}
-                offerModalOpen={this.offerModalOpen}
+                openOfferModal={this.openOfferModal}
                 inProgress={sendMessageInProgress}
                 sendMessageError={sendMessageError}
                 onFocus={this.onSendMessageFormFocus}
@@ -365,6 +398,20 @@ export class TransactionPanelComponent extends Component {
               />
             </div>
           </div>
+
+          <SpecialOffer
+            className={classes}
+            customer={customer}
+            listing={listing}
+            intl={intl}
+            user={currentUser}
+            onManageDisableScrolling={onManageDisableScrolling}
+            specialOfferShowing={this.state.specialOfferShowing}
+            closeOfferModal={this.closeOfferModal}
+            onSubmit={this.onSpecialOfferSubmit}
+            marketplaceCurrency={marketplaceCurrency}
+          />
+          
         </div>
       </div>
     );
@@ -410,6 +457,7 @@ TransactionPanelComponent.propTypes = {
   sendMessageError: propTypes.error,
   onOpenDisputeModal: func.isRequired,
   onSendMessage: func.isRequired,
+  onSendOffer: func.isRequired,
   stateData: stateDataShape,
   showBookingLocation: bool,
   activityFeed: node,

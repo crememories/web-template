@@ -50,6 +50,10 @@ export const SEND_MESSAGE_REQUEST = 'app/TransactionPage/SEND_MESSAGE_REQUEST';
 export const SEND_MESSAGE_SUCCESS = 'app/TransactionPage/SEND_MESSAGE_SUCCESS';
 export const SEND_MESSAGE_ERROR = 'app/TransactionPage/SEND_MESSAGE_ERROR';
 
+export const SEND_OFFER_REQUEST = 'app/TransactionPage/SEND_OFFER_REQUEST';
+export const SEND_OFFER_SUCCESS = 'app/TransactionPage/SEND_OFFER_SUCCESS';
+export const SEND_OFFER_ERROR = 'app/TransactionPage/SEND_OFFER_ERROR';
+
 export const SEND_REVIEW_REQUEST = 'app/TransactionPage/SEND_REVIEW_REQUEST';
 export const SEND_REVIEW_SUCCESS = 'app/TransactionPage/SEND_REVIEW_SUCCESS';
 export const SEND_REVIEW_ERROR = 'app/TransactionPage/SEND_REVIEW_ERROR';
@@ -77,9 +81,12 @@ const initialState = {
   oldestMessagePageFetched: 0,
   messages: [],
   initialMessageFailedToTransaction: null,
+  initialOfferFailedToTransaction: null,
   savePaymentMethodFailed: false,
   sendMessageInProgress: false,
   sendMessageError: null,
+  sendOfferInProgress: false,
+  sendOfferError: null,
   sendReviewInProgress: false,
   sendReviewError: null,
   monthlyTimeSlots: {
@@ -176,6 +183,18 @@ export default function transactionPageReducer(state = initialState, action = {}
     case SEND_MESSAGE_ERROR:
       return { ...state, sendMessageInProgress: false, sendMessageError: payload };
 
+    case SEND_OFFER_REQUEST:
+      return {
+        ...state,
+        sendOfferInProgress: true,
+        sendOfferError: null,
+        initialOfferFailedToTransaction: null,
+      };
+    case SEND_OFFER_SUCCESS:
+      return { ...state, sendOfferInProgress: false };
+    case SEND_OFFER_ERROR:
+      return { ...state, sendOfferInProgress: false, sendOfferError: payload };
+
     case SEND_REVIEW_REQUEST:
       return { ...state, sendReviewInProgress: true, sendReviewError: null };
     case SEND_REVIEW_SUCCESS:
@@ -271,6 +290,10 @@ const fetchMessagesError = e => ({ type: FETCH_MESSAGES_ERROR, error: true, payl
 const sendMessageRequest = () => ({ type: SEND_MESSAGE_REQUEST });
 const sendMessageSuccess = () => ({ type: SEND_MESSAGE_SUCCESS });
 const sendMessageError = e => ({ type: SEND_MESSAGE_ERROR, error: true, payload: e });
+
+const sendOfferRequest = () => ({ type: SEND_OFFER_REQUEST });
+const sendOfferSuccess = () => ({ type: SEND_OFFER_SUCCESS });
+const sendOfferError = e => ({ type: SEND_OFFER_ERROR, error: true, payload: e });
 
 const sendReviewRequest = () => ({ type: SEND_REVIEW_REQUEST });
 const sendReviewSuccess = () => ({ type: SEND_REVIEW_SUCCESS });
@@ -510,7 +533,7 @@ export const makeTransition = (txId, transitionName, params) => (dispatch, getSt
 const fetchMessages = (txId, page, config) => (dispatch, getState, sdk) => {
   const paging = { page, perPage: MESSAGES_PAGE_SIZE };
   dispatch(fetchMessagesRequest());
-
+  
   return sdk.messages
     .query({
       transaction_id: txId,
@@ -580,6 +603,70 @@ export const sendMessage = (txId, message, config) => (dispatch, getState, sdk) 
     })
     .catch(e => {
       dispatch(sendMessageError(storableError(e)));
+      // Rethrow so the page can track whether the sending failed, and
+      // keep the message in the form for a retry.
+      throw e;
+    });
+};
+
+export const sendOffer = (txId, offerDetails, config) => (dispatch, getState, sdk) => {
+  dispatch(sendOfferRequest());
+  
+  const listingId = offerDetails.listing.id
+  const listingTitle = offerDetails.listing.attributes?.title;
+
+  const messageData = {
+    type: 'offer',
+    price: offerDetails.newPrice,
+    listingId: listingId,
+    listingTitle
+  };
+
+  const stringifyOffer = JSON.stringify(messageData);
+
+  const offerData = {
+      price: offerDetails.newPrice.amount,
+      currency: offerDetails.newPrice.currency,
+  };
+  
+
+  return sdk.messages
+    .send({ transactionId: txId, content: stringifyOffer})
+    .then(response => {
+      const offerId = response.data.data.id;
+      const offerUuid = response.data.data.id.uuid;
+
+      console.log(response);
+
+      // We fetch the first page again to add sent message to the page data
+      // and update possible incoming messages too.
+      // TODO if there're more than 100 incoming messages,
+      // this should loop through most recent pages instead of fetching just the first one.
+      return dispatch(fetchMessages(txId, 1, config))
+        .then(() => {
+          dispatch(sendOfferSuccess());
+
+          const publicData = {}
+          publicData[offerUuid] = offerData;
+
+          const updateListing = {
+            id: listingId,
+            publicData: publicData
+          }
+
+          sdk.ownListings.update(
+            updateListing
+          ).then(response => {
+            console.log('response - update listing');
+            console.log(response);
+          })
+          
+          return offerId;
+        })
+        .catch(() => dispatch(sendOfferSuccess()));
+    })
+    .catch(e => {
+      dispatch(sendOfferError(storableError(e)));
       // Rethrow so the page can track whether the sending failed, and
       // keep the message in the form for a retry.
       throw e;

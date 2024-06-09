@@ -19,6 +19,7 @@ const adminUsers = require('./api-flex/admin-users');
 const adminUser = require('./api-flex/admin-user');
 const adminUserUpdate = require('./api-flex/admin-user-update');
 const adminGetListingOwner = require('./api-flex/admin-get-listing-owner');
+const specialOffer = require('./api-flex/special-offer');
 
 const createUserWithIdp = require('./api/auth/createUserWithIdp');
 
@@ -62,6 +63,7 @@ router.post('/admin-users', adminUsers);
 router.post('/admin-user', adminUser);
 router.post('/admin-user-update', adminUserUpdate);
 router.post('/admin-get-listing-owner', adminGetListingOwner);
+router.post('/special-offer', specialOffer);
 
 // Create user with identity provider (e.g. Facebook or Google)
 // This endpoint is called to create a new user after user has confirmed

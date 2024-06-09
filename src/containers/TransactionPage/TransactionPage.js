@@ -56,6 +56,7 @@ import TransactionPanel from './TransactionPanel/TransactionPanel';
 import {
   makeTransition,
   sendMessage,
+  sendOffer,
   sendReview,
   fetchMoreMessages,
   fetchTimeSlots,
@@ -104,6 +105,7 @@ export const TransactionPageComponent = props => {
     messages,
     onManageDisableScrolling,
     onSendMessage,
+    onSendOffer,
     onSendReview,
     onShowMoreMessages,
     params,
@@ -431,10 +433,13 @@ export const TransactionPageComponent = props => {
       sendMessageInProgress={sendMessageInProgress}
       sendMessageError={sendMessageError}
       onSendMessage={onSendMessage}
+      onSendOffer={onSendOffer}
       onOpenDisputeModal={onOpenDisputeModal}
       stateData={stateData}
       transactionRole={transactionRole}
       showBookingLocation={showBookingLocation}
+      onManageDisableScrolling={onManageDisableScrolling}
+      marketplaceCurrency={config.currency}
       activityFeed={
         <ActivityFeed
           messages={messages}
@@ -448,6 +453,7 @@ export const TransactionPageComponent = props => {
           onOpenReviewModal={onOpenReviewModal}
           onShowOlderMessages={() => onShowMoreMessages(transaction.id, config)}
           fetchMessagesInProgress={fetchMessagesInProgress}
+          marketplaceCurrency={config.currency}
         />
       }
       isInquiryProcess={processName === INQUIRY_PROCESS_NAME}
@@ -572,6 +578,7 @@ TransactionPageComponent.propTypes = {
   sendMessageError: propTypes.error,
   onShowMoreMessages: func.isRequired,
   onSendMessage: func.isRequired,
+  onSendOffer: func.isRequired,
   onFetchTimeSlots: func.isRequired,
   monthlyTimeSlots: object,
   // monthlyTimeSlots could be something like:
@@ -663,14 +670,15 @@ const mapDispatchToProps = dispatch => {
       dispatch(makeTransition(txId, transitionName, params)),
     onShowMoreMessages: (txId, config) => dispatch(fetchMoreMessages(txId, config)),
     onSendMessage: (txId, message, config) => dispatch(sendMessage(txId, message, config)),
+    onSendOffer: (txId, message, config) => dispatch(sendOffer(txId, message, config)),
     onManageDisableScrolling: (componentId, disableScrolling) =>
       dispatch(manageDisableScrolling(componentId, disableScrolling)),
     onSendReview: (tx, transitionOptions, params, config) =>
       dispatch(sendReview(tx, transitionOptions, params, config)),
     callSetInitialValues: (setInitialValues, values) => dispatch(setInitialValues(values)),
     onInitializeCardPaymentData: () => dispatch(initializeCardPaymentData()),
-    onFetchTransactionLineItems: (orderData, listingId, isOwnListing) =>
-      dispatch(fetchTransactionLineItems(orderData, listingId, isOwnListing)),
+    onFetchTransactionLineItems: (orderData, listingId, isOwnListing, specialOfferId) =>
+      dispatch(fetchTransactionLineItems(orderData, listingId, isOwnListing, specialOfferId)),
     onFetchTimeSlots: (listingId, start, end, timeZone) =>
       dispatch(fetchTimeSlots(listingId, start, end, timeZone)),
   };

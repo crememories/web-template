@@ -40,7 +40,8 @@ const handleFetchLineItems = ({
   fetchLineItemsInProgress,
   onFetchTransactionLineItems,
   variants,
-  variantId
+  variantId,
+  specialOfferId
 }) => {
   // const stockReservationQuantity = Number.parseInt(quantity, 10);
   const deliveryMethodMaybe = deliveryMethod ? { deliveryMethod } : {};
@@ -58,7 +59,7 @@ const handleFetchLineItems = ({
     !fetchLineItemsInProgress
   ) {
     onFetchTransactionLineItems({
-      orderData: { stockReservationQuantity, ...deliveryMethodMaybe, variantId },
+      orderData: { stockReservationQuantity, ...deliveryMethodMaybe, variantId, specialOfferId },
       listingId,
       isOwnListing,
     });
@@ -147,6 +148,7 @@ const renderForm = formRenderProps => {
     marketplaceName,
     values,
     variants,
+    specialOfferId,
   } = formRenderProps;
 
   // Note: don't add custom logic before useEffect
@@ -164,6 +166,7 @@ const renderForm = formRenderProps => {
         isOwnListing,
         fetchLineItemsInProgress,
         onFetchTransactionLineItems,
+        specialOfferId,
       });
     }
   }, []);
@@ -180,7 +183,8 @@ const renderForm = formRenderProps => {
         fetchLineItemsInProgress,
         onFetchTransactionLineItems,
         variants,
-        variantId
+        variantId,
+        specialOfferId
       });
     }
   };
@@ -189,7 +193,7 @@ const renderForm = formRenderProps => {
   // Otherwise continue with the default handleSubmit function.
   const handleFormSubmit = e => {
     const { quantity, deliveryMethod, variant } = values || {};
-
+    
     if ((!quantity || quantity < 1) && !variant) {
       e.preventDefault();
       // Blur event will show validator message
@@ -375,6 +379,7 @@ const ProductOrderForm = props => {
     shippingEnabled,
     displayDeliveryMethod,
     allowOrdersOfMultipleItems,
+    specialOfferId,
   } = props;
 
   // Should not happen for listings that go through EditListingWizard.
@@ -398,8 +403,13 @@ const ProductOrderForm = props => {
       : !shippingEnabled && !pickupEnabled
       ? { deliveryMethod: 'none' }
       : {};
+  const specialOfferMaybe = specialOfferId ? {specialOfferId} : {};
   const hasMultipleDeliveryMethods = pickupEnabled && shippingEnabled;
-  const initialValues = { ...quantityMaybe, ...deliveryMethodMaybe };
+  const initialValues = { ...quantityMaybe, ...deliveryMethodMaybe, ...specialOfferMaybe };
+
+  console.log('initialValues');
+  console.log(initialValues);
+  console.log(specialOfferId);
 
   return (
     <FinalForm
@@ -425,6 +435,7 @@ ProductOrderForm.defaultProps = {
   displayDeliveryMethod: false,
   lineItems: null,
   fetchLineItemsError: null,
+  specialOfferId: null,
 };
 
 ProductOrderForm.propTypes = {

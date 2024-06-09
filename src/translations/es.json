@@ -989,6 +989,10 @@
   "TransactionPage.ActivityFeed.reviewLink": "Deja una evaluación para {otherUsersName}.",
   "TransactionPage.ActivityFeed.showOlderMessages": "Mostrar anteriores",
   "TransactionPage.ActivityFeed.today": "Hoy",
+  "TransactionPage.ActivityFeed.received-offer": "{owner} Sendu al vi Specialan Oferton",
+  "TransactionPage.ActivityFeed.sended-offer": "Vi sendas Specialan Proponon",
+  "TransactionPage.ActivityFeed.received-offer-price": "Totala prezo",
+  "TransactionPage.ActivityFeed.accept-offer": "Akceptu Oferton",
   "TransactionPage.default-booking.customer.accepted.title": "¡Tu solicitud de reserva fue aceptada!",
   "TransactionPage.default-booking.customer.canceled.title": "Tu reserva fue cancelada.",
   "TransactionPage.default-booking.customer.declined.title": "Tu solicitud de reserva fue rechazada.",
@@ -1105,5 +1109,7 @@
   "EditCommissionForm.saveCommission": "Update Commission",
   "FieldCommissionInput.CommisionMinValue": "This should be bigger then {minValue}",
   "FieldCommissionInput.CommisionMaxValue": "This should be smaller then {maxValue}",
-  "FieldCommissionInput.CommisionRequired": "Commision is required."
+  "FieldCommissionInput.CommisionRequired": "Commision is required.",
+  "SpecialOffer.sendSpecialOfferTitle": "Sendu al {custumer} Specialan Oferton",
+  "SpecialOffer.sendSpecialOfferListing": "Detaloj de Listo"
 }

@@ -21,7 +21,9 @@
 }
 
 .message,
-.ownMessage {
+.ownMessage,
+.offer,
+.ownOffer {
   /* Preserve newlines, but collapse other whitespace */
   white-space: pre-line;
   max-width: 433px;
@@ -178,4 +180,29 @@
 }
 
 .showOlderButton {
+  
+}
+
+.offer{
+  display: flex;
+  flex-direction: row;
+}
+.offerContainer{
+  padding: 10px;
+  border: 1px solid var(--marketplaceColor);
+  border-radius: 6px;
+  flex: 0 0 100%
+}
+.ownOffer {
+  float: right;
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+}
+.acceptOffer{
+  color: #fff;
+  background-color: var(--marketplaceColor);
+  border: 1px solid var(--marketplaceColor);
+  border-radius: 6px;
+  min-height: 40px;
 }
