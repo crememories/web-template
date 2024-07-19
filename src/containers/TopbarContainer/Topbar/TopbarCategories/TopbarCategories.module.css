@@ -536,6 +536,9 @@
 }
 .categoryLabel{
 }
+.categoryLabel svg{
+  height: 30px;
+}
 .active .categoryLabel{
   color: var(--colorBlack);
   border-bottom: 2px solid var(--colorBlack);
