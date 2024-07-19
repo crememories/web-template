@@ -200,6 +200,7 @@ const OrderPanel = props => {
   const price = listing?.attributes?.price;
   const isPaymentProcess = processName !== INQUIRY_PROCESS_NAME;
 
+
   const showPriceMissing = isPaymentProcess && !price;
   const PriceMissing = () => {
     return (

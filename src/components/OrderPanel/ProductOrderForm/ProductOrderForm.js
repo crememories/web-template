@@ -42,6 +42,7 @@ const handleFetchLineItems = ({
   variants,
   variantId,
   specialOfferId
+
 }) => {
   // const stockReservationQuantity = Number.parseInt(quantity, 10);
   const deliveryMethodMaybe = deliveryMethod ? { deliveryMethod } : {};
@@ -193,7 +194,6 @@ const renderForm = formRenderProps => {
   // Otherwise continue with the default handleSubmit function.
   const handleFormSubmit = e => {
     const { quantity, deliveryMethod, variant } = values || {};
-    
     if ((!quantity || quantity < 1) && !variant) {
       e.preventDefault();
       // Blur event will show validator message
@@ -406,10 +406,6 @@ const ProductOrderForm = props => {
   const specialOfferMaybe = specialOfferId ? {specialOfferId} : {};
   const hasMultipleDeliveryMethods = pickupEnabled && shippingEnabled;
   const initialValues = { ...quantityMaybe, ...deliveryMethodMaybe, ...specialOfferMaybe };
-
-  console.log('initialValues');
-  console.log(initialValues);
-  console.log(specialOfferId);
 
   return (
     <FinalForm

@@ -23,6 +23,7 @@ import {
   IconCategoryPlane,
   IconCategoryUrn,
   IconCategoryArt,
+  IconCategoryTrees,
   IconArrowHead,
 } from '../../../../components';
 
@@ -234,6 +235,10 @@ const TopbarDesktop = props => {
     
       case 'art':
         return <IconCategoryArt />
+        break;
+
+      case 'trees':
+        return <IconCategoryTrees />
         break;
     
       default:

@@ -142,6 +142,7 @@ exports.transactionLineItems = (listing, orderData, providerCommission, customer
     const specialOffer = publicData[orderData.specialOfferId];
     unitPrice.amount = specialOffer.price;
   }
+
   
   // Unit type needs to be one of the following:
   // day, night, hour or item

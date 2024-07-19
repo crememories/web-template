@@ -42,6 +42,7 @@ export { default as IconCategoryPlane } from './IconCategoryPlane/IconCategoryPl
 export { default as IconCategoryJewerly } from './IconCategoryJewerly/IconCategoryJewerly';
 export { default as IconCategoryUrn } from './IconCategoryUrn/IconCategoryUrn';
 export { default as IconCategoryArt } from './IconCategoryArt/IconCategoryArt';
+export { default as IconCategoryTrees } from './IconCategoryTrees/IconCategoryTrees';
 export { default as IconMap } from './IconMap/IconMap';
 export { default as IconList } from './IconList/IconList';
 
