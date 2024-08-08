@@ -282,11 +282,6 @@ class SearchMapWithMapbox extends Component {
       }
     }
 
-    if(this.map){
-      console.log('getMapCenter(this.map)');
-      console.log(this.map.getBounds());
-    }
-
     if (!this.map && this.state.mapContainer) {
       this.initializeMap();
 
@@ -364,9 +359,6 @@ class SearchMapWithMapbox extends Component {
         zoom: this.props.zoom,
         center: this.props.center,
       });
-
-      console.log(this.map);
-      window.mapboxMap = this.map;
 
       this.fullMapButton = new SearchShowFulscreenMap(this);
       this.map.addControl(this.fullMapButton, "top-left");
