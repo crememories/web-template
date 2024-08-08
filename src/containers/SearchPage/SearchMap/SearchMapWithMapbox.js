@@ -282,6 +282,11 @@ class SearchMapWithMapbox extends Component {
       }
     }
 
+    if(this.map){
+      console.log('getMapCenter(this.map)');
+      console.log(this.map.getBounds());
+    }
+
     if (!this.map && this.state.mapContainer) {
       this.initializeMap();
 
@@ -356,7 +361,11 @@ class SearchMapWithMapbox extends Component {
         container: this.state.mapContainer,
         style: 'mapbox://styles/mapbox/streets-v10',
         scrollZoom: false,
+        zoom: this.props.zoom,
+        center: this.props.center,
       });
+
+      console.log(this.map);
       window.mapboxMap = this.map;
 
       this.fullMapButton = new SearchShowFulscreenMap(this);
@@ -520,7 +529,7 @@ SearchMapWithMapbox.defaultProps = {
   center: null,
   priceLabels: [],
   infoCard: null,
-  zoom: 11,
+  zoom: 6,
   reusableMapHiddenHandle: null,
 };
 

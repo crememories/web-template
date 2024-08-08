@@ -218,7 +218,8 @@ SearchMapComponent.defaultProps = {
   activeListingId: null,
   listings: [],
   onCloseAsModal: null,
-  zoom: 11,
+  zoom: 3,
+  center: [-100, 38]
 };
 
 SearchMapComponent.propTypes = {
