@@ -462,7 +462,7 @@
 }
 .categoryContainner{
   display: block;
-  width: 44px;
+  /* width: 44px; */
   margin: 0 20px;
 }
 

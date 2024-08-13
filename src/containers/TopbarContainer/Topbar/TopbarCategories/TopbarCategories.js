@@ -24,6 +24,7 @@ import {
   IconCategoryUrn,
   IconCategoryArt,
   IconCategoryTrees,
+  IconCategoryBalloons,
   IconArrowHead,
 } from '../../../../components';
 
@@ -239,6 +240,10 @@ const TopbarDesktop = props => {
 
       case 'trees':
         return <IconCategoryTrees />
+        break;
+
+      case 'balloons':
+        return <IconCategoryBalloons />
         break;
     
       default:

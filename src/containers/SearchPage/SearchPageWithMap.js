@@ -25,6 +25,7 @@ import { manageDisableScrolling, isScrollingDisabled } from '../../ducks/ui.duck
 
 import { H3, H5, ModalInMobile, Page, Modal, FooterSearch } from '../../components';
 import TopbarContainer from '../../containers/TopbarContainer/TopbarContainer';
+import FooterContainer from '../FooterContainer/FooterContainer';
 
 import { setActiveListing } from './SearchPage.duck';
 import {
@@ -670,6 +671,7 @@ export class SearchPageComponent extends Component {
           handleShowMap={this.handleShowMap}
           showMapMobile={() => this.setState({ isSearchMapOpenOnMobile: true })}
         />
+        <FooterContainer />
       </Page>
     );
   }
