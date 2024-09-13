@@ -133,6 +133,9 @@ app.use(compression());
 app.use('/static', express.static(path.join(buildPath, 'static')));
 app.use(cookieParser());
 
+app.use('/info', proxy(url.parse('https://joshua-daniel-walker.webflow.io')));
+// now requests to '/info/x/y/z' are proxied to 'https://example.com/endpoint/x/y/z'
+
 // We don't serve favicon.ico from root. PNG images are used instead for icons through link elements.
 app.get('/favicon.ico', (req, res) => {
   res.status(404).send('favicon.ico not found.');
@@ -282,9 +285,6 @@ if (cspEnabled) {
     res.status(204).end();
   });
 }
-
-app.use('/info', proxy(url.parse('https://joshua-daniel-walker.webflow.io')));
-// now requests to '/info/x/y/z' are proxied to 'https://example.com/endpoint/x/y/z'
 
 const server = app.listen(PORT, () => {
   const mode = dev ? 'development' : 'production';
