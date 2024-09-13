@@ -30,8 +30,7 @@ const path = require('path');
 const passport = require('passport');
 
 //configure domain in folder
-const url = require('url');
-const proxy = require('proxy-middleware');
+const { createProxyMiddleware } = require('http-proxy-middleware');
 
 const auth = require('./auth');
 const apiRouter = require('./apiRouter');
@@ -133,8 +132,12 @@ app.use(compression());
 app.use('/static', express.static(path.join(buildPath, 'static')));
 app.use(cookieParser());
 
-app.use('/info', proxy(url.parse('https://joshua-daniel-walker.webflow.io')));
-// now requests to '/info/x/y/z' are proxied to 'https://example.com/endpoint/x/y/z'
+const apiProxy = createProxyMiddleware({
+  target: 'https://thememorialmarket.webflow.io',
+  changeOrigin: true,
+});
+
+app.use('/info', apiProxy);
 
 // We don't serve favicon.ico from root. PNG images are used instead for icons through link elements.
 app.get('/favicon.ico', (req, res) => {
