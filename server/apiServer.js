@@ -9,6 +9,12 @@ const compression = require('compression');
 const cookieParser = require('cookie-parser');
 const bodyParser = require('body-parser');
 const cors = require('cors');
+
+//configure domain in folder
+const url = require('url');
+const proxy = require('proxy-middleware');
+
+
 const apiRouter = require('./apiRouter');
 const wellKnownRouter = require('./wellKnownRouter');
 const webmanifestResourceRoute = require('./resources/webmanifest');
@@ -30,6 +36,9 @@ app.use(
 app.use(cookieParser());
 app.use('/.well-known', wellKnownRouter);
 app.use('/api', apiRouter);
+
+app.use('/info', proxy(url.parse('https://joshua-daniel-walker.webflow.io')));
+// now requests to '/info/x/y/z' are proxied to 'https://example.com/endpoint/x/y/z'
 
 // Generate web app manifest
 // When developing with "yarn run dev",

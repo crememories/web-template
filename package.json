@@ -39,6 +39,7 @@
     "path-to-regexp": "^6.2.1",
     "postinstall-postinstall": "^2.1.0",
     "prop-types": "^15.8.1",
+    "proxy-middleware": "^0.15.0",
     "query-string": "^7.1.1",
     "raf": "^3.4.0",
     "react": "^16.13.1",
