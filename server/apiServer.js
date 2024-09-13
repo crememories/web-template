@@ -39,7 +39,7 @@ app.use('/.well-known', wellKnownRouter);
 app.use('/api', apiRouter);
 
 const apiProxy = createProxyMiddleware({
-  target: 'https://thememorialmarket.webflow.io',
+  target: 'https://info.thememorialmarket.com',
   changeOrigin: true,
 });
 

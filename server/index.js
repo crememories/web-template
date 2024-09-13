@@ -133,7 +133,7 @@ app.use('/static', express.static(path.join(buildPath, 'static')));
 app.use(cookieParser());
 
 const apiProxy = createProxyMiddleware({
-  target: 'https://thememorialmarket.webflow.io',
+  target: 'https://info.thememorialmarket.com',
   changeOrigin: true,
 });
 
