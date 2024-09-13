@@ -29,6 +29,10 @@ const enforceSsl = require('express-enforces-ssl');
 const path = require('path');
 const passport = require('passport');
 
+//configure domain in folder
+const url = require('url');
+const proxy = require('proxy-middleware');
+
 const auth = require('./auth');
 const apiRouter = require('./apiRouter');
 const wellKnownRouter = require('./wellKnownRouter');
@@ -57,6 +61,9 @@ const cspEnabled = CSP === 'block' || CSP === 'report';
 const app = express();
 
 const errorPage = fs.readFileSync(path.join(buildPath, '500.html'), 'utf-8');
+
+console.log('test string');
+
 
 // Setup error logger
 log.setup();
@@ -275,6 +282,9 @@ if (cspEnabled) {
     res.status(204).end();
   });
 }
+
+app.use('/info', proxy(url.parse('https://joshua-daniel-walker.webflow.io')));
+// now requests to '/info/x/y/z' are proxied to 'https://example.com/endpoint/x/y/z'
 
 const server = app.listen(PORT, () => {
   const mode = dev ? 'development' : 'production';
