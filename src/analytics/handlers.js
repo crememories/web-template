@@ -1,3 +1,6 @@
+import { actionTapfiliate } from '../util/api';
+import * as log from '../util/log';
+
 export class LoggingAnalyticsHandler {
   trackPageView(url) {
     console.log('Analytics page view:', url);
@@ -22,5 +25,29 @@ export class GoogleAnalyticsHandler {
         });
       }, 300);
     }
+  }
+}
+
+// tapafilliate Analytics 4 (GA4) using gtag.js script, which is included in util/includeScripts.js
+export class TapfiliateAnalyticsHandler {
+  trackPageView(url) {
+
+    const getRefParam = () => {
+      const params = new URLSearchParams(window.location.search);
+      return params.get('ref');
+    };
+
+    const params = getRefParam();
+    if(params){
+      actionTapfiliate(params)
+      .then(res => {
+        console.log(res)
+        return res;
+      })
+      .catch(e => {
+        log.error(e, 'tapafiliate-failed', { params });
+      });
+    }
+    
   }
 }
