@@ -5,16 +5,17 @@ exports.actionTapfiliate = (req, res) => {
 
   fetch('https://api.tapfiliate.com/1.6/clicks/', {
     method: 'POST',
-    headers: {'X-Api-Key': '62889eeac02707ad34511538138150493597419d'},
-    body: {
-      referral_code: 'test',
-      user_agent: 'test user agent',
-      ip: 'test ip string'
-    }
+    headers: {
+      'Content-Type': 'application/json',
+      'Api-Key': '62889eeac02707ad34511538138150493597419d'
+    },
+    body: JSON.stringify({
+      referral_code: 'mjdinzm',
+    })
   })
-  .then(response => {
-    console.log('json - fetch');
-    console.log(response);
+  .then(json => {
+    console.log('json - fetch - suc');
+    console.log(json);
   })
   .catch(error => {
     console.log('error - fetch');

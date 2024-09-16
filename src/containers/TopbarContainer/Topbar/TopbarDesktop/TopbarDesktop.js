@@ -7,6 +7,8 @@ import { ACCOUNT_SETTINGS_PAGES } from '../../../../routing/routeConfiguration';
 import { propTypes } from '../../../../util/types';
 import { AccessRole } from '../../../../util/roles';
 
+import { Link } from 'react-router-dom';
+
 import {
   Avatar,
   InlineTextButton,
@@ -171,6 +173,11 @@ const TopbarDesktop = props => {
         alt={intl.formatMessage({ id: 'TopbarDesktop.logo' }, { marketplaceName })}
       />
       {search}
+      <Link className={css.createListingLink} to={'/info'}>
+        <span className={css.createListing}>
+          <FormattedMessage id="TopbarDesktop.articles" />
+        </span>
+      </Link>
       {manageCommission}
       <NamedLink className={css.createListingLink} name="NewListingPage">
         <span className={css.createListing}>
