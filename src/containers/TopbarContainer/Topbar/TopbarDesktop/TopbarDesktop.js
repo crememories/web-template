@@ -177,11 +177,11 @@ const TopbarDesktop = props => {
         alt={intl.formatMessage({ id: 'TopbarDesktop.logo' }, { marketplaceName })}
       />
       {search}
-      <Link className={css.createListingLink} to={'/info'} onClick={redirectToInfo}>
+      <div className={css.createListingLink} onClick={redirectToInfo}>
         <span className={css.createListing}>
           <FormattedMessage id="TopbarDesktop.articles" />
         </span>
-      </Link>
+      </div>
       {manageCommission}
       <NamedLink className={css.createListingLink} name="NewListingPage">
         <span className={css.createListing}>
