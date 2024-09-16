@@ -165,6 +165,10 @@ const TopbarDesktop = props => {
       </NamedLink>
   );
 
+  const redirectToInfo = () => {
+    window.location.href = '/info';
+  }
+
   return (
     <nav className={classes}>
       <LinkedLogo
@@ -173,7 +177,7 @@ const TopbarDesktop = props => {
         alt={intl.formatMessage({ id: 'TopbarDesktop.logo' }, { marketplaceName })}
       />
       {search}
-      <Link className={css.createListingLink} to={'/info'}>
+      <Link className={css.createListingLink} to={'/info'} onClick={redirectToInfo}>
         <span className={css.createListing}>
           <FormattedMessage id="TopbarDesktop.articles" />
         </span>
