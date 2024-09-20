@@ -29,6 +29,7 @@ const defaultDirectives = {
     'maps.googleapis.com',
     '*.tiles.mapbox.com',
     'api.mapbox.com',
+    '*.mapbox.com',
     'events.mapbox.com',
 
     // Google Analytics
