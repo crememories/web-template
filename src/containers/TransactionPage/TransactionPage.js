@@ -503,13 +503,13 @@ export const TransactionPageComponent = props => {
   const conversion = cookies.get('tapfiliateConversion') == transaction?.id?.uuid;
 
   if(tapfiliateId && transaction?.id && !conversion){
+    cookies.set('tapfiliateConversion', transaction?.id?.uuid, { path: '/' });
     const tapfiliateTransaction = {
       tapfiliateId,
       transactionId: transaction?.id?.uuid,
       amount: transaction?.attributes?.payinTotal?.amount
     }
     purchaseTapfiliate(tapfiliateTransaction).then(res => {
-      cookies.set('tapfiliateConversion', transaction?.id?.uuid, { path: '/' });
       return res;
     })
     .catch(e => {
