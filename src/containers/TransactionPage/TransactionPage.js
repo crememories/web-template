@@ -4,6 +4,9 @@ import { compose } from 'redux';
 import { connect } from 'react-redux';
 import { withRouter } from 'react-router-dom';
 import classNames from 'classnames';
+import { purchaseTapfiliate } from '../../util/api';
+import * as log from '../../util/log';
+import Cookies from 'universal-cookie';
 
 import { useConfiguration } from '../../context/configurationContext';
 import { useRouteConfiguration } from '../../context/routeConfigurationContext';
@@ -494,6 +497,25 @@ export const TransactionPageComponent = props => {
   ) : (
     loadingOrFailedFetching
   );
+
+  const cookies = new Cookies();
+  const tapfiliateId = cookies.get('tapfiliateId');
+  const conversion = cookies.get('tapfiliateConversion') == transaction?.id?.uuid;
+
+  if(tapfiliateId && transaction?.id && !conversion){
+    const tapfiliateTransaction = {
+      tapfiliateId,
+      transactionId: transaction?.id?.uuid,
+      amount: transaction?.attributes?.payinTotal?.amount
+    }
+    purchaseTapfiliate(tapfiliateTransaction).then(res => {
+      cookies.set('tapfiliateId', transaction?.id?.uuid, { path: '/' });
+      return res;
+    })
+    .catch(e => {
+      log.error(e, 'tapafiliate-failed', { params });
+    });
+  }
 
   return (
     <Page

@@ -1,5 +1,7 @@
 import { actionTapfiliate } from '../util/api';
 import * as log from '../util/log';
+import Cookies from 'universal-cookie';
+
 
 export class LoggingAnalyticsHandler {
   trackPageView(url) {
@@ -41,7 +43,10 @@ export class TapfiliateAnalyticsHandler {
     if(params){
       actionTapfiliate(params)
       .then(res => {
-        console.log(res)
+        const cookies = new Cookies();
+        if(res.data){
+          cookies.set('tapfiliateId', res.data, { path: '/' });
+        }
         return res;
       })
       .catch(e => {
