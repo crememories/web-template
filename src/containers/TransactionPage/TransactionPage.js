@@ -509,7 +509,7 @@ export const TransactionPageComponent = props => {
       amount: transaction?.attributes?.payinTotal?.amount
     }
     purchaseTapfiliate(tapfiliateTransaction).then(res => {
-      cookies.set('tapfiliateId', transaction?.id?.uuid, { path: '/' });
+      cookies.set('tapfiliateConversion', transaction?.id?.uuid, { path: '/' });
       return res;
     })
     .catch(e => {
