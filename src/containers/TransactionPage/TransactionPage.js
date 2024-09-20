@@ -501,9 +501,11 @@ export const TransactionPageComponent = props => {
   const cookies = new Cookies();
   const tapfiliateId = cookies.get('tapfiliateId');
   const conversion = cookies.get('tapfiliateConversion') == transaction?.id?.uuid;
+  const tapfiliateOrder = cookies.get('tapfiliateOrder') == transaction?.listing?.id?.uuid;
 
-  if(tapfiliateId && transaction?.id && !conversion){
+  if(tapfiliateId && transaction?.id && !conversion && tapfiliateOrder){
     cookies.set('tapfiliateConversion', transaction?.id?.uuid, { path: '/' });
+    cookies.remove('tapfiliateOrder', { path: '/' });
     const tapfiliateTransaction = {
       tapfiliateId,
       transactionId: transaction?.id?.uuid,
@@ -513,7 +515,7 @@ export const TransactionPageComponent = props => {
       return res;
     })
     .catch(e => {
-      log.error(e, 'tapafiliate-failed', { params });
+      log.error(e, 'tapafiliate-failed', { tapfiliateTransaction });
     });
   }
 
