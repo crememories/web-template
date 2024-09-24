@@ -277,10 +277,10 @@ const OrderPanel = props => {
           <H1 className={css.heading}>{title}</H1>
         </div>
 
-        <div className={css.orderHeading}>
+        {/* <div className={css.orderHeading}>
           {titleDesktop ? titleDesktop : <H2 className={titleClasses}>{title}</H2>}
           {subTitleText ? <div className={css.orderHelp}>{subTitleText}</div> : null}
-        </div>
+        </div> */}
 
         <PriceMaybe
           price={price}
