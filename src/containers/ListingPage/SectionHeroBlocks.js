@@ -189,6 +189,15 @@ const SectionHeroBlocks = props => {
           </div>
         </div>
       )
+    } else{
+      return (
+        <ResponsiveImage
+          rootClassName={css.rootForImage}
+          alt={title}
+          image={firstImage}
+          variants={variants}
+        />
+      )
     }
   }
 

@@ -9,11 +9,21 @@
   height: 100%;
 }
 
-:global(.image-gallery-slide-wrapper) {
+/* :global(.image-gallery-slide-wrapper) {
   background-color: var(--colorBlack);
 
   @media (--viewportMedium) {
     padding: 0 10%;
+  }
+} */
+
+:global(.image-gallery-slide-wrapper) {
+  background-color: var(--colorWhite);
+  border-bottom: 1px solid var(--colorGrey100);
+
+  @media (--viewportMedium) {
+    border-radius: var(--borderRadiusMedium);
+    border: 1px solid var(--colorGrey100);
   }
 }
 

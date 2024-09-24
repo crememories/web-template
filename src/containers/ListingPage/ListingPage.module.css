@@ -164,7 +164,7 @@
 
     &:hover {
       transform: scale(1.005);
-      box-shadow: var(--boxShadowListingCard);
+      /* box-shadow: var(--boxShadowListingCard); */
     }
   }
 }

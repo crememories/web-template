@@ -44,6 +44,7 @@ import { manageDisableScrolling, isScrollingDisabled } from '../../ducks/ui.duck
 import { initializeCardPaymentData } from '../../ducks/stripe.duck.js';
 
 import {
+  H1,
   H4,
   Page,
   NamedLink,
