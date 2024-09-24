@@ -277,6 +277,14 @@
   display: flex;
   height: 100%;
 }
+.SectionHeroBlocksLeftImage{
+  padding-right: 5px;
+  flex: 1;
+}
+.SectionHeroBlocksRightImage{
+  padding-left: 5px;
+  flex: 1;
+}
 .SectionHeroBlocksfirsImages{
   display: flex;
   flex: 2;

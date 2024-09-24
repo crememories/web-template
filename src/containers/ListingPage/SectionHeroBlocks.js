@@ -60,7 +60,7 @@ const SectionHeroBlocks = props => {
       : [];
       return (
         <div className={css.SectionHeroBlocksImages}>
-          <div className={css.SectionHeroBlocksleftImages}>
+          <div className={css.SectionHeroBlocksLeftImage}>
             <ResponsiveImage
               rootClassName={css.rootForImage}
               alt={title}
@@ -68,7 +68,7 @@ const SectionHeroBlocks = props => {
               variants={variants}
             />
           </div>
-          <div className={css.SectionHeroBlocksRightImages}>
+          <div className={css.SectionHeroBlocksRightImage}>
             <ResponsiveImage
               rootClassName={css.rootForImage}
               alt={title}
