@@ -46,6 +46,7 @@ export { default as IconCategoryTrees } from './IconCategoryTrees/IconCategoryTr
 export { default as IconCategoryBalloons } from './IconCategoryBalloons/IconCategoryBalloons';
 export { default as IconMap } from './IconMap/IconMap';
 export { default as IconList } from './IconList/IconList';
+export { default as IconButtonDots } from './IconButtonDots/IconButtonDots';
 
 // Typography
 export { Heading, H1, H2, H3, H4, H5, H6  } from './Heading/Heading';

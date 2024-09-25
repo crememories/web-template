@@ -115,6 +115,7 @@
   /* ================ Border radius ================ */
 
   --borderRadius: 2px;
+  --borderRadiusSub: 8px;
   --borderRadiusMedium: 4px;
   --borderRadiusHight: 12px;
 

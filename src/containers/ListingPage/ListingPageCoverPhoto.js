@@ -81,6 +81,7 @@ import SectionMultiEnumMaybe from './SectionMultiEnumMaybe';
 import SectionReviews from './SectionReviews';
 import SectionAuthorMaybe from './SectionAuthorMaybe';
 import SectionMapMaybe from './SectionMapMaybe';
+import SectionGallery from './SectionGallery';
 
 import css from './ListingPage.module.css';
 
@@ -354,6 +355,12 @@ export const ListingPageComponent = props => {
           onManageDisableScrolling={onManageDisableScrolling}
           noPayoutDetailsSetWithOwnListing={noPayoutDetailsSetWithOwnListing}
         />
+        <div className={css.sectionGallery}>
+          <SectionGallery 
+            listing={currentListing}
+            variantPrefix={config.layout.listingImage.variantPrefix}
+          />
+        </div>
         <div className={css.contentWrapperForHeroLayout}>
           <div className={css.mainColumnForHeroLayout}>
             <div className={css.videoContainer}>

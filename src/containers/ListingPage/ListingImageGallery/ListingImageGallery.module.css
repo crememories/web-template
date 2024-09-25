@@ -50,14 +50,18 @@
   }
 }
 
-:global(.image-gallery-slide-wrapper) {
-  background-color: var(--colorWhite);
+/* :global(.image-gallery-slide-wrapper) {
+  background-color: var(--colorBlack);
   border-bottom: 1px solid var(--colorGrey100);
 
   @media (--viewportMedium) {
     border-radius: var(--borderRadiusMedium);
     border: 1px solid var(--colorGrey100);
   }
+} */
+.image-gallery-slide-wrapper {
+  background-color: var(--colorBlack);
+  border: unset;
 }
 
 :global(.fullscreen) {

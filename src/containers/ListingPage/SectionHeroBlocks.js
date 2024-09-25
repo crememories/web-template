@@ -1,7 +1,7 @@
 import React from 'react';
 
 import { FormattedMessage } from '../../util/reactIntl';
-import { ResponsiveImage, Modal } from '../../components';
+import { ResponsiveImage, Modal, IconButtonDots } from '../../components';
 
 import ImageCarousel from './ImageCarousel/ImageCarousel';
 import ActionBarMaybe from './ActionBarMaybe';
@@ -36,6 +36,7 @@ const SectionHeroBlocks = props => {
 
   const viewPhotosButton = hasImages ? (
     <button className={css.viewPhotos} onClick={handleViewPhotosClick}>
+      <IconButtonDots className={css.viewPhotosDots} />
       <FormattedMessage
         id="ListingPage.viewImagesButton"
         values={{ count: listing.images.length }}

@@ -178,17 +178,19 @@
   bottom: 19px;
   right: 24px;
   margin: 0;
-  padding: 8px 13px 6px 13px;
+  padding: 8px 15px 8px 15px;
 
   /* Colors */
   background-color: var(--colorWhite);
 
   /* Borders */
-  border: 1px solid var(--marketplaceColor);
-  border-radius: var(--borderRadius);
+  border: 1px solid var(--colorBlack);
+  border-radius: var(--borderRadiusSub);
 
   cursor: pointer;
   transition: var(--transitionStyleButton);
+
+  line-height: 10px;
 
   &:hover {
     background-color: var(--marketplaceColor);
@@ -198,6 +200,13 @@
   @media (--viewportMedium) {
     margin: 0;
   }
+}
+.viewPhotosDots{
+  margin-right: 5px;
+}
+.viewPhotos:hover{
+  background-color: var(--colorGrey100);
+  color: inherit;
 }
 
 .SectionHeroBlocks{
@@ -312,7 +321,19 @@
 }
 
 .orderHeading {
-  margin-top: 24px;
+  display: none;
+
+  @media (--viewportLarge) {
+    display: block;
+    margin-top: 24px;
+  }
+}
+.sectionGallery{
+  display: block;
+
+  @media (--viewportMedium) {
+    display: none;
+  }
 }
 
 .orderTitle {
