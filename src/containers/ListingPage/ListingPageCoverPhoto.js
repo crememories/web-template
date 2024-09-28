@@ -98,8 +98,6 @@ export const ListingPageComponent = props => {
   const [shareListingOpen, setShareListingOpen] = useState(false);
   const [shareListingCopied, setShareListingCopied] = useState(false);
 
-  console.log(useState(false));
-
   const {
     isAuthenticated,
     currentUser,

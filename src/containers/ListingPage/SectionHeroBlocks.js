@@ -213,7 +213,7 @@ const SectionHeroBlocks = props => {
           <div onClick={handleShareListingClick}>
             <SecondaryButtonInline className={css.iconShareInline}>
               <IconShareListing className={css.iconShareListing} />
-              Share
+              <FormattedMessage id="ListingPage.share" />
             </SecondaryButtonInline>
           </div>
      

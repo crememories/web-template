@@ -58,13 +58,13 @@ const SectionShareListing = props => {
     { id: 'ListingImageGallery.imageAltText' }
   );
 
-  console.log(listing);
+  // console.log(listing);
 
   // const shareTitle = listing.
 
   function shareByEmail() {
     const subject = "";
-    const body = location.href;
+    const body = window.location.href;
   
     const mailtoLink = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
   
@@ -72,14 +72,14 @@ const SectionShareListing = props => {
   }
 
   function shareBySMS() {
-    const body = location.href;
+    const body = window.location.href;
     const smsLink = `sms:?body=${encodeURIComponent(body)}`;
   
     window.location.href = smsLink;
   }
 
   function shareByNavigator() {
-    const link = location.href;
+    const link = window.location.href;
     const shareData = {
       title: <FormattedMessage id="ListingPage.shareListingTitle" />,
       url: link,
@@ -90,7 +90,7 @@ const SectionShareListing = props => {
     // window.location.href = smsLink;
   }
 
-  const shareLink = location.href;
+  const shareLink = window.location.href;
 
   const copyToClipboardClass = isVisible ? classNames(
     css.copyToClipboardMessage,

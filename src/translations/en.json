@@ -466,6 +466,7 @@
   "ListingPage.shareByFacebook": "Facebook",
   "ListingPage.shareByTwitter": "Twitter",
   "ListingPage.shareMoreOptions": "More options",
+  "ListingPage.share": "Share",
   "LoadableComponentErrorBoundaryPage.description": "It looks like the app needs to be updated! Please refresh the page or go back to {link}.",
   "LoadableComponentErrorBoundaryPage.heading": "Oops, we couldn't fetch the page.",
   "LoadableComponentErrorBoundaryPage.landingPageLink": "landing page",
