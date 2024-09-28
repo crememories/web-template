@@ -1,7 +1,7 @@
 import React from 'react';
 
 import { FormattedMessage } from '../../util/reactIntl';
-import { ResponsiveImage, Modal, IconButtonDots } from '../../components';
+import { ResponsiveImage, Modal, IconButtonDots, IconShareListing, SecondaryButtonInline, SecondaryButton } from '../../components';
 
 import ImageCarousel from './ImageCarousel/ImageCarousel';
 import ActionBarMaybe from './ActionBarMaybe';
@@ -26,6 +26,7 @@ const SectionHeroBlocks = props => {
     onImageCarouselClose,
     onManageDisableScrolling,
     noPayoutDetailsSetWithOwnListing,
+    handleShareListingClick
   } = props;
 
   const hasImages = listing.images && listing.images.length > 0;
@@ -204,9 +205,18 @@ const SectionHeroBlocks = props => {
 
   return (
     <div className={css.SectionHeroBlocks} data-testid="hero">
-      <div className={css.orderHeading}>
-        {titleDesktop ? titleDesktop : <H2 className={titleClasses}>{title}</H2>}
-        {subTitleText ? <div className={css.orderHelp}>{subTitleText}</div> : null}
+      <div className={css.orderHeadingContainer}>
+        <div className={css.orderHeading}>
+          {titleDesktop ? titleDesktop : <H2 className={titleClasses}>{title}</H2>}
+          {subTitleText ? <div className={css.orderHelp}>{subTitleText}</div> : null}
+        </div>
+          <div onClick={handleShareListingClick}>
+            <SecondaryButtonInline className={css.iconShareInline}>
+              <IconShareListing className={css.iconShareListing} />
+              Share
+            </SecondaryButtonInline>
+          </div>
+     
       </div>
       <div className={css.imageWrapperForSectionHero} onClick={handleViewPhotosClick}>
         {listing.id && isOwnListing ? (

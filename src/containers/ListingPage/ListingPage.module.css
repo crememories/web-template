@@ -842,3 +842,87 @@
     flex-shrink: 0;
   }
 }
+
+.shareListingButtons{
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+}
+.copyToClipboardMessageContainer{
+  position: absolute;
+  bottom: 20px;
+  width: 100%;
+  text-align: center;
+  box-sizing: border-box;
+  left: 0;
+  right: 0;
+  display: block;
+}
+
+.copyToClipboardMessage{
+  display: inline-block;
+  border: 1px solid #DDDDDD;
+  padding: 10px;
+  transition: 500ms;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+  border-radius: 12px;
+  opacity: 0;
+}
+.copyToClipboardMessageShow{
+  opacity: 1;
+}
+.thumb {
+  /* With the active thumbnail border (default 4px), make the result
+   height a multiple of the baseline. */
+  max-width: 88px;
+  max-height: 88px;
+  border-radius: var(--borderRadiusMedium);
+}
+.sharePreviewImage{
+  width: 88px;
+  height: 88px;
+  display: table-cell;
+  vertical-align: middle;
+}
+.sharePreviewTitle{
+  display: table-cell;
+  vertical-align: middle;
+  padding-left: 10px;
+}
+.sharePreviewContainer{
+  padding: 20px 0;
+}
+.shareBtn{
+  text-align: left;
+  /* padding: 10px; */
+  width: 100%;
+}
+.shareBtnComponent{
+  display: inline-flex;
+  align-items: center;
+}
+.shareIcon, .shareIconMore{
+  width: 22px;
+  height: 22px;
+  margin: 0 16px;
+  border-radius: 4px;
+}
+.shareIconMore{
+  width: 32px;
+  height: 32px;
+}
+.orderHeadingContainer{
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.iconShareListing{
+  stroke: black;
+  width: 16px;
+  height: 16px;
+  margin-right: 5px;
+  vertical-align: text-top;
+}
+.iconShareInline:hover{
+  text-decoration: underline;
+}

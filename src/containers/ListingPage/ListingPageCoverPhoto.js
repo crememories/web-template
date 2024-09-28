@@ -82,6 +82,7 @@ import SectionReviews from './SectionReviews';
 import SectionAuthorMaybe from './SectionAuthorMaybe';
 import SectionMapMaybe from './SectionMapMaybe';
 import SectionGallery from './SectionGallery';
+import SectionShareListing from './SectionShareListing';
 
 import css from './ListingPage.module.css';
 
@@ -94,6 +95,10 @@ export const ListingPageComponent = props => {
     props.inquiryModalOpenForListingId === props.params.id
   );
   const [imageCarouselOpen, setImageCarouselOpen] = useState(false);
+  const [shareListingOpen, setShareListingOpen] = useState(false);
+  const [shareListingCopied, setShareListingCopied] = useState(false);
+
+  console.log(useState(false));
 
   const {
     isAuthenticated,
@@ -295,6 +300,13 @@ export const ListingPageComponent = props => {
     setImageCarouselOpen(true);
   };
 
+  const handleShareListingClick = () => {
+    setShareListingOpen(true);
+  }
+  const handleShareListingCopied = (e) => {
+    setShareListingCopied(e);
+  }
+
   return (
     <Page
       title={schemaTitle}
@@ -352,6 +364,9 @@ export const ListingPageComponent = props => {
           imageCarouselOpen={imageCarouselOpen}
           onImageCarouselClose={() => setImageCarouselOpen(false)}
           handleViewPhotosClick={handleViewPhotosClick}
+          shareListingOpen={shareListingOpen}
+          handleShareListingClick={handleShareListingClick}
+          onShareListingClose={() => setShareListingOpen(false)}
           onManageDisableScrolling={onManageDisableScrolling}
           noPayoutDetailsSetWithOwnListing={noPayoutDetailsSetWithOwnListing}
         />
@@ -467,6 +482,17 @@ export const ListingPageComponent = props => {
             />
           </div>
         </div>
+        <SectionShareListing
+          intl={intl}
+          listing={currentListing}
+          shareListingOpen={shareListingOpen}
+          handleShareListingClick={handleShareListingClick}
+          onshareListingClose={() => setShareListingOpen(false)}
+          handleShareListingCopied={handleShareListingCopied}
+          shareListingCopied={shareListingCopied}
+          onManageDisableScrolling={onManageDisableScrolling}
+          richTitle={richTitle}
+        />
       </LayoutSingleColumn>
     </Page>
   );
