@@ -490,6 +490,7 @@ export const ListingPageComponent = props => {
           shareListingCopied={shareListingCopied}
           onManageDisableScrolling={onManageDisableScrolling}
           richTitle={richTitle}
+          productURL={productURL}
         />
       </LayoutSingleColumn>
     </Page>
