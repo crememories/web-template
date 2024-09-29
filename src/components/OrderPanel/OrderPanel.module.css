@@ -181,7 +181,7 @@
   bottom: 0;
   left: 0;
   width: 100vw;
-  padding: 18px 24px 18px 16px;
+  padding: 0 24px 18px 16px;
   background-color: var(--colorWhite);
   box-shadow: var(--boxShadowTop);
   /* display: flex; */
@@ -191,7 +191,7 @@
   transform: translate3d(0, 0, 0);
 
   @media (--viewportMedium) {
-    padding: 18px 60px 18px 60px;
+    padding: 0 60px 18px 60px;
   }
 
   @media (--viewportLarge) {
@@ -203,7 +203,9 @@
 }
 
 .contact{
-  margin-top: 20px;
+  width: 100%;
+  margin-right: 20px;
+  /* margin-top: 20px; */
 }
 
 .priceContainerInCTA,

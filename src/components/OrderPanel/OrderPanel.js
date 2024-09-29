@@ -379,15 +379,23 @@ const OrderPanel = props => {
         ) : null}
       </ModalInMobile>
       <div className={css.openOrderForm}>
+        <PriceMaybe
+          price={price}
+          publicData={publicData}
+          validListingTypes={validListingTypes}
+          intl={intl}
+          marketplaceCurrency={marketplaceCurrency}
+          showCurrencyMismatch
+        />
         <div className={css.orderContainer}>
-          <PriceMaybe
-            price={price}
-            publicData={publicData}
-            validListingTypes={validListingTypes}
-            intl={intl}
-            marketplaceCurrency={marketplaceCurrency}
-            showCurrencyMismatch
-          />
+          <div className={css.contact}>
+            <SecondaryButton
+              onClick={onClickContactUser}
+              enforcePagePreloadFor="SignupPage"
+            >
+              <FormattedMessage id="ProductOrderForm.askAQusetion" />
+            </SecondaryButton>
+          </div>
 
           {isClosed ? (
             <div className={css.closedListingButton}>
@@ -416,15 +424,6 @@ const OrderPanel = props => {
               )}
             </PrimaryButton>
           )}
-        </div>
-
-        <div className={css.contact}>
-          <SecondaryButton
-            onClick={onClickContactUser}
-            enforcePagePreloadFor="SignupPage"
-          >
-            <FormattedMessage id="ProductOrderForm.askAQusetion" />
-          </SecondaryButton>
         </div>
       </div>
     </div>

@@ -332,6 +332,7 @@ export const ListingPageComponent = props => {
             <SectionGallery
               listing={currentListing}
               variantPrefix={config.layout.listingImage.variantPrefix}
+              showThumbnails={true}
             />
             <div className={css.videoContainer}>
              {listingVideo ? (

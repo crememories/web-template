@@ -1,6 +1,4 @@
 import React, { useState } from 'react';
-import { useLocation } from 'react-router-dom';
-
 import { FacebookShareButton, TwitterShareButton, WhatsappShareButton, FacebookMessengerShareButton } from "react-share";
 
 import { CopyToClipboard } from 'react-copy-to-clipboard';
@@ -34,8 +32,7 @@ const SectionShareListing = props => {
     handleShareListingCopied,
     shareListingCopied,
     intl,
-    richTitle,
-    productURL
+    richTitle
   } = props;
 
   const [isVisible, setIsVisible] = useState(false);
@@ -67,7 +64,7 @@ const SectionShareListing = props => {
 
   function shareByEmail() {
     const subject = "";
-    const body = window.location.href;
+    const body = location.href;
   
     const mailtoLink = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
   
@@ -75,14 +72,14 @@ const SectionShareListing = props => {
   }
 
   function shareBySMS() {
-    const body = window.location.href;
+    const body = location.href;
     const smsLink = `sms:?body=${encodeURIComponent(body)}`;
   
     window.location.href = smsLink;
   }
 
   function shareByNavigator() {
-    const link = window.location.href;
+    const link = location.href;
     const shareData = {
       title: <FormattedMessage id="ListingPage.shareListingTitle" />,
       url: link,
@@ -92,6 +89,8 @@ const SectionShareListing = props => {
   
     // window.location.href = smsLink;
   }
+
+  const shareLink = location.href;
 
   const copyToClipboardClass = isVisible ? classNames(
     css.copyToClipboardMessage,
@@ -139,7 +138,7 @@ const SectionShareListing = props => {
 
         <div className={css.shareListingButtons}>
           <div>
-            <CopyToClipboard text={productURL} onCopy={handleCopy}>
+            <CopyToClipboard text={shareLink} onCopy={handleCopy}>
               <SecondaryButton className={css.shareBtn}
                 // onClick={onClickContactUser}
                 enforcePagePreloadFor="SignupPage"
@@ -169,7 +168,7 @@ const SectionShareListing = props => {
           </div>
           <div>
             <WhatsappShareButton className={css.shareBtn}
-              url={productURL}
+              url={shareLink}
               quote={'Title or jo bhi aapko likhna ho'}
             >
               <div className={classNames(css.shareBtnComponent, css.shareBtn, bottonCss.secondaryButtonRoot, bottonCss.secondaryButton, 'buttonSecondary')}>
@@ -180,7 +179,7 @@ const SectionShareListing = props => {
           </div>  
           <div>
             <FacebookMessengerShareButton className={css.shareBtn}
-              url={productURL}
+              url={shareLink}
             >
               <div className={classNames(css.shareBtnComponent, css.shareBtn, bottonCss.secondaryButtonRoot, bottonCss.secondaryButton, 'buttonSecondary')}>
                 <IconMessenger className={css.shareIcon} />
@@ -190,7 +189,7 @@ const SectionShareListing = props => {
           </div>
           <div>
             <FacebookShareButton className={css.shareBtn}
-              url={productURL}
+              url={shareLink}
             >
               <div className={classNames(css.shareBtnComponent, css.shareBtn, bottonCss.secondaryButtonRoot, bottonCss.secondaryButton, 'buttonSecondary')}>
                 <IconFacebook className={css.shareIcon} />
@@ -200,7 +199,7 @@ const SectionShareListing = props => {
           </div>
           <div>
             <TwitterShareButton className={css.shareBtn}
-              url={productURL}
+              url={shareLink}
             >
               <div className={classNames(css.shareBtnComponent, css.shareBtn, bottonCss.secondaryButtonRoot, bottonCss.secondaryButton, 'buttonSecondary')}>
                 <IconTwitter className={css.shareIcon} />

@@ -396,13 +396,13 @@
   margin-bottom: 23px;
 
   @media (--viewportMedium) {
-    margin-top: 50px;
+    margin-top: 20px;
     margin-bottom: 51px;
     flex-shrink: 0;
   }
 
   @media (--viewportLarge) {
-    margin-top: 80px;
+    margin-top: 30px;
     margin-bottom: 0px;
     /* contentContainer's full width - (orderColumn + two paddings + margin + border) */
     max-width: calc(100% - 433px);
@@ -417,16 +417,19 @@
   }
   @media (--viewportLarge) {
     display: block;
-    margin-top: 80px;
+    margin-top: 30px;
     margin-left: 60px;
     border-left: 1px solid var(--colorGrey100);
-    padding-left: 60px;
-    flex-basis: 312px;
+    padding-left: 40px;
+    flex-basis: 360px;
     flex-shrink: 0;
   }
 }
 
 .orderPanel {
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: rgba(0, 0, 0, 0.12) 0px 6px 16px;
   /* Note: panel height might be too much on small viewport - hence min-height */
   @media (--viewportLarge) and (min-height: 950px) {
     position: sticky;
