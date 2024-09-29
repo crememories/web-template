@@ -32,7 +32,8 @@ const SectionShareListing = props => {
     handleShareListingCopied,
     shareListingCopied,
     intl,
-    richTitle
+    richTitle,
+    productURL
   } = props;
 
   const [isVisible, setIsVisible] = useState(false);
@@ -90,7 +91,7 @@ const SectionShareListing = props => {
     // window.location.href = smsLink;
   }
 
-  const shareLink = location.href;
+  const shareLink = productURL;
 
   const copyToClipboardClass = isVisible ? classNames(
     css.copyToClipboardMessage,
@@ -180,6 +181,7 @@ const SectionShareListing = props => {
           <div>
             <FacebookMessengerShareButton className={css.shareBtn}
               url={shareLink}
+              // appId={}
             >
               <div className={classNames(css.shareBtnComponent, css.shareBtn, bottonCss.secondaryButtonRoot, bottonCss.secondaryButton, 'buttonSecondary')}>
                 <IconMessenger className={css.shareIcon} />
