@@ -273,6 +273,8 @@
   "EditListingPricingForm.pricePerProductPlaceholderVariant": "Item price for variant",
   "EditListingPricingForm.labelProductVariant": "Description for variant",
   "EditListingPricingForm.labelProductPlaceholderVariant": "Description for variant",
+  "EditListingPricingForm.labelProductPriceDescription": "Preisbeschreibung",
+  "EditListingPricingForm.labelProductPlaceholderPriceDescription": "Preisbeschreibung",
   "EditListingPricingPanel.createListingTitle": "Preis",
   "EditListingPricingPanel.listingPriceCurrencyInvalid": "Die Eintragswährung unterscheidet sich von der Marktplatzwährung ({marketplaceCurrency}). Du kannst den Preis nicht bearbeiten.",
   "EditListingPricingPanel.title": "Den Preis von {listingTitle} ändern",

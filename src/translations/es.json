@@ -273,6 +273,8 @@
   "EditListingPricingForm.pricePerProductPlaceholderVariant": "Item price for variant",
   "EditListingPricingForm.labelProductVariant": "Description for variant",
   "EditListingPricingForm.labelProductPlaceholderVariant": "Description for variant",
+  "EditListingPricingForm.labelProductPriceDescription": "Prezo Priskribo",
+  "EditListingPricingForm.labelProductPlaceholderPriceDescription": "Prezo Priskribo",
   "EditListingPricingPanel.createListingTitle": "Precio",
   "EditListingPricingPanel.listingPriceCurrencyInvalid": "La moneda del anuncio es diferente de la moneda del sistema ({marketplaceCurrency}). No es posible editar el precio.",
   "EditListingPricingPanel.title": "Editar el precio de {listingTitle}",
