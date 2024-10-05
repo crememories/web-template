@@ -46,7 +46,9 @@ const getInitialValues = props => {
       : 1;
   const stockTypeInfinity = [];
 
-  return { price, stock, stockTypeInfinity };
+  const priceDescription = publicData.priceDescription;
+
+  return { price, stock, stockTypeInfinity, priceDescription };
 };
 
 const EditListingPricingAndStockPanel = props => {
@@ -91,6 +93,9 @@ const EditListingPricingAndStockPanel = props => {
   const pricingVariant = [];
   const variantKeys = variants ? Object.keys(variants) : null;
 
+  // const priceDescription = publicData.priceDescription;
+  // initialValues.priceDescription = priceDescription;
+
   if(variantKeys && priceCurrencyValid){
     variantKeys.forEach( key => {
       const variantLabel = variants[key].variantLabel;
@@ -123,7 +128,7 @@ const EditListingPricingAndStockPanel = props => {
           className={css.form}
           initialValues={initialValues}
           onSubmit={values => {
-            const { price, stock, stockTypeInfinity } = values;
+            const { price, stock, stockTypeInfinity, priceDescription } = values;
 
             // configured options for add variant price with descriptions
             const variantsValues = values.pricingVariant;
@@ -172,7 +177,7 @@ const EditListingPricingAndStockPanel = props => {
             const updateValues = {
               price,
               ...stockUpdateMaybe,
-              publicData: { variants:variantsUpdate },
+              publicData: { variants:variantsUpdate, priceDescription },
             };
             // Save the initialValues to state
             // Otherwise, re-rendering would overwrite the values during XHR call.
@@ -181,6 +186,7 @@ const EditListingPricingAndStockPanel = props => {
                 price,
                 stock: stockUpdateMaybe?.stockUpdate?.newTotal || stock,
                 stockTypeInfinity,
+                priceDescription
               },
             });
             onSubmit(updateValues);

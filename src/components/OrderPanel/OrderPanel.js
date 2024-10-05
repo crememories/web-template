@@ -186,7 +186,7 @@ const OrderPanel = props => {
   } = props;
 
   const publicData = listing?.attributes?.publicData || {};
-  const { listingType, unitType, transactionProcessAlias = '' } = publicData || {};
+  const { listingType, unitType, transactionProcessAlias = '', priceDescription } = publicData || {};
   const processName = resolveLatestProcessName(transactionProcessAlias.split('/')[0]);
   const lineItemUnitType = lineItemUnitTypeMaybe || `line-item/${unitType}`;
 
@@ -289,6 +289,9 @@ const OrderPanel = props => {
           intl={intl}
           marketplaceCurrency={marketplaceCurrency}
         />
+        <div className={css.priceDescription}>
+          {priceDescription}
+        </div>
 
         <div className={css.author}>
           <AvatarSmall user={author} className={css.providerAvatar} />
@@ -387,6 +390,10 @@ const OrderPanel = props => {
           marketplaceCurrency={marketplaceCurrency}
           showCurrencyMismatch
         />
+        <div className={css.priceDescription}>
+          dfhdghgsfa hjhsdgafdgsfhdfgsfa
+          {priceDescription}
+        </div>
         <div className={css.orderContainer}>
           <div className={css.contact}>
             <SecondaryButton

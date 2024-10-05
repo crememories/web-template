@@ -209,6 +209,17 @@ export const EditListingPricingAndStockFormComponent = props => (
           )}
           {setStockError ? <p className={css.error}>{stockErrorMessage}</p> : null}
 
+          <FieldTextInput
+            className={css.input}
+            id={`${formId}.priceDescription`}
+            name="priceDescription"
+            label={intl.formatMessage({ id: 'EditListingPricingForm.labelProductPriceDescription' })}
+            placeholder={intl.formatMessage({
+              id: 'EditListingPricingForm.labelProductPlaceholderPriceDescription',
+            })}
+            type="text"
+          />
+
           <EditListingPricingVariant
             variants={variants}
             intl={intl}

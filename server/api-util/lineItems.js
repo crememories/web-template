@@ -132,7 +132,7 @@ exports.transactionLineItems = (listing, orderData, providerCommission, customer
 
   // custom variants prices
   if( orderData.variantId ){
-    const variantId = orderData.variantId-1;
+    const variantId = orderData.variantId;
     const variantData = publicData.variants[variantId];
     const variantPrice = variantData.variantPrice;
     unitPrice.amount = variantPrice;
