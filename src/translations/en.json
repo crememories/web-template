@@ -652,6 +652,7 @@
   "ProductOrderForm.selectQuantityVariantOption": "Select variant",
   "ProductOrderForm.shippingOption": "Shipping",
   "ProductOrderForm.askAQusetion": "Ask a question",
+  "ProductOrderForm.actionContactPhone": "Call",
   "ProfilePage.desktopHeading": "Hello, I'm {name}.",
   "ProfilePage.editProfileLinkDesktop": "Edit profile",
   "ProfilePage.editProfileLinkMobile": "Edit",

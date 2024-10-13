@@ -147,6 +147,8 @@ const renderForm = formRenderProps => {
     marketplaceName,
     values,
     variants,
+    userPhoneMetaData,
+    listingType
   } = formRenderProps;
 
   // Note: don't add custom logic before useEffect
@@ -215,6 +217,13 @@ const renderForm = formRenderProps => {
     e.preventDefault();
     onContactUser();
   };
+
+  const onClickContactUserPhone = e => {
+    e.preventDefault();
+    window.location.href = 'tel:' + userPhoneMetaData;
+
+  };
+
 
   const hasVarinats = (currentStock,variants) => {
     return !variants ? null : (()=>{
@@ -341,6 +350,17 @@ const renderForm = formRenderProps => {
           )}
         </PrimaryButton>
       </div>
+
+      {userPhoneMetaData && listingType == 'boatListing' ? ( 
+        <div className={css.contact}>
+          <SecondaryButton
+            onClick={onClickContactUserPhone}
+            enforcePagePreloadFor="SignupPage"
+          >
+            <FormattedMessage id="ProductOrderForm.actionContactPhone" />
+          </SecondaryButton>
+        </div>)
+      : null}
 
       <div className={css.contact}>
         <SecondaryButton

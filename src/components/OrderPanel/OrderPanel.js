@@ -257,6 +257,8 @@ const OrderPanel = props => {
   const classes = classNames(rootClassName || css.root, className);
   const titleClasses = classNames(titleClassName || css.orderTitle);
 
+  const userPhoneMetaData = listing.author?.attributes?.profile?.metadata?.phoneNumber;
+
   const onClickContactUser = e => {
     e.preventDefault();
     onContactUser();
@@ -372,6 +374,8 @@ const OrderPanel = props => {
             fetchLineItemsInProgress={fetchLineItemsInProgress}
             fetchLineItemsError={fetchLineItemsError}
             payoutDetailsWarning={payoutDetailsWarning}
+            userPhoneMetaData={userPhoneMetaData}
+            listingType={listingType}
           />
         ) : showInquiryForm ? (
           <InquiryWithoutPaymentForm formId="OrderPanelInquiryForm" onSubmit={onSubmit} />
