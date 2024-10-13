@@ -404,7 +404,6 @@ const OrderPanel = props => {
           showCurrencyMismatch
         />
         <div className={css.priceDescription}>
-          dfhdghgsfa hjhsdgafdgsfhdfgsfa
           {priceDescription}
         </div>
         <div className={css.orderContainer}>
