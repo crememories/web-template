@@ -148,7 +148,8 @@ const renderForm = formRenderProps => {
     values,
     variants,
     userPhoneMetaData,
-    listingType
+    listingType,
+    onClickContactUserPhone
   } = formRenderProps;
 
   // Note: don't add custom logic before useEffect
@@ -217,13 +218,6 @@ const renderForm = formRenderProps => {
     e.preventDefault();
     onContactUser();
   };
-
-  const onClickContactUserPhone = e => {
-    e.preventDefault();
-    window.location.href = 'tel:' + userPhoneMetaData;
-
-  };
-
 
   const hasVarinats = (currentStock,variants) => {
     return !variants ? null : (()=>{

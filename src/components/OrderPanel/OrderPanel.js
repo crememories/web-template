@@ -259,6 +259,14 @@ const OrderPanel = props => {
 
   const userPhoneMetaData = listing.author?.attributes?.profile?.metadata?.phoneNumber;
 
+  console.log(listingType);
+  console.log(userPhoneMetaData);
+
+  const onClickContactUserPhone = e => {
+    e.preventDefault();
+    window.location.href = 'tel:' + userPhoneMetaData;
+  };
+
   const onClickContactUser = e => {
     e.preventDefault();
     onContactUser();
@@ -376,6 +384,7 @@ const OrderPanel = props => {
             payoutDetailsWarning={payoutDetailsWarning}
             userPhoneMetaData={userPhoneMetaData}
             listingType={listingType}
+            onClickContactUserPhone={onClickContactUserPhone}
           />
         ) : showInquiryForm ? (
           <InquiryWithoutPaymentForm formId="OrderPanelInquiryForm" onSubmit={onSubmit} />
@@ -408,6 +417,17 @@ const OrderPanel = props => {
             </SecondaryButton>
           </div>
 
+          {userPhoneMetaData && listingType == 'boatListing' ? ( 
+            <div className={css.contact}>
+              <SecondaryButton
+                onClick={onClickContactUserPhone}
+                enforcePagePreloadFor="SignupPage"
+              >
+                <FormattedMessage id="ProductOrderForm.actionContactPhone" />
+              </SecondaryButton>
+            </div>)
+          : null}
+
           {isClosed ? (
             <div className={css.closedListingButton}>
               <FormattedMessage id="OrderPanel.closedListingButtonText" />
@@ -435,6 +455,7 @@ const OrderPanel = props => {
               )}
             </PrimaryButton>
           )}
+        
         </div>
       </div>
     </div>
