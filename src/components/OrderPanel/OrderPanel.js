@@ -44,7 +44,7 @@ import {
   resolveLatestProcessName,
 } from '../../transactions/transaction';
 
-import { ModalInMobile, PrimaryButton, SecondaryButton, AvatarSmall, H1, H2 } from '../../components';
+import { ModalInMobile, PrimaryButton, SecondaryButton, AvatarSmall, H1, H2, IconSendMessage, IconPhoneCall } from '../../components';
 
 import css from './OrderPanel.module.css';
 
@@ -407,25 +407,33 @@ const OrderPanel = props => {
           {priceDescription}
         </div>
         <div className={css.orderContainer}>
-          <div className={css.contact}>
-            <SecondaryButton
-              onClick={onClickContactUser}
-              enforcePagePreloadFor="SignupPage"
-            >
-              <FormattedMessage id="ProductOrderForm.askAQusetion" />
-            </SecondaryButton>
-          </div>
-
-          {userPhoneMetaData && listingType == 'boatListing' ? ( 
+          <div className={css.contactContainer}>
             <div className={css.contact}>
-              <SecondaryButton
-                onClick={onClickContactUserPhone}
+              <SecondaryButton className={css.secondaryActionButton}
+                onClick={onClickContactUser}
                 enforcePagePreloadFor="SignupPage"
               >
-                <FormattedMessage id="ProductOrderForm.actionContactPhone" />
+                <div>
+                  <IconSendMessage className={css.secondaryActionIcon} />
+                </div>
+                <FormattedMessage id="ProductOrderForm.askAQusetion" />
               </SecondaryButton>
-            </div>)
-          : null}
+            </div>
+
+            {userPhoneMetaData && listingType == 'boatListing' ? ( 
+              <div className={css.contact}>
+                <SecondaryButton className={css.secondaryActionButton}
+                  onClick={onClickContactUserPhone}
+                  enforcePagePreloadFor="SignupPage"
+                >
+                  <div>
+                    <IconPhoneCall className={css.secondaryActionIcon} />
+                  </div>
+                  <FormattedMessage id="ProductOrderForm.actionContactPhone" />
+                </SecondaryButton>
+              </div>)
+            : null}
+          </div>
 
           {isClosed ? (
             <div className={css.closedListingButton}>

@@ -198,13 +198,15 @@
     display: none;
   }
 }
-.orderContainer {
+.orderContainer, .contactContainer {
   display: flex;
 }
-
-.contact{
-  width: 100%;
+.contactContainer{
   margin-right: 20px;
+}
+.contact{
+  width: 90px;
+  display: inline-block;
   /* margin-top: 20px; */
 }
 
@@ -234,6 +236,7 @@
   align-items: center;
   justify-content: center;
   gap: unset;
+  padding: 5px 10px;
 }
 
 .priceValue {
@@ -296,4 +299,14 @@
   @media (--viewportMedium) {
     padding: 0;
   }
+}
+.secondaryActionButton{
+  border: unset;
+  font-size: var(--fontSizeXSmall);
+  line-height: 16px;
+}
+.secondaryActionIcon{ 
+  fill: var(--marketplaceColor);
+  width: 24px;
+  height: 24px;
 }

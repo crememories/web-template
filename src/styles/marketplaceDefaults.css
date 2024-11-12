@@ -75,6 +75,13 @@
 
   --fontWeightHighlightEmail: var(--fontWeightBold);
 
+  --fontSizeBase: 16px;
+  --fontSizeXxSmall: 10px;
+  --fontSizeXSmall: 12px;
+  --fontSizeSmall: 14px;
+  --fontSizeMedium: 18px;
+  --fontSizeLarge: 24px;
+
   /* ================ Spacing units ================ */
 
   /**
