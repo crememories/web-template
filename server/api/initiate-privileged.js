@@ -41,7 +41,7 @@ module.exports = (req, res) => {
       console.log(listing.attributes.publicData.variants);
 
       if(variantCheck){
-        const variantId = bodyParams.params.stockReservationVariant;
+        const variantId = bodyParams.params.stockReservationVariant - 1;
         const variantSelected = listing.attributes.publicData.variants[variantId];
         listing.attributes.price.amount = variantSelected.variantPrice;
       }

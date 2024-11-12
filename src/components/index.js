@@ -56,8 +56,6 @@ export { default as IconFacebook } from './IconFacebook/IconFacebook';
 export { default as IconTwitter } from './IconTwitter/IconTwitter';
 export { default as IconMoreOptions } from './IconMoreOptions/IconMoreOptions';
 export { default as IconShareListing } from './IconShareListing/IconShareListing';
-export { default as IconSendMessage } from './IconSendMessage/IconSendMessage';
-export { default as IconPhoneCall } from './IconPhoneCall/IconPhoneCall';
 
 // Typography
 export { Heading, H1, H2, H3, H4, H5, H6  } from './Heading/Heading';
