@@ -24,6 +24,7 @@ import {
 } from '../../../../components';
 
 import EditListingPricingVariant from './EditListingPricingVariant';
+import EditListingAddonVariant from './EditListingAddonVariant';
 
 // Import modules from this directory
 import css from './EditListingPricingAndStockForm.module.css';
@@ -120,9 +121,11 @@ export const EditListingPricingAndStockFormComponent = props => (
         fetchErrors,
         values,
         variantLabel,
+        addonLabel,
       } = formRenderProps;
 
       const variants = {};
+      const addons = {};
 
       const priceValidators = getPriceValidators(
         listingMinimumPriceSubUnits,
@@ -142,9 +145,16 @@ export const EditListingPricingAndStockFormComponent = props => (
       const classes = classNames(css.root, className);
       const submitReady = (updated && pristine) || ready;
       const submitInProgress = updateInProgress;
+      console.log('invalid');
+      console.log(invalid);
+      console.log('disabled');
+      console.log(disabled);
+      console.log('submitInProgress');
+      console.log(submitInProgress);
       const submitDisabled = invalid || disabled || submitInProgress;
       const { updateListingError, showListingsError, setStockError } = fetchErrors || {};
       const variantAdd = variantLabel;
+      const addonAdd = addonLabel;
 
       const stockErrorMessage = isOldTotalMismatchStockError(setStockError)
         ? intl.formatMessage({ id: 'EditListingPricingAndStockForm.oldStockTotalWasOutOfSync' })
@@ -153,6 +163,17 @@ export const EditListingPricingAndStockFormComponent = props => (
       const handleAddField = (e) => {
         formRenderProps.form.mutators.push("pricingVariant",Math.random());
       };
+      // const handleAddAddon = (e) => {
+      //   // {
+      //   //   variantLabel: '',
+      //   //   options: [],
+      //   // }
+      //   const newAddon = {
+      //     variantLabel: '', // You can set default values here
+      //     options: [],
+      //   };
+      //   formRenderProps.form.mutators.push("addonVariant",newAddon);
+      // };
 
       return (
         <Form onSubmit={handleSubmit} className={classes}>
@@ -219,6 +240,14 @@ export const EditListingPricingAndStockFormComponent = props => (
             })}
             type="text"
           />
+
+          <EditListingAddonVariant
+            addons={addons}
+            intl={intl}
+            marketplaceCurrency={marketplaceCurrency}
+            priceValidators={priceValidators}
+          > 
+          </EditListingAddonVariant>
 
           <EditListingPricingVariant
             variants={variants}

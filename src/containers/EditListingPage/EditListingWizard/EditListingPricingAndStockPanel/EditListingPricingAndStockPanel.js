@@ -96,16 +96,54 @@ const EditListingPricingAndStockPanel = props => {
   // const priceDescription = publicData.priceDescription;
   // initialValues.priceDescription = priceDescription;
 
-  if(variantKeys && priceCurrencyValid){
-    variantKeys.forEach( key => {
-      const variantLabel = variants[key].variantLabel;
-      const variantPrice = new Money;
-      variantPrice.amount = variants[key].variantPrice;
-      variantPrice.currency = initialValues.price.currency;
-      pricingVariant[pricingVariant.length] = {variantPrice,variantLabel}
+  if (variantKeys && priceCurrencyValid) {
+    // Initialize the pricingVariant array
+    const pricingVariant = variantKeys.map(key => {
+      const { variantLabel, variantPrice } = variants[key];
+      
+      // Create a Money instance for variantPrice
+      const price = new Money();
+      price.amount = variantPrice;
+      price.currency = initialValues.price.currency;
+  
+      return { variantLabel, variantPrice: price };
     });
-
+  
+    // Update initialValues with the new pricingVariant
     initialValues.pricingVariant = pricingVariant;
+  }
+
+  const addonVariants = publicData.addons;
+  const pricingAddonVariant = [];
+  
+  if (addonVariants && priceCurrencyValid) {
+    Object.keys(addonVariants).forEach(key => {
+      const { addonLabel, options = [] } = addonVariants[key];
+  
+      // Map addon options to structured data
+      const addonOptions = options.map(({ optionLabel, subOptionLabel, price, options: subOptions = [] }) => {
+        // Map sub-options and create Money objects for prices
+        const optionPrice = new Money();
+        optionPrice.amount = price;
+        optionPrice.currency = initialValues.price.currency;
+  
+        const mappedSubOptions = subOptions.map(({ subOptionName, price }) => {
+          const subOptionPrice = new Money();
+          subOptionPrice.amount = price;
+          subOptionPrice.currency = initialValues.price.currency;
+  
+          return { subOptionName, price: subOptionPrice };
+        });
+  
+        return { optionLabel, subOptionLabel, price: optionPrice, options: mappedSubOptions };
+      });
+  
+      // Push the structured addon data to pricingAddonVariant
+      pricingAddonVariant.push({ addonLabel, options: addonOptions });
+    });
+  
+    // Update initialValues with the structured addon variant data
+    initialValues.addonVariant = pricingAddonVariant;
   }
 
   return (
@@ -134,15 +172,51 @@ const EditListingPricingAndStockPanel = props => {
             const variantsValues = values.pricingVariant;
             const variantsUpdate = {};
             
-            if(typeof variantsValues == "object"){
-              const valuesKeys = Object.keys(variantsValues);
-              valuesKeys.forEach((element) => {
-                  const curVariant = variantsValues[element];
-                  if(curVariant.variantPrice && curVariant.variantPrice.amount){
-                    const variantPrice = curVariant.variantPrice.amount;
-                    const variantLabel = curVariant.variantLabel;
-                    variantsUpdate[element] = {variantPrice,variantLabel};
-                  }
+            if (typeof variantsValues === "object") {
+              Object.keys(variantsValues).forEach((key) => {
+                const { variantPrice, variantLabel } = variantsValues[key];
+                
+                // Only update if the variantPrice and its amount are valid
+                if (variantPrice?.amount) {
+                  variantsUpdate[key] = { variantPrice: variantPrice.amount, variantLabel };
+                }
+              });
+            }
+            
+            // configured options for add variant price with descriptions
+            const addonVariantsValues = values.addonVariant;
+            const addonVariantsUpdate = {};
+
+            if (typeof addonVariantsValues === "object") {
+              const addonVariantKeys = Object.keys(addonVariantsValues);
+
+              addonVariantKeys.forEach((addonKey) => {
+                const curAddon = addonVariantsValues[addonKey];
+                
+                // If the addon has a valid label and options
+                if (curAddon.addonLabel && curAddon.options) {
+                  const addonLabel = curAddon.addonLabel;
+                  
+                  // Process each option within the addon
+                  const optionsUpdate = curAddon.options.map((option) => {
+                    const optionLabel = option.optionLabel;
+                    const subOptionLabel = option.subOptionLabel;
+                    const optionPrice = option.price.amount;
+                    
+                    // Process each subOption within the option
+                    const subOptionsUpdate = option.options.map((subOption) => {
+                      const subOptionName = subOption.subOptionName;
+                      const subOptionPrice = subOption.price.amount;
+
+                      return { subOptionName, price: subOptionPrice };
+                    });
+
+                    return { optionLabel, subOptionLabel, price: optionPrice, options: subOptionsUpdate };
+                  });
+
+                  // Update the addonVariant structure with the new data
+                  addonVariantsUpdate[addonKey] = { addonLabel, options: optionsUpdate };
+                }
               });
             }
 
@@ -177,8 +251,10 @@ const EditListingPricingAndStockPanel = props => {
             const updateValues = {
               price,
               ...stockUpdateMaybe,
-              publicData: { variants:variantsUpdate, priceDescription },
+              publicData: { variants:variantsUpdate, priceDescription, addons:addonVariantsUpdate },
             };
+
+            console.log(updateValues);
             // Save the initialValues to state
             // Otherwise, re-rendering would overwrite the values during XHR call.
             setState({
