@@ -215,7 +215,7 @@ export const initiateOrder = (
   // initiate.
   const isTransition = !!transactionId;
 
-  const { deliveryMethod, quantity, variant, bookingDates, ...otherOrderParams } = orderParams;
+  const { deliveryMethod, quantity, variant, bookingDates, addonVariant, ...otherOrderParams } = orderParams;
   console.log('initiateOrder');
   console.log(orderParams);
 
@@ -223,6 +223,7 @@ export const initiateOrder = (
   cookies.set('tapfiliateOrder', orderParams?.listingId?.uuid, { path: '/' });
   const quantityMaybe = quantity ? { stockReservationQuantity: quantity } : {};
   const variantMaybe = quantity ? { stockReservationVariant: variant } : {};
+  const addonMaybe = quantity ? { stockReservationAddon: addonVariant } : {};
   const bookingParamsMaybe = bookingDates || {};
 
   // Parameters only for client app's server
@@ -233,6 +234,7 @@ export const initiateOrder = (
     ...quantityMaybe,
     ...bookingParamsMaybe,
     ...variantMaybe,
+    ...addonMaybe,
     ...otherOrderParams,
   };
 

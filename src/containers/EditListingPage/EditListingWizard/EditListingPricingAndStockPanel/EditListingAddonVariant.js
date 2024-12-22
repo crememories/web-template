@@ -47,45 +47,12 @@ const EditListingAddonVariant = (props) => {
     });
   };
 
-  // Function to add a sub-option to a specific option
-  const addSubOption = (optionFieldArrayProps, optionIndex) => {
-    const option = optionFieldArrayProps.fields;
-
-    // Ensure the sub-options array is initialized
-    // if (!option.options) {
-    //   option.options = [];
-    // }
-
-    // const addonPrice = new Money;
-    // addonPrice.currency = marketplaceCurrency;
-    // addonPrice.price = 1;
-
-    // Add a new sub-option to the 'options' array
-    option.push({
-      subOptionName: '', // Sub-option name (e.g., 1.0 Carat)
-    });
-
-    // Update the form state with the modified option
-    // optionFieldArrayProps.fields.update(optionIndex, option);
-  };
 
   // Function to remove an option
   const removeOption = (optionFieldArrayProps, optionIndex) => {
     optionFieldArrayProps.fields.remove(optionIndex);
   };
 
-  // Function to remove a sub-option
-  const removeSubOption = (subOptionFieldArrayProps, subOptionIndex) => {
-    subOptionFieldArrayProps.fields.remove(subOptionIndex);
-  };
-
-  console.log(props.priceValidators);
-
-  const testValidator = (test,nex) =>{
-    console.log('testValidator');
-    console.log(test);
-    console.log(nex);
-  }
 
   return (
     <FieldArray name="addonVariant">
@@ -95,7 +62,7 @@ const EditListingAddonVariant = (props) => {
             <div key={name}>
               <hr />
               <h2>
-                Addon {index + 1}
+                {props.intl.formatMessage({ id: 'ProductOrderForm.addonVariantLabel' })} {index + 1}
                 <button
                   className={css.removeButton}
                   type="button"
@@ -110,7 +77,7 @@ const EditListingAddonVariant = (props) => {
                 id={`${name}.addonLabel`}
                 name={`${name}.addonLabel`}
                 className={css.input} 
-                label="Addon Name"
+                label={props.intl.formatMessage({ id: 'ProductOrderForm.addonTitle' })}
                 placeholder="Enter addon name"
                 type="text"
               />
@@ -152,77 +119,7 @@ const EditListingAddonVariant = (props) => {
                             currencyConfig={appSettings.getCurrencyFormatting(props.marketplaceCurrency)}
                             validate={props.priceValidators}
                           />
-
-                          <FieldTextInput
-                            id={`${optionName}.subOptionLabel`}
-                            name={`${optionName}.subOptionLabel`}
-                            className={css.input} 
-                            label="Sub Option Label"
-                            placeholder="Enter sub option label"
-                            type="text"
-                          />
-
-                          {/* Sub-options for the option */}
-                          <div className={css.optionsContainer}>
-                            <FieldArray name={`${optionName}.options`}>
-                              {subOptionFieldArrayProps => (
-                                <>
-                                  {subOptionFieldArrayProps.fields.map((subOptionName, subOptionIndex) => (
-                                    <div key={subOptionName}>
-                                      <h4>Sub-option {subOptionIndex + 1}
-                                        {/* Remove Sub-option Button */}
-                                        <button
-                                          className={css.removeButton}
-                                          type="button"
-                                          onClick={() => removeSubOption(subOptionFieldArrayProps, subOptionIndex)}
-                                        >
-                                          <IconTrash rootClassName={css.IconTrash} />
-                                        </button>
-                                      </h4>
-
-                                     
-
-                                      {/* Sub-option Name (e.g., 1.0 Carat) */}
-                                      <FieldTextInput
-                                        id={`${subOptionName}.subOptionName`}
-                                        name={`${subOptionName}.subOptionName`}
-                                        className={css.input}
-                                        label="Sub-option Name"
-                                        placeholder="Enter sub-option name"
-                                        type="text"
-                                      />
-
-                                      {/* Sub-option Price */}
-                                      <FieldCurrencyInput
-                                        id={`${subOptionName}.price`}
-                                        name={`${subOptionName}.price`}
-                                        className={css.input}
-                                        label="Sub-option Price"
-                                        currencyConfig={appSettings.getCurrencyFormatting(props.marketplaceCurrency)}
-                                        validate={props.priceValidators}
-                                      />
-
-                                    </div>
-                                  ))}
-
-                                  {/* Button to add a new sub-option */}
-                                  <div>
-                                    <p>
-                                      If you want to add a new sub-option, click the button below
-                                    </p>
-                                  </div>
-                                  <Button
-                                    className={css.addonOptionButton}
-                                    type="button"
-                                    onClick={() => addSubOption(subOptionFieldArrayProps, optionIndex)}
-                                  >
-                                    Add Sub-option
-                                  </Button>
-                                </>
-                              )}
-                            </FieldArray>
-                          </div>
-                           
+                          
                         </div>
                       ))}
 
@@ -247,7 +144,7 @@ const EditListingAddonVariant = (props) => {
             type="button"
             onClick={() => addAddonVariant(fieldArrayProps)}
           >
-            Add Addon
+            {props.intl.formatMessage({ id: 'ProductOrderForm.createAddOn' })}
           </Button>
         </>
       )}

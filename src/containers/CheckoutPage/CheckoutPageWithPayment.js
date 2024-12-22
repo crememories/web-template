@@ -75,6 +75,10 @@ const getOrderParams = (pageData, shippingDetails, optionalPaymentParams, config
   const variant = pageData.orderData?.variant;
   const variantMaybe = variant ? { variant } : {};
 
+  const addonVariant = pageData.orderData?.addonVariant;  
+  const addonVariantMaybe = addonVariant ? { addonVariant } : {};
+  
+
   const { listingType, unitType } = pageData?.listing?.attributes?.publicData || {};
   const protectedDataMaybe = {
     protectedData: {
@@ -91,6 +95,7 @@ const getOrderParams = (pageData, shippingDetails, optionalPaymentParams, config
     ...deliveryMethodMaybe,
     ...quantityMaybe,
     ...variantMaybe,
+    ...addonVariantMaybe,
     ...bookingDatesMaybe(pageData.orderData?.bookingDates),
     ...protectedDataMaybe,
     ...optionalPaymentParams,

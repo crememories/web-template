@@ -137,6 +137,26 @@ exports.transactionLineItems = (listing, orderData, providerCommission, customer
     const variantPrice = variantData.variantPrice;
     unitPrice.amount = variantPrice;
   }
+
+  if(orderData.addonVariant){
+    const addonData = orderData.addonVariant;
+    const itemAddons = publicData.addons;
+
+    let amountAddons = 0;
+
+    if(addonData.length > 0){
+      addonData.forEach((addon,key) => {
+        if(addon.option && addon.option !== null){
+          let currentAddon = itemAddons[key];
+          let addonSelected = currentAddon.options[addon.option];
+          let priceForAddonOption = addonSelected.price;
+          amountAddons += priceForAddonOption;
+        }
+      });
+    }
+    // const variantPrice = variantData.variantPrice;
+    unitPrice.amount = unitPrice.amount + amountAddons;
+  }
   
   // Unit type needs to be one of the following:
   // day, night, hour or item
