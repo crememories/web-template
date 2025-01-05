@@ -408,7 +408,7 @@
 }
 .categoryIconsContainner{
   flex-grow: 1;
-  /* overflow: hidden; */
+  overflow: hidden;
   text-align: center;
   padding: 0 30px;
   position: relative;

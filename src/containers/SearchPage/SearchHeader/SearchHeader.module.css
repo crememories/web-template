@@ -1,0 +1,70 @@
+.root {
+  display: flex;
+  flex-direction: row;
+  position: relative;
+  justify-content: center; /* Horizontally center content */
+  align-items: center; /* Vertically center content */
+  padding-bottom: 4.25rem;
+  padding-top: 2.25rem;
+}
+
+.desctopHeader {
+  display: flex;
+  flex-direction: row;
+  max-width: 1280px;
+  width: 100%;
+  justify-content: center;
+}
+
+.lContainer, .cContainer, .rContainer {
+  display: flex;
+  justify-content: center; /* Horizontally center content */
+  align-items: center; /* Vertically center content */
+  position: relative;
+}
+
+.lContainer {
+  flex: 0 0 25%; /* Left container takes up 25% */
+  margin-right: 19px; /* Space between left and center container */
+}
+
+.cContainer {
+  flex: 0 0 50%; /* Center container takes up 50% */
+  margin-right: 19px; /* Space between center and right container */
+  text-align: center;
+  flex-direction: column;
+  max-width: 50%;
+}
+
+.rContainer {
+  flex: 0 0 25%; /* Right container takes up 25% */
+}
+
+.mainImageImg {
+  width: 80%;
+  border-radius: 10px;
+  height: 340px;
+  object-fit: cover;
+  object-position: center;
+}
+
+.secondImageImg {
+  width: 60%;
+  border-radius: 10px;
+  height: 240px;
+  object-fit: cover;
+  object-position: center;
+  position: absolute;
+  right: 0;
+  border: 4px solid var(--colorWhite);
+}
+
+.rContainer{
+  .mainImage{
+    text-align: right;
+  }
+  .secondImageImg{
+    left: 0;
+    right: unset;
+  }
+}

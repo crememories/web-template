@@ -41,6 +41,7 @@ import {
 import FilterComponent from './FilterComponent';
 import SearchMap from './SearchMap/SearchMap';
 import MainPanelHeader from './MainPanelHeader/MainPanelHeader';
+import SearchHeader from './SearchHeader/SearchHeader';
 import SearchFiltersSecondary from './SearchFiltersSecondary/SearchFiltersSecondary';
 // import SearchFiltersPrimary from './SearchFiltersPrimary/SearchFiltersPrimary';
 import SearchFiltersMobile from './SearchFiltersMobile/SearchFiltersMobile';
@@ -438,6 +439,7 @@ export class SearchPageComponent extends Component {
     );
 
     const { bounds, origin } = searchParamsInURL || {};
+    // console.log(searchParamsInURL);
     const { title, description, schema } = createSearchResultSchema(
       listings,
       searchParamsInURL || {},
@@ -488,6 +490,7 @@ export class SearchPageComponent extends Component {
           searchModalOpen={this.handleOpenFilterModal}
           handleShowMap={this.handleShowMap}
           isMapShow={this.state.isMapShow}
+          routeConfiguration={routeConfiguration}
         />
         <div className={css.container}>
         <Modal 
@@ -523,6 +526,16 @@ export class SearchPageComponent extends Component {
             </div>
           </Modal>
           <div className={searchResultContainer}>
+            <div>
+              <SearchHeader
+                className={css.searchHeader}
+                urlQueryParams={urlQueryParams}
+                categories={enumOptions}
+                history={history}
+                routeConfiguration={routeConfiguration}
+              >
+              </SearchHeader>
+            </div>
             <SearchFiltersMobile
               className={css.searchFiltersMobileMap}
               urlQueryParams={validQueryParams}
@@ -648,7 +661,7 @@ export class SearchPageComponent extends Component {
                   reusableContainerClassName={mapSizeClass}
                   activeListingId={activeListingId}
                   bounds={bounds}
-                  center={origin}
+                  // center={origin}
                   isSearchMapOpenOnMobile={this.state.isSearchMapOpenOnMobile}
                   location={location}
                   listings={listings || []}

@@ -4,6 +4,15 @@ import brandImage from '../assets/biketribe-brandImage-1500.jpg';
 import facebookImage from '../assets/biketribe-facebook-sharing-1200x630.jpg';
 import twitterImage from '../assets/biketribe-twitter-sharing-600x314.jpg';
 
+// import searchImageleftMain from '../assets/search-left-main.png';
+// import searchImagerightMain from '../assets/search-right-main.png';
+// import searchImageleftSecondary from '../assets/search-left-secondary.png';
+// import searchImagerightSecondary from '../assets/search-right-secondary.png';
+import searchImageleftMain from '../assets/biketribe-brandImage-1500.jpg';
+import searchImagerightMain from '../assets/biketribe-brandImage-1500.jpg';
+import searchImageleftSecondary from '../assets/biketribe-brandImage-1500.jpg';
+import searchImagerightSecondary from '../assets/biketribe-brandImage-1500.jpg';
+
 /////////////////////////////////////////////////////////
 // This file contains configs that affect branding     //
 // NOTE: these are just some of the relevant configs   //
@@ -51,3 +60,8 @@ export const brandImageURL = brandImage;
 export const facebookImageURL = facebookImage;
 // For Twitter, the aspect ratio should be 600x314 (otherwise, the image is cropped)
 export const twitterImageURL = twitterImage;
+
+export const searchImageleftMainURL = searchImageleftMain;
+export const searchImagerightMainURL = searchImagerightMain;
+export const searchImageleftSecondaryURL = searchImageleftSecondary;
+export const searchImagerightSecondaryURL = searchImagerightSecondary;

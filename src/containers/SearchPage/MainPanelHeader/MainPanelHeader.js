@@ -32,6 +32,16 @@ const MainPanelHeader = props => {
 
   const classes = classNames(rootClassName || css.root, className);
 
+  const reorderFields = (fields) => {
+    const order = ["categories", "price"];  // Keys that need to come first
+    return [
+      ...fields.filter(field => order.includes(field.key)),  // Fields that should come first
+      ...fields.filter(field => !order.includes(field.key))  // Fields that are left
+    ];
+  };
+
+  const reorderAvailablePrimaryFilters = reorderFields(availablePrimaryFilters);
+
   return (
     <div className={classes}>
       <div className={css.searchResultSummary}>
@@ -48,7 +58,7 @@ const MainPanelHeader = props => {
         </div>
       <div className={css.searchOptions}>
         <SearchFiltersPrimary {...propsForSecondaryFiltersToggle}>
-          {availablePrimaryFilters.map(config => {
+          {reorderAvailablePrimaryFilters.map(config => {
             return (
               <FilterComponent
                 key={`SearchFiltersPrimary.${config.key}`}

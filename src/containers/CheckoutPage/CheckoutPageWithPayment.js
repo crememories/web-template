@@ -80,11 +80,20 @@ const getOrderParams = (pageData, shippingDetails, optionalPaymentParams, config
   
 
   const { listingType, unitType } = pageData?.listing?.attributes?.publicData || {};
+  const testAdittionalData = 'ssssssssssssssssssssss';
   const protectedDataMaybe = {
     protectedData: {
       ...getTransactionTypeData(listingType, unitType, config),
       ...deliveryMethodMaybe,
       ...shippingDetails,
+      testAdittionalData
+    },
+  };
+
+  const metadataMaybe = {
+    metaData: {
+      gsfas: 'gewgdfas',
+      listingType,
     },
   };
 
@@ -99,6 +108,7 @@ const getOrderParams = (pageData, shippingDetails, optionalPaymentParams, config
     ...bookingDatesMaybe(pageData.orderData?.bookingDates),
     ...protectedDataMaybe,
     ...optionalPaymentParams,
+    ...metadataMaybe
   };
   return orderParams;
 };
