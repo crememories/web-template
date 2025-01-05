@@ -152,9 +152,6 @@ export class SearchMapComponent extends Component {
     } = this.props;
     const classes = classNames(rootClassName || css.root, className);
 
-    console.log('center');
-    console.log(center);
-
     const listingsWithLocation = originalListings.filter(l => !!l.attributes.geolocation);
     const listings = config.maps.fuzzy.enabled
       ? withCoordinatesObfuscated(listingsWithLocation, config.maps.fuzzy.offset)
@@ -222,7 +219,7 @@ SearchMapComponent.defaultProps = {
   listings: [],
   onCloseAsModal: null,
   zoom: 3,
-  // center: [-100, 38]
+  center: [-100, 38]
 };
 
 SearchMapComponent.propTypes = {
