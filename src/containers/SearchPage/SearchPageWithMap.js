@@ -531,7 +531,7 @@ export class SearchPageComponent extends Component {
                 className={css.searchHeader}
                 urlQueryParams={urlQueryParams}
                 categories={enumOptions}
-                history={history}
+                // history={history}
                 routeConfiguration={routeConfiguration}
               >
               </SearchHeader>
