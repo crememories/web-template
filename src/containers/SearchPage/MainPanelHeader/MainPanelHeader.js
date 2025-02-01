@@ -6,6 +6,7 @@ import { FormattedMessage } from '../../../util/reactIntl';
 
 import SearchFiltersPrimary from '../SearchFiltersPrimary/SearchFiltersPrimary';
 import FilterComponent from '../FilterComponent';
+import Switch from "react-switch";  // Keep the switch logic intact
 
 import css from './MainPanelHeader.module.css';
 
@@ -27,20 +28,20 @@ const MainPanelHeader = props => {
     initialValues,
     getHandleChangedValueFn,
     contentPlacementOffset,
-    validQueryParams
+    validQueryParams,
+    handleShowMap,
+    isMapShow
   } = props;
 
   const classes = classNames(rootClassName || css.root, className);
 
-  const reorderFields = (fields) => {
-    const order = ["categories", "price"];  // Keys that need to come first
-    return [
-      ...fields.filter(field => order.includes(field.key)),  // Fields that should come first
-      ...fields.filter(field => !order.includes(field.key))  // Fields that are left
-    ];
+  const labelShowMApSwitcher = (isMapShow) => {
+    if (isMapShow) {
+      return 'Hide map';
+    } else {
+      return 'Show map';
+    }
   };
-
-  const reorderAvailablePrimaryFilters = reorderFields(availablePrimaryFilters);
 
   return (
     <div className={classes}>
@@ -58,7 +59,7 @@ const MainPanelHeader = props => {
         </div>
       <div className={css.searchOptions}>
         <SearchFiltersPrimary {...propsForSecondaryFiltersToggle}>
-          {reorderAvailablePrimaryFilters.map(config => {
+          {availablePrimaryFilters.map(config => {
             return (
               <FilterComponent
                 key={`SearchFiltersPrimary.${config.key}`}
@@ -75,8 +76,23 @@ const MainPanelHeader = props => {
             );
           })}
         </SearchFiltersPrimary>
+
+
+        <div className={css.mapSwitcherWrapper}>
+          {/* Map Show Switch */}
+          <div className={css.searchModalButtonContainer}>
+              <label className={css.showMapSwitcher}>
+                <span>{labelShowMApSwitcher(isMapShow)}</span>
+                <span className={css.mapSwitcherContainer}>
+                  <Switch width={44} height={20} onColor={'#0095cd'} uncheckedIcon={false} checkedIcon={false} onChange={handleShowMap} checked={isMapShow} />
+                </span>
+              </label>
+            </div>
+        </div>  
         {isSortByActive ? (
           <div className={css.sortyByWrapper}>
+            
+            
             <span className={css.sortyBy}>
               <FormattedMessage id="MainPanelHeader.sortBy" />
             </span>

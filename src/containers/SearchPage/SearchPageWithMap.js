@@ -42,6 +42,7 @@ import FilterComponent from './FilterComponent';
 import SearchMap from './SearchMap/SearchMap';
 import MainPanelHeader from './MainPanelHeader/MainPanelHeader';
 import SearchHeader from './SearchHeader/SearchHeader';
+import SearchHeaderMobile from './SearchHeader/SearchHeaderMobile';
 import SearchFiltersSecondary from './SearchFiltersSecondary/SearchFiltersSecondary';
 // import SearchFiltersPrimary from './SearchFiltersPrimary/SearchFiltersPrimary';
 import SearchFiltersMobile from './SearchFiltersMobile/SearchFiltersMobile';
@@ -471,8 +472,6 @@ export class SearchPageComponent extends Component {
     const searchResultContainer = this.state.isMapShow ? css.searchResultContainer : css.searchResultContainerWithoutMap;
     const mapPanel = this.state.isMapShow ? css.mapPanel : css.mapPanelHidden;
 
-    console.log(searchResultContainer);
-
     // N.B. openMobileMap button is sticky.
     // For some reason, stickyness doesn't work on Safari, if the element is <button>
     return (
@@ -526,16 +525,24 @@ export class SearchPageComponent extends Component {
             </div>
           </Modal>
           <div className={searchResultContainer}>
-            <div>
-              <SearchHeader
-                className={css.searchHeader}
-                urlQueryParams={urlQueryParams}
-                categories={enumOptions}
-                // history={history}
-                routeConfiguration={routeConfiguration}
-              >
-              </SearchHeader>
-            </div>
+            <SearchHeaderMobile
+              className={css.searchHeaderMobile}
+              urlQueryParams={urlQueryParams}
+              categories={enumOptions}
+              // history={history}
+              routeConfiguration={routeConfiguration}
+            >
+            </SearchHeaderMobile>
+
+            <SearchHeader
+              className={css.searchHeader}
+              urlQueryParams={urlQueryParams}
+              categories={enumOptions}
+              // history={history}
+              routeConfiguration={routeConfiguration}
+            >
+            </SearchHeader>
+             
             <SearchFiltersMobile
               className={css.searchFiltersMobileMap}
               urlQueryParams={validQueryParams}
@@ -589,6 +596,8 @@ export class SearchPageComponent extends Component {
               getHandleChangedValueFn={this.getHandleChangedValueFn}
               intl={intl}
               contentPlacementOffset={FILTER_DROPDOWN_OFFSET}
+              handleShowMap={this.handleShowMap}
+              isMapShow={this.state.isMapShow}
             >
             </MainPanelHeader>
             {isSecondaryFiltersOpen ? (

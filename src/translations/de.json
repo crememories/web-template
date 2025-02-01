@@ -454,6 +454,8 @@
   "MainPanelHeader.foundResults": "{count, number} {count, plural, one {Ergebnis} other {Ergebnisse}}",
   "MainPanelHeader.loadingResults": "Suchergebnisse werden geladen…",
   "MainPanelHeader.sortBy": "Sortieren nach:",
+  "SearchHeader.title" : "Erstellen Sie Ihre außergewöhnliche Erinnerung",
+  "SearchHeader.subTitle" : "Finden Sie wunderschöne, personalisierte Gedenkstätten, um das Leben Ihrer Lieben mit Sorgfalt und Würde zu ehren.",
   "ManageListingCard.actionFailed": "Hoppla, etwas ist schiefgelaufen. Bitte aktualisiere die Seite und versuche es erneut.",
   "ManageListingCard.closeListing": "Eintrag schließen",
   "ManageListingCard.closeListingText": "Eintrag schließen",

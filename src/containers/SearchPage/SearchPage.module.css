@@ -192,6 +192,7 @@
   display: flex;
   flex-direction: column;
   padding: 2px 0 0 0;
+  max-width: 100%;
 
   @media (--viewportMedium) {
     padding: 0;
@@ -360,6 +361,7 @@
 .mapSubFullwidth {
   width: 100vw;
   height: 100vh;
+  z-index: 2;
 
   @media (--viewportMedium) {
     /* Map is fixed so that it doesn't scroll along search results */
@@ -370,5 +372,17 @@
     /* Fixed content needs width relative to viewport */
     width: 100vw;
     height: calc(100vh - var(--topbarHeightDesktopSearch));
+  }
+}
+
+.searchHeader {
+  composes: mainPanel;
+}
+
+.searchHeaderMobile {
+  padding: 16px 24px;
+  
+  @media (--viewportMedium) {
+    display: none;
   }
 }

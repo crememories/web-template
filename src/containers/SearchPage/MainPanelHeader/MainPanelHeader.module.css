@@ -42,7 +42,26 @@
 
 .sortyByWrapper {
   display: inline-flex;
+  /* margin-left: auto; */
+  margin-left: 20px;
+}
+
+.mapSwitcherWrapper {
+  display: inline-flex;
   margin-left: auto;
+}
+
+.showMapSwitcher{
+  display: inline-flex;
+  flex-direction: row;
+  border: solid 1px var(--colorGrey100);
+  border-radius: 18px;
+  height: 40px;
+  width: 150px;
+  align-items: center;
+  vertical-align: middle;
+  padding: 0 10px;
+  justify-content: space-between;
 }
 
 .sortyBy {

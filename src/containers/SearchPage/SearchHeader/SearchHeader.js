@@ -8,6 +8,8 @@ import { ResponsiveImage, ImageFromFile } from '../../../components/';
 import { createResourceLocatorString } from '../../../util/routes';
 import { useHistory, useLocation } from 'react-router-dom';
 
+import { FormattedMessage } from '../../../util/reactIntl';
+
 import defaultConfig from '../../../config/configDefault';
 // import TopbarCategories from './TopbarCategories/TopbarCategories';
 
@@ -47,27 +49,26 @@ const SearchHeader = props => {
             <img src={defaultConfig.branding.searchImageleftMainURL} alt={'file.name'} className={css.mainImageImg} />
           </div>
           <div className={css.secondImage}>
-            <img src={defaultConfig.branding.searchImageleftMainURL} alt={'file.name'} className={css.secondImageImg} />
+            <img src={defaultConfig.branding.searchImageleftSecondaryURL} alt={'file.name'} className={css.secondImageImg} />
           </div>
         </div>
         <div className={css.cContainer}>
           <div>
-            <h2 className={css.title}>Get Outdoors</h2>
-            <h2 className={css.title}>Without the Crowds</h2>
+            <h2 className={css.title}><FormattedMessage id="SearchHeader.title" /></h2>
           </div>
           <div className={css.searchContainer}>
-            <span>
-             Discover and book exclusive access on private lands for your next outdoor experience.
-            </span>
+            <p>
+              <FormattedMessage id="SearchHeader.subTitle" />
+            </p>
           </div>
           <CategoryScroller categories={categories} categoryAction={categoryAction} urlQueryParams={urlQueryParams} />
         </div>
         <div className={css.rContainer}>
           <div className={css.mainImage}>
-            <img src={defaultConfig.branding.searchImageleftMainURL} alt={'file.name'} className={css.mainImageImg} />
+            <img src={defaultConfig.branding.searchImagerightMainURL} alt={'file.name'} className={css.mainImageImg} />
           </div>
           <div className={css.secondImage}>
-            <img src={defaultConfig.branding.searchImageleftMainURL} alt={'file.name'} className={css.secondImageImg} />
+            <img src={defaultConfig.branding.searchImagerightSecondaryURL} alt={'file.name'} className={css.secondImageImg} />
           </div>
         </div>
       </div>

@@ -1,0 +1,54 @@
+.root {
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  justify-content: center; /* Horizontally center content */
+  align-items: center; /* Vertically center content */
+  padding-bottom: 4.25rem;
+  padding-top: 2.25rem;
+  width: 100%;
+  text-align: center;
+}
+
+.title{
+  margin: auto;
+}
+
+.container {
+  text-align: center;
+  flex-direction: column;
+}
+
+.imagesConatiner{
+  display: flex;
+  margin-top: 2rem;
+  margin-bottom: 2rem;
+  /* width: 100%; */
+  display: flex;
+  justify-content: center;
+  gap: 18px;
+  padding-bottom: 20%;
+}
+
+.imageWrapper{
+  display: inline;
+  img {
+    width: 100%;
+    height: auto;
+    object-fit: cover; /* This will crop the image to cover the area */
+    border-radius: 8px;
+    border: solid 1px var(--colorWhite);
+    position: relative;
+  }
+  .middleImage{
+    position: relative;
+    top: 60%;
+    z-index: 1;
+  }
+  .leftImage{
+    right: -40px;
+  }
+  .rightImage{
+    left: -40px;
+  }
+}

@@ -454,6 +454,8 @@
   "MainPanelHeader.foundResults": "{count, number} {count, plural, one {resultado} other {resultados}}",
   "MainPanelHeader.loadingResults": "Cargando los resultados de la búsqueda…",
   "MainPanelHeader.sortBy": "Ordenar por:",
+  "SearchHeader.title" : "Kreu vian eksterordinaran memoron",
+  "SearchHeader.subTitle" : "Trovu belajn, personecigitajn memoraĵojn por festi la vivojn de viaj amatoj, zorge kaj digne.",
   "ManageListingCard.actionFailed": "Algo salió mal. Actualiza la página e inténtalo de nuevo.",
   "ManageListingCard.closeListing": "Cerrar anuncio",
   "ManageListingCard.closeListingText": "cerrar anuncio",

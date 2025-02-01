@@ -8,10 +8,16 @@ import twitterImage from '../assets/biketribe-twitter-sharing-600x314.jpg';
 // import searchImagerightMain from '../assets/search-right-main.png';
 // import searchImageleftSecondary from '../assets/search-left-secondary.png';
 // import searchImagerightSecondary from '../assets/search-right-secondary.png';
-import searchImageleftMain from '../assets/biketribe-brandImage-1500.jpg';
-import searchImagerightMain from '../assets/biketribe-brandImage-1500.jpg';
-import searchImageleftSecondary from '../assets/biketribe-brandImage-1500.jpg';
-import searchImagerightSecondary from '../assets/biketribe-brandImage-1500.jpg';
+
+// balloon-memorial-market-2 - back left
+import searchImageleftMain from '../assets/balloon-memorial-market-2.jpg';
+// memorial-market-tree-2 - Back right
+import searchImagerightMain from '../assets/memorial-market-tree-2.jpg';
+
+// dog-memorial-market-2 - front left
+import searchImageleftSecondary from '../assets/dog-memorial-market-2.jpg';
+// Mici-Memorial-Market-vendor-2 - Place front right
+import searchImagerightSecondary from '../assets/Mici-Memorial-Market-vendor-2.jpg';
 
 /////////////////////////////////////////////////////////
 // This file contains configs that affect branding     //

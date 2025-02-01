@@ -454,6 +454,8 @@
   "MainPanelHeader.foundResults": "{count, number} {count, plural, one {résultat} other {résultats}}",
   "MainPanelHeader.loadingResults": "Chargement des résultats de la recherche…",
   "MainPanelHeader.sortBy": "Trier par :",
+  "SearchHeader.title" : "Créez votre souvenir extraordinaire",
+  "SearchHeader.subTitle" : "Trouvez de beaux monuments commémoratifs personnalisés pour célébrer la vie de vos proches, avec soin et dignité.",
   "ManageListingCard.actionFailed": "Oups, quelque chose n'a pas fonctionné. Veuillez actualiser la page et réessayer.",
   "ManageListingCard.closeListing": "Clore l'annonce",
   "ManageListingCard.closeListingText": "fermer l'annonce",
