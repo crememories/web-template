@@ -417,6 +417,7 @@
 
 .categoryScrollerContainner{
   overflow: hidden;
+  height: 60px;
 }
 .categoryCeneterContainner{
   display: inline-block;

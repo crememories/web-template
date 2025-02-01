@@ -2,6 +2,7 @@
 .categoryScrollerContainner {
   overflow: hidden;
   position: relative;
+  height: 60px;
 }
 
 .categoryIconsContainner {
