@@ -381,8 +381,8 @@
 
 .searchHeaderMobile {
   padding: 16px 24px;
-  
+
   @media (--viewportMedium) {
-    display: none;
+    display: none !important;
   }
 }
