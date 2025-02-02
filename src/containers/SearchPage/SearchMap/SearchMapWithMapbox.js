@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import ReactDOM from 'react-dom';
-import { arrayOf, func, node, number, object, shape, string } from 'prop-types';
+import { arrayOf, func, node, number, object, shape, string, bool } from 'prop-types';
 import differenceBy from 'lodash/differenceBy';
 import isEqual from 'lodash/isEqual';
 import classNames from 'classnames';
@@ -250,6 +250,7 @@ class SearchMapWithMapbox extends Component {
     this.changeMapSize = props.changeMapSize;
     this.fullMap = props.fullMap;
     this.fullMapButton = null;
+    this.updateShowAction = props.updateShowAction;
 
     this.onMount = this.onMount.bind(this);
     this.onMoveend = this.onMoveend.bind(this);
@@ -270,9 +271,16 @@ class SearchMapWithMapbox extends Component {
         this.viewportBounds = null;
       }
     }
-
+    
     if (this.map) {
       const currentBounds = getMapBounds(this.map);
+
+        if (this.props.showAction === true) {
+          // Perform the action
+          this.onMoveend(null, true);
+          // After triggering the action, update the state in parent (which will reset showAction)
+          this.props.updateShowAction(false);
+        }
 
       // Do not call fitMapToBounds if bounds are the same.
       // Our bounds are viewport bounds, and fitBounds will try to add margins around those bounds
@@ -314,7 +322,7 @@ class SearchMapWithMapbox extends Component {
     this.setState({ mapContainer: element });
   }
 
-  onMoveend(e) {
+  onMoveend(e,refresh) {
     if (this.map) {
       // If reusableMapHiddenHandle is given and parent element has that class,
       // we don't listen moveend events.
@@ -337,7 +345,9 @@ class SearchMapWithMapbox extends Component {
         const viewportBoundsChanged =
           this.viewportBounds && !hasSameSDKBounds(this.viewportBounds, viewportBounds);
 
-        this.props.onMapMoveEnd(viewportBoundsChanged, { viewportBounds, viewportMapCenter });
+        const refreshChecks = refresh || viewportBoundsChanged;
+
+        this.props.onMapMoveEnd(refreshChecks, { viewportBounds, viewportMapCenter });
         this.viewportBounds = viewportBounds;
       }
     }
@@ -523,6 +533,7 @@ SearchMapWithMapbox.defaultProps = {
   infoCard: null,
   zoom: 6,
   reusableMapHiddenHandle: null,
+  showAction: false,
 };
 
 SearchMapWithMapbox.propTypes = {
@@ -539,6 +550,7 @@ SearchMapWithMapbox.propTypes = {
   zoom: number,
   reusableMapHiddenHandle: string,
   config: object.isRequired,
+  showAction: bool,
 };
 
 export default SearchMapWithMapbox;

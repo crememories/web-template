@@ -70,7 +70,8 @@ export class SearchPageComponent extends Component {
       isSecondaryFiltersOpen: false,
       isFilterModalOpen: false,
       fullMap : false,
-      isMapShow : false
+      isMapShow : false,
+      showAction : false,
     };
 
     this.onMapMoveEnd = debounce(this.onMapMoveEnd.bind(this), SEARCH_WITH_MAP_DEBOUNCE);
@@ -93,6 +94,7 @@ export class SearchPageComponent extends Component {
     this.mapSizeEnableFullWidth = this.mapSizeEnableFullWidth.bind(this);
     this.mapSizeDisableFullWidth = this.mapSizeDisableFullWidth.bind(this);
     this.handleShowMap = this.handleShowMap.bind(this);
+    this.updateShowAction = this.updateShowAction.bind(this);
   }
 
   // Callback to determine if new search is needed
@@ -289,8 +291,14 @@ export class SearchPageComponent extends Component {
       };
 
       history.push(createResourceLocatorString('SearchPage', routeConfiguration, {}, searchParams));
+    }else{
+      this.setState({ showAction: true });
     }
     
+  }
+
+  updateShowAction() {
+    this.setState({ showAction: false });
   }
 
   // Reset all filter query parameters
@@ -681,6 +689,8 @@ export class SearchPageComponent extends Component {
                     onManageDisableScrolling('SearchPage.map', false);
                   }}
                   messages={intl.messages}
+                  showAction={this.state.showAction}
+                  updateShowAction={this.updateShowAction}
                 />
               ) : null}
             </div>

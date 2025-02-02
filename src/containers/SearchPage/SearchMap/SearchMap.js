@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { arrayOf, func, number, string, shape, object } from 'prop-types';
+import { arrayOf, func, number, string, shape, object, bool } from 'prop-types';
 import { useHistory } from 'react-router-dom';
 import classNames from 'classnames';
 
@@ -149,6 +149,8 @@ export class SearchMapComponent extends Component {
       messages,
       changeMapSize,
       fullMap,
+      showAction,
+      updateShowAction,
     } = this.props;
     const classes = classNames(rootClassName || css.root, className);
 
@@ -199,6 +201,8 @@ export class SearchMapComponent extends Component {
           config={config}
           changeMapSize={changeMapSize}
           fullMap={fullMap}
+          showAction={showAction}
+          updateShowAction={updateShowAction}
         />
       </ReusableMapContainer>
     ) : (
@@ -219,7 +223,8 @@ SearchMapComponent.defaultProps = {
   listings: [],
   onCloseAsModal: null,
   zoom: 3,
-  center: [-100, 38]
+  center: [-100, 38],
+  showAction: false,
 };
 
 SearchMapComponent.propTypes = {
@@ -250,6 +255,8 @@ SearchMapComponent.propTypes = {
   history: shape({
     push: func.isRequired,
   }).isRequired,
+
+  showAction: bool,
 };
 
 const SearchMap = props => {

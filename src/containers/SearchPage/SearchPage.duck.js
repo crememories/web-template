@@ -244,12 +244,6 @@ export const loadData = (params, search, config) => {
     latlngBounds: ['bounds'],
   });
 
-  console.log('search');
-  console.log(search);
-  console.log(queryParams);
-  console.log(params);
-  console.log(config);
-
   const { page = 1, address, origin, pageSize, ...rest } = queryParams;
   const originMaybe = isOriginInUse(config) && origin ? { origin } : {};
 
