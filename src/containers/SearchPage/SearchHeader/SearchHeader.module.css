@@ -16,6 +16,10 @@
   justify-content: center;
 }
 
+.title{
+  margin-bottom: 0px;
+}
+
 .lContainer, .cContainer, .rContainer {
   display: flex;
   justify-content: center; /* Horizontally center content */
