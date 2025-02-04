@@ -21,6 +21,7 @@ const adminUserUpdate = require('./api-flex/admin-user-update');
 const adminGetListingOwner = require('./api-flex/admin-get-listing-owner');
 
 const createUserWithIdp = require('./api/auth/createUserWithIdp');
+const {actionTapfiliate, purchaseTapfiliate} = require('./api/tapafiliate');
 
 const { authenticateFacebook, authenticateFacebookCallback } = require('./api/auth/facebook');
 const { authenticateGoogle, authenticateGoogleCallback } = require('./api/auth/google');
@@ -62,6 +63,8 @@ router.post('/admin-users', adminUsers);
 router.post('/admin-user', adminUser);
 router.post('/admin-user-update', adminUserUpdate);
 router.post('/admin-get-listing-owner', adminGetListingOwner);
+router.post('/action-tapfiliate', actionTapfiliate);
+router.post('/purchase-tapfiliate', purchaseTapfiliate);
 
 // Create user with identity provider (e.g. Facebook or Google)
 // This endpoint is called to create a new user after user has confirmed

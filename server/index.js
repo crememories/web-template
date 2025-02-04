@@ -29,6 +29,9 @@ const enforceSsl = require('express-enforces-ssl');
 const path = require('path');
 const passport = require('passport');
 
+//configure domain in folder
+const { createProxyMiddleware } = require('http-proxy-middleware');
+
 const auth = require('./auth');
 const apiRouter = require('./apiRouter');
 const wellKnownRouter = require('./wellKnownRouter');
@@ -125,6 +128,13 @@ if (TRUST_PROXY === 'true') {
 app.use(compression());
 app.use('/static', express.static(path.join(buildPath, 'static')));
 app.use(cookieParser());
+
+const apiProxy = createProxyMiddleware({
+  target: 'https://info.thememorialmarket.com',
+  changeOrigin: true,
+});
+
+app.use('/info', apiProxy);
 
 // We don't serve favicon.ico from root. PNG images are used instead for icons through link elements.
 app.get('/favicon.ico', (req, res) => {

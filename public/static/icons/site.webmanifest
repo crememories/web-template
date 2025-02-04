@@ -1,6 +1,6 @@
 {
-    "name": "CreMemories",
-    "short_name": "CreMemories",
+    "name": "TheMemorialMarket",
+    "short_name": "TheMemorialMarket",
     "start_url": "/",
     "display": "standalone",
     "theme_color": "#ffffff",

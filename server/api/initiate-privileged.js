@@ -10,11 +10,6 @@ const {
 module.exports = (req, res) => {
   const { isSpeculative, orderData, bodyParams, queryParams, commission } = req.body;
 
-  console.log('comissionValue');
-  console.log(commission);
-  console.log('req.body');
-  console.log(req.body);
-
   const sdk = getSdk(req, res);
   let lineItems = null;
 
@@ -29,27 +24,30 @@ module.exports = (req, res) => {
         && listing.attributes.publicData
         && listing.attributes.publicData.variants);
 
-      console.log('listing');
-      console.log(listing);
-      console.log('bodyParams.params');
-      console.log(bodyParams.params);
-      console.log('bodyParams.params.stockReservationVariant');
-      console.log(bodyParams.params.stockReservationVariant);
-      console.log('listing.attributes.publicData');
-      console.log(listing.attributes.publicData);
-      console.log('listing.attributes.publicData.variants');
-      console.log(listing.attributes.publicData.variants);
-
       if(variantCheck){
-        const variantId = bodyParams.params.stockReservationVariant - 1;
+        const variantId = bodyParams.params.stockReservationVariant;
         const variantSelected = listing.attributes.publicData.variants[variantId];
         listing.attributes.price.amount = variantSelected.variantPrice;
       }
 
-      console.log('variantCheck');
-      console.log(variantCheck);
-      console.log('listing - after');
-      console.log(listing);
+      const addonCheck = (bodyParams.params 
+        && bodyParams.params.stockReservationAddon 
+        && listing.attributes.publicData
+        && listing.attributes.publicData.addons);
+
+      if(addonCheck){
+        const addonIds = bodyParams.params.stockReservationAddon;
+        const addonSelected = listing.attributes.publicData.addons;
+
+        addonIds.forEach((addonOption,addonId) => {
+          const addon = addonSelected[addonId].options[addonOption.option];
+          listing.attributes.price.amount += addon.price;
+
+          console.log('listing.attributes.price.amount');
+          console.log(listing.attributes.price.amount);
+        });
+
+      }
 
       const { providerCommission, customerCommission } =
         commissionAsset?.type === 'jsonAsset' ? commissionAsset.attributes.data : {};

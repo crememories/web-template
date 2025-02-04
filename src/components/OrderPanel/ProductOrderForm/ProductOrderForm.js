@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
+
 import { bool, func, number, string } from 'prop-types';
 import { Form as FinalForm, FormSpy } from 'react-final-form';
 
@@ -40,7 +41,8 @@ const handleFetchLineItems = ({
   fetchLineItemsInProgress,
   onFetchTransactionLineItems,
   variants,
-  variantId
+  variantId,
+  addonVariant
 }) => {
   // const stockReservationQuantity = Number.parseInt(quantity, 10);
   const deliveryMethodMaybe = deliveryMethod ? { deliveryMethod } : {};
@@ -51,6 +53,10 @@ const handleFetchLineItems = ({
 
   const stockReservationQuantity = quantityInt ? quantityInt : variantInt ? variantInt: 0;
 
+  // console.log('stockReservationQuantity');
+  // console.log(stockReservationQuantity);
+  
+
   if (
     isBrowser &&
     stockReservationQuantity &&
@@ -58,7 +64,7 @@ const handleFetchLineItems = ({
     !fetchLineItemsInProgress
   ) {
     onFetchTransactionLineItems({
-      orderData: { stockReservationQuantity, ...deliveryMethodMaybe, variantId },
+      orderData: { stockReservationQuantity, ...deliveryMethodMaybe, variantId, addonVariant},
       listingId,
       isOwnListing,
     });
@@ -123,6 +129,7 @@ const DeliveryMethodMaybe = props => {
 
 const renderForm = formRenderProps => {
   const [mounted, setMounted] = useState(false);
+
   const {
     // FormRenderProps from final-form
     handleSubmit,
@@ -147,6 +154,11 @@ const renderForm = formRenderProps => {
     marketplaceName,
     values,
     variants,
+    addons,
+    userPhoneMetaData,
+    listingType,
+    onClickContactUserPhone,
+    addonVariant,
   } = formRenderProps;
 
   // Note: don't add custom logic before useEffect
@@ -164,13 +176,14 @@ const renderForm = formRenderProps => {
         isOwnListing,
         fetchLineItemsInProgress,
         onFetchTransactionLineItems,
+        addonVariant
       });
     }
   }, []);
 
   // If form values change, update line-items for the order breakdown
   const handleOnChange = formValues => {
-    const { quantity, deliveryMethod, variant: variantId } = formValues.values;
+    const { quantity, deliveryMethod, variant: variantId, addonVariant } = formValues.values;
     if (mounted) {
       handleFetchLineItems({
         quantity,
@@ -180,29 +193,74 @@ const renderForm = formRenderProps => {
         fetchLineItemsInProgress,
         onFetchTransactionLineItems,
         variants,
-        variantId
+        variantId,
+        addonVariant
       });
     }
   };
 
   // In case quantity and deliveryMethod are missing focus on that select-input.
   // Otherwise continue with the default handleSubmit function.
-  const handleFormSubmit = e => {
-    const { quantity, deliveryMethod, variant } = values || {};
+  // const handleFormSubmit = e => {
+  //   const { quantity, deliveryMethod, variant } = values || {};
 
+  //   if ((!quantity || quantity < 1) && !variant) {
+  //     e.preventDefault();
+  //     // Blur event will show validator message
+  //     formApi.blur('quantity');
+  //     formApi.focus('quantity');
+  //   } else if (displayDeliveryMethod && !deliveryMethod) {
+  //     e.preventDefault();
+  //     // Blur event will show validator message
+  //     formApi.blur('deliveryMethod');
+  //     formApi.focus('deliveryMethod');
+  //   } else {
+  //     handleSubmit(e);
+  //   }
+  // };
+
+  const handleFormSubmit = e => {
+    const { quantity, deliveryMethod, variant, addonVariant } = values || {};
+    let valid = true;
+
+    // Check if quantity is required and greater than 0, and if variant is selected
     if ((!quantity || quantity < 1) && !variant) {
-      e.preventDefault();
-      // Blur event will show validator message
-      formApi.blur('quantity');
-      formApi.focus('quantity');
-    } else if (displayDeliveryMethod && !deliveryMethod) {
-      e.preventDefault();
-      // Blur event will show validator message
-      formApi.blur('deliveryMethod');
-      formApi.focus('deliveryMethod');
-    } else {
-      handleSubmit(e);
+      // e.preventDefault();  // Prevent form submission if validation fails
+      formApi.blur('quantity');  // Trigger blur to show validation error
+      formApi.focus('quantity'); // Focus the quantity field to highlight it
+      valid = false;
     }
+  
+    // Validate delivery method if it's required and not provided
+    if (displayDeliveryMethod && !deliveryMethod) {
+      // e.preventDefault();  // Prevent form submission if validation fails
+      formApi.blur('deliveryMethod');  // Trigger blur to show validation error
+      formApi.focus('deliveryMethod'); // Focus the delivery method field
+      valid = false;
+    }
+  
+    // Validate addon options and suboptions
+    if (addonVariant) {
+      Object.keys(addonVariant).forEach((addonKey) => {
+        const addon = addonVariant[addonKey];  // Each addon in addonVariant
+        const selectedOption = addon?.option;
+
+        // If no option is selected, show error
+        if (selectedOption === undefined) {
+          // e.preventDefault();  // Prevent form submission
+          formApi.blur(`addonVariant.${addonKey}.option`);  // Trigger blur to show validation error
+          formApi.focus(`addonVariant.${addonKey}.option`); // Focus the option field
+          valid = false;
+        }
+      });
+    }
+
+    if(valid !== true) {
+      e.preventDefault();  // Prevent form submission
+      return;
+    }
+    // If all validation passes, submit the form
+    handleSubmit(e);
   };
 
   const breakdownData = {};
@@ -233,6 +291,27 @@ const renderForm = formRenderProps => {
     return formatMoney(intl, variantPrice) +' '+ variant.variantLabel;
   }
 
+  const hasAddonVariants = (currentStock, addonVariants) => {
+    if (!addonVariants) return null;
+  
+    // Loop through the addonVariants to filter based on the condition (currentStock)
+    return Object.values(addonVariants).map(addon => {
+      // Filter options based on the currentStock
+      const options = addon.options.filter(option => {
+        // Add your custom condition based on currentStock or other criteria for each option
+        return currentStock && option.price > 0; // Example condition: option should have price and currentStock should be true
+      });
+  
+      // If there are valid options, return the addon with filtered options
+      if (options.length > 0) {
+        return { addonLabel: addon.addonLabel, options };
+      }
+  
+      // If no valid options, return null
+      return null;
+    }).filter(addon => addon !== null); // Remove addons with no valid options
+  };
+
   const contactSellerLink = (
     <InlineTextButton onClick={onClickContactUser}>
       <FormattedMessage id="ProductOrderForm.finePrintNoStockLinkText" />
@@ -249,6 +328,8 @@ const renderForm = formRenderProps => {
     currentStock > MAX_QUANTITY_FOR_DROPDOWN ? MAX_QUANTITY_FOR_DROPDOWN : currentStock;
   const quantities = hasStock ? [...Array(selectableStock).keys()].map(i => i + 1) : [];
   const variantsMap = hasStock ? hasVarinats(currentStock,variants) : null;
+
+  const addonVariants = hasStock ? hasAddonVariants(currentStock,addons) : null;
 
   const submitInProgress = fetchLineItemsInProgress;
   const submitDisabled = !hasStock;
@@ -278,6 +359,74 @@ const renderForm = formRenderProps => {
           ))}
         </FieldSelect>
       )}
+
+      <div>
+        {addonVariants &&
+          Object.keys(addonVariants).map((addonKey) => {
+            const addon = addonVariants[addonKey];
+            const { addonLabel, options } = addon;
+
+            // Get selected option and suboption for this addon from the state
+            // const selectedAddon = selectedAddons[addonKey] || {};
+            // const selectedOptionIndex = selectedAddon.option;
+            // const selectedSubOptionIndex = selectedAddon.subOption;
+            // let subOptionLabel = options[selectedOptionIndex]?.subOptionLabel || 'Select Suboption';
+
+            return (
+              <div key={addonKey}>
+                {/* First Dropdown - Addon Options */}
+                <FieldSelect
+                  id={`${formId}.addonVariant.${addonKey}.option`}
+                  className="quantityField"
+                  name={`addonVariant.${addonKey}.option`}
+                  disabled={!hasStock}
+                  label={addonLabel}
+                  // onChange={(e) => handleAddonOptionChange(addonKey, e)}
+                  validate={(value) => {
+                    if (value === undefined || value === "") {
+                      return intl.formatMessage({ id: 'ProductOrderForm.required' });
+                    }
+                    return undefined;  // No error if a valid option is selected
+                  }}
+                >
+                  <option value="">{intl.formatMessage({ id: 'ProductOrderForm.selectAddonVariantOption' }, { addonLabel })}</option>
+                  {options.map((option, optionIndex) => (
+                    <option key={optionIndex} value={optionIndex}>
+                      {option.optionLabel}
+                      {/* Display price only if there are no suboptions for this option */}
+                      {option?.options?.length === 0 && (
+                        ` - ${formatMoney(intl, new Money(option.price, price.currency))}`
+                      )}
+                    </option>
+                  ))}
+                </FieldSelect>
+
+                {/* {selectedOptionIndex !== undefined && options[selectedOptionIndex]?.options?.length > 0 && (
+                  <FieldSelect
+                    id={`${formId}.addonVariant.${addonKey}.subOption`}
+                    className="quantityField"
+                    name={`addonVariant.${addonKey}.subOption`}
+                    label={subOptionLabel}
+                    onChange={(e) => handleSubOptionChange(addonKey, selectedOptionIndex, e)}
+                    validate={(value) => {
+                      if (value === undefined || value === "") {
+                        return intl.formatMessage({ id: 'ProductOrderForm.required' });
+                      }
+                      return undefined;  // No error if a valid suboption is selected
+                    }}
+                  >
+                    <option value="">{intl.formatMessage({ id: 'ProductOrderForm.selectAddonSubOption' }, { subOptionLabel })}</option>
+                    {options[selectedOptionIndex].options.map((subOption, subOptionIndex) => (
+                      <option key={subOptionIndex} value={subOptionIndex}>
+                        {subOption.subOptionName} - {formatMoney(intl, new Money(subOption.price, price.currency))}
+                      </option>
+                    ))}
+                  </FieldSelect>
+                )} */}
+              </div>
+            );
+          })}
+      </div>
 
       {hasNoStockLeft ? null : hasOneItemLeft || !allowOrdersOfMultipleItems ? (
         <FieldTextInput
@@ -342,6 +491,17 @@ const renderForm = formRenderProps => {
         </PrimaryButton>
       </div>
 
+      {userPhoneMetaData && listingType == 'boatListing' ? ( 
+        <div className={css.contact}>
+          <SecondaryButton
+            onClick={onClickContactUserPhone}
+            enforcePagePreloadFor="SignupPage"
+          >
+            <FormattedMessage id="ProductOrderForm.actionContactPhone" />
+          </SecondaryButton>
+        </div>)
+      : null}
+
       <div className={css.contact}>
         <SecondaryButton
           onClick={onClickContactUser}
@@ -375,6 +535,7 @@ const ProductOrderForm = props => {
     shippingEnabled,
     displayDeliveryMethod,
     allowOrdersOfMultipleItems,
+    addons
   } = props;
 
   // Should not happen for listings that go through EditListingWizard.
@@ -399,7 +560,30 @@ const ProductOrderForm = props => {
       ? { deliveryMethod: 'none' }
       : {};
   const hasMultipleDeliveryMethods = pickupEnabled && shippingEnabled;
-  const initialValues = { ...quantityMaybe, ...deliveryMethodMaybe };
+
+  // Conditionally initialize addonVariant under the key 'addonVariant' if addons are present
+  const addonVariantMaybe = useMemo(() => {
+    if (addons) {
+      return {
+        addonVariant: Object.keys(addons).reduce((acc, addonKey) => {
+          acc[addonKey] = {
+            option: undefined,  // Default value for option
+          };
+          return acc;
+        }, []),
+      };
+    }
+    return {}; // If no addons, return an empty object
+  }, [addons]); // Recalculate only when 'addons' changes
+
+  // const initialValues = { ...quantityMaybe, ...deliveryMethodMaybe };
+
+  // Merge all initial values
+  const initialValues = { 
+    ...quantityMaybe, 
+    ...deliveryMethodMaybe, 
+    ...addonVariantMaybe 
+  };
 
   return (
     <FinalForm

@@ -5,9 +5,6 @@ const { constructValidLineItems } = require('../api-util/lineItemHelpers');
 module.exports = (req, res) => {
   const { isOwnListing, listingId, orderData } = req.body;
 
-  console.log('orderData');
-  console.log(orderData);
-
   const sdk = getSdk(req, res);
 
   const listingPromise = () =>

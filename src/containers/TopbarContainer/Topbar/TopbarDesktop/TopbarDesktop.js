@@ -7,6 +7,8 @@ import { ACCOUNT_SETTINGS_PAGES } from '../../../../routing/routeConfiguration';
 import { propTypes } from '../../../../util/types';
 import { AccessRole } from '../../../../util/roles';
 
+import { Link } from 'react-router-dom';
+
 import {
   Avatar,
   InlineTextButton,
@@ -163,6 +165,10 @@ const TopbarDesktop = props => {
       </NamedLink>
   );
 
+  const redirectToInfo = () => {
+    window.location.href = '/info';
+  }
+
   return (
     <nav className={classes}>
       <LinkedLogo
@@ -171,6 +177,11 @@ const TopbarDesktop = props => {
         alt={intl.formatMessage({ id: 'TopbarDesktop.logo' }, { marketplaceName })}
       />
       {search}
+      <div className={css.createListingLink} onClick={redirectToInfo}>
+        <span className={css.createListing}>
+          <FormattedMessage id="TopbarDesktop.articles" />
+        </span>
+      </div>
       {manageCommission}
       <NamedLink className={css.createListingLink} name="NewListingPage">
         <span className={css.createListing}>

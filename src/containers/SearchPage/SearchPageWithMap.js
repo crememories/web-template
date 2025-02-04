@@ -25,6 +25,7 @@ import { manageDisableScrolling, isScrollingDisabled } from '../../ducks/ui.duck
 
 import { H3, H5, ModalInMobile, Page, Modal, FooterSearch } from '../../components';
 import TopbarContainer from '../../containers/TopbarContainer/TopbarContainer';
+import FooterContainer from '../FooterContainer/FooterContainer';
 
 import { setActiveListing } from './SearchPage.duck';
 import {
@@ -40,6 +41,8 @@ import {
 import FilterComponent from './FilterComponent';
 import SearchMap from './SearchMap/SearchMap';
 import MainPanelHeader from './MainPanelHeader/MainPanelHeader';
+import SearchHeader from './SearchHeader/SearchHeader';
+import SearchHeaderMobile from './SearchHeader/SearchHeaderMobile';
 import SearchFiltersSecondary from './SearchFiltersSecondary/SearchFiltersSecondary';
 // import SearchFiltersPrimary from './SearchFiltersPrimary/SearchFiltersPrimary';
 import SearchFiltersMobile from './SearchFiltersMobile/SearchFiltersMobile';
@@ -67,7 +70,8 @@ export class SearchPageComponent extends Component {
       isSecondaryFiltersOpen: false,
       isFilterModalOpen: false,
       fullMap : false,
-      isMapShow : false
+      isMapShow : false,
+      showAction : false,
     };
 
     this.onMapMoveEnd = debounce(this.onMapMoveEnd.bind(this), SEARCH_WITH_MAP_DEBOUNCE);
@@ -90,6 +94,7 @@ export class SearchPageComponent extends Component {
     this.mapSizeEnableFullWidth = this.mapSizeEnableFullWidth.bind(this);
     this.mapSizeDisableFullWidth = this.mapSizeDisableFullWidth.bind(this);
     this.handleShowMap = this.handleShowMap.bind(this);
+    this.updateShowAction = this.updateShowAction.bind(this);
   }
 
   // Callback to determine if new search is needed
@@ -286,8 +291,14 @@ export class SearchPageComponent extends Component {
       };
 
       history.push(createResourceLocatorString('SearchPage', routeConfiguration, {}, searchParams));
+    }else{
+      this.setState({ showAction: true });
     }
     
+  }
+
+  updateShowAction() {
+    this.setState({ showAction: false });
   }
 
   // Reset all filter query parameters
@@ -437,6 +448,7 @@ export class SearchPageComponent extends Component {
     );
 
     const { bounds, origin } = searchParamsInURL || {};
+    // console.log(searchParamsInURL);
     const { title, description, schema } = createSearchResultSchema(
       listings,
       searchParamsInURL || {},
@@ -468,8 +480,6 @@ export class SearchPageComponent extends Component {
     const searchResultContainer = this.state.isMapShow ? css.searchResultContainer : css.searchResultContainerWithoutMap;
     const mapPanel = this.state.isMapShow ? css.mapPanel : css.mapPanelHidden;
 
-    console.log(searchResultContainer);
-
     // N.B. openMobileMap button is sticky.
     // For some reason, stickyness doesn't work on Safari, if the element is <button>
     return (
@@ -487,6 +497,7 @@ export class SearchPageComponent extends Component {
           searchModalOpen={this.handleOpenFilterModal}
           handleShowMap={this.handleShowMap}
           isMapShow={this.state.isMapShow}
+          routeConfiguration={routeConfiguration}
         />
         <div className={css.container}>
         <Modal 
@@ -522,6 +533,24 @@ export class SearchPageComponent extends Component {
             </div>
           </Modal>
           <div className={searchResultContainer}>
+            <SearchHeaderMobile
+              className={css.searchHeaderMobile}
+              urlQueryParams={urlQueryParams}
+              categories={enumOptions}
+              // history={history}
+              routeConfiguration={routeConfiguration}
+            >
+            </SearchHeaderMobile>
+
+            <SearchHeader
+              className={css.searchHeader}
+              urlQueryParams={urlQueryParams}
+              categories={enumOptions}
+              // history={history}
+              routeConfiguration={routeConfiguration}
+            >
+            </SearchHeader>
+             
             <SearchFiltersMobile
               className={css.searchFiltersMobileMap}
               urlQueryParams={validQueryParams}
@@ -575,6 +604,8 @@ export class SearchPageComponent extends Component {
               getHandleChangedValueFn={this.getHandleChangedValueFn}
               intl={intl}
               contentPlacementOffset={FILTER_DROPDOWN_OFFSET}
+              handleShowMap={this.handleShowMap}
+              isMapShow={this.state.isMapShow}
             >
             </MainPanelHeader>
             {isSecondaryFiltersOpen ? (
@@ -647,7 +678,7 @@ export class SearchPageComponent extends Component {
                   reusableContainerClassName={mapSizeClass}
                   activeListingId={activeListingId}
                   bounds={bounds}
-                  center={origin}
+                  // center={origin}
                   isSearchMapOpenOnMobile={this.state.isSearchMapOpenOnMobile}
                   location={location}
                   listings={listings || []}
@@ -658,6 +689,8 @@ export class SearchPageComponent extends Component {
                     onManageDisableScrolling('SearchPage.map', false);
                   }}
                   messages={intl.messages}
+                  showAction={this.state.showAction}
+                  updateShowAction={this.updateShowAction}
                 />
               ) : null}
             </div>
@@ -670,6 +703,7 @@ export class SearchPageComponent extends Component {
           handleShowMap={this.handleShowMap}
           showMapMobile={() => this.setState({ isSearchMapOpenOnMobile: true })}
         />
+        <FooterContainer />
       </Page>
     );
   }

@@ -169,3 +169,14 @@ export const updateUsersAdmin = body => {
 export const getListingOwnerAdmin = body => {
   return post('/api/admin-get-listing-owner', body);
 };
+
+// admin without description yet
+//
+export const actionTapfiliate = body => {
+  return post('/api/action-tapfiliate', body);
+};
+// admin without description yet
+//
+export const purchaseTapfiliate = body => {
+  return post('/api/purchase-tapfiliate', body);
+};

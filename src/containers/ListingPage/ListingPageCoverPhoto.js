@@ -8,6 +8,8 @@ import { useConfiguration } from '../../context/configurationContext';
 import { useRouteConfiguration } from '../../context/routeConfigurationContext';
 
 import { FormattedMessage, intlShape, useIntl } from '../../util/reactIntl';
+import { YoutubeEmbed } from '../PageBuilder/Primitives/YoutubeEmbed';
+
 import {
   LISTING_STATE_PENDING_APPROVAL,
   LISTING_STATE_CLOSED,
@@ -42,6 +44,7 @@ import { manageDisableScrolling, isScrollingDisabled } from '../../ducks/ui.duck
 import { initializeCardPaymentData } from '../../ducks/stripe.duck.js';
 
 import {
+  H1,
   H4,
   Page,
   NamedLink,
@@ -71,12 +74,15 @@ import {
   handleSubmit,
 } from './ListingPage.shared';
 import SectionHero from './SectionHero';
+import SectionHeroBlocks from './SectionHeroBlocks';
 import SectionTextMaybe from './SectionTextMaybe';
 import SectionDetailsMaybe from './SectionDetailsMaybe';
 import SectionMultiEnumMaybe from './SectionMultiEnumMaybe';
 import SectionReviews from './SectionReviews';
 import SectionAuthorMaybe from './SectionAuthorMaybe';
 import SectionMapMaybe from './SectionMapMaybe';
+import SectionGallery from './SectionGallery';
+import SectionShareListing from './SectionShareListing';
 
 import css from './ListingPage.module.css';
 
@@ -89,6 +95,8 @@ export const ListingPageComponent = props => {
     props.inquiryModalOpenForListingId === props.params.id
   );
   const [imageCarouselOpen, setImageCarouselOpen] = useState(false);
+  const [shareListingOpen, setShareListingOpen] = useState(false);
+  const [shareListingCopied, setShareListingCopied] = useState(false);
 
   const {
     isAuthenticated,
@@ -281,12 +289,21 @@ export const ListingPageComponent = props => {
 
   const createFilterOptions = options => options.map(o => ({ key: `${o.option}`, label: o.label }));
 
+  const listingVideo = currentListing.attributes?.publicData?.listing_video || false;
+
   const handleViewPhotosClick = e => {
     // Stop event from bubbling up to prevent image click handler
     // trying to open the carousel as well.
     e.stopPropagation();
     setImageCarouselOpen(true);
   };
+
+  const handleShareListingClick = () => {
+    setShareListingOpen(true);
+  }
+  const handleShareListingCopied = (e) => {
+    setShareListingCopied(e);
+  }
 
   return (
     <Page
@@ -311,7 +328,7 @@ export const ListingPageComponent = props => {
       }}
     >
       <LayoutSingleColumn className={css.pageRoot} topbar={topbar} footer={<FooterContainer />}>
-        <SectionHero
+        {/* <SectionHero
           title={title}
           listing={currentListing}
           isOwnListing={isOwnListing}
@@ -326,9 +343,45 @@ export const ListingPageComponent = props => {
           handleViewPhotosClick={handleViewPhotosClick}
           onManageDisableScrolling={onManageDisableScrolling}
           noPayoutDetailsSetWithOwnListing={noPayoutDetailsSetWithOwnListing}
+        /> */}
+        <SectionHeroBlocks
+          title={title}
+          listing={currentListing}
+          isOwnListing={isOwnListing}
+          editParams={{
+            id: listingId.uuid,
+            slug: listingSlug,
+            type: listingPathParamType,
+            tab: listingTab,
+          }}
+          titleDesktop={
+            <H4 as="h1" className={css.orderPanelTitle}>
+              <FormattedMessage id="ListingPage.orderTitle" values={{ title: richTitle }} />
+            </H4>
+          }
+          imageCarouselOpen={imageCarouselOpen}
+          onImageCarouselClose={() => setImageCarouselOpen(false)}
+          handleViewPhotosClick={handleViewPhotosClick}
+          shareListingOpen={shareListingOpen}
+          handleShareListingClick={handleShareListingClick}
+          onShareListingClose={() => setShareListingOpen(false)}
+          onManageDisableScrolling={onManageDisableScrolling}
+          noPayoutDetailsSetWithOwnListing={noPayoutDetailsSetWithOwnListing}
         />
+        <div className={css.sectionGallery}>
+          <SectionGallery 
+            listing={currentListing}
+            variantPrefix={config.layout.listingImage.variantPrefix}
+            showThumbnails={false}
+          />
+        </div>
         <div className={css.contentWrapperForHeroLayout}>
           <div className={css.mainColumnForHeroLayout}>
+            <div className={css.videoContainer}>
+             {listingVideo ? (
+                <YoutubeEmbed youtubeVideoId={listingVideo} />
+              ) : null}
+            </div>
             <div className={css.mobileHeading}>
               <H4 as="h1" className={css.orderPanelTitle}>
                 <FormattedMessage id="ListingPage.orderTitle" values={{ title: richTitle }} />
@@ -428,6 +481,18 @@ export const ListingPageComponent = props => {
             />
           </div>
         </div>
+        <SectionShareListing
+          intl={intl}
+          listing={currentListing}
+          shareListingOpen={shareListingOpen}
+          handleShareListingClick={handleShareListingClick}
+          onshareListingClose={() => setShareListingOpen(false)}
+          handleShareListingCopied={handleShareListingCopied}
+          shareListingCopied={shareListingCopied}
+          onManageDisableScrolling={onManageDisableScrolling}
+          richTitle={richTitle}
+          productURL={productURL}
+        />
       </LayoutSingleColumn>
     </Page>
   );

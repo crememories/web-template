@@ -115,6 +115,7 @@
   /* ================ Border radius ================ */
 
   --borderRadius: 2px;
+  --borderRadiusSub: 8px;
   --borderRadiusMedium: 4px;
   --borderRadiusHight: 12px;
 
@@ -128,7 +129,8 @@
   --topbarHeight: 60px;
   --topbarHeightDesktop: 72px;
   --topbarHeightCategiries: 68px;
-  --topbarHeightDesktopSearch: 140px;
+  /* --topbarHeightDesktopSearch: 140px; */
+  --topbarHeightDesktopSearch: 72px;
 
   --TopbarMobileMenu_topMargin: 96px;
 

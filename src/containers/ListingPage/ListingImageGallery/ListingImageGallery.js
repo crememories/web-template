@@ -52,7 +52,7 @@ const getFirstImageAspectRatio = (firstImage, scaledVariant) => {
 
 const ListingImageGallery = props => {
   const [isFullscreen, setIsFullscreen] = useState(false);
-  const { intl, rootClassName, className, images, imageVariants, thumbnailVariants } = props;
+  const { intl, rootClassName, className, images, imageVariants, thumbnailVariants, showThumbnails } = props;
   const thumbVariants = thumbnailVariants || imageVariants;
   // imageVariants are scaled variants.
   const { aspectWidth, aspectHeight } = getFirstImageAspectRatio(images?.[0], imageVariants[0]);
@@ -169,6 +169,7 @@ const ListingImageGallery = props => {
       renderLeftNav={renderLeftNav}
       renderRightNav={renderRightNav}
       renderFullscreenButton={renderFullscreenButton}
+      showThumbnails={showThumbnails}
       {...IMAGE_GALLERY_OPTIONS}
     />
   );
@@ -178,9 +179,10 @@ ListingImageGallery.defaultProps = {
   rootClassName: null,
   className: null,
   thumbnailVariants: null,
+  showThumbnails: true
 };
 
-const { string, arrayOf } = PropTypes;
+const { string, arrayOf, bool } = PropTypes;
 
 ListingImageGallery.propTypes = {
   rootClassName: string,
@@ -191,6 +193,8 @@ ListingImageGallery.propTypes = {
 
   // from injectIntl
   intl: intlShape.isRequired,
+
+  showThumbnails: bool
 };
 
 export default injectIntl(ListingImageGallery);

@@ -42,8 +42,20 @@ export { default as IconCategoryPlane } from './IconCategoryPlane/IconCategoryPl
 export { default as IconCategoryJewerly } from './IconCategoryJewerly/IconCategoryJewerly';
 export { default as IconCategoryUrn } from './IconCategoryUrn/IconCategoryUrn';
 export { default as IconCategoryArt } from './IconCategoryArt/IconCategoryArt';
+export { default as IconCategoryTrees } from './IconCategoryTrees/IconCategoryTrees';
+export { default as IconCategoryBalloons } from './IconCategoryBalloons/IconCategoryBalloons';
 export { default as IconMap } from './IconMap/IconMap';
 export { default as IconList } from './IconList/IconList';
+export { default as IconButtonDots } from './IconButtonDots/IconButtonDots';
+export { default as IconCopy } from './IconCopy/IconCopy';
+export { default as IconEmail } from './IconEmail/IconEmail';
+export { default as IconMessages } from './IconMessages/IconMessages';
+export { default as IconWhatsApp } from './IconWhatsApp/IconWhatsApp';
+export { default as IconMessenger } from './IconMessenger/IconMessenger';
+export { default as IconFacebook } from './IconFacebook/IconFacebook';
+export { default as IconTwitter } from './IconTwitter/IconTwitter';
+export { default as IconMoreOptions } from './IconMoreOptions/IconMoreOptions';
+export { default as IconShareListing } from './IconShareListing/IconShareListing';
 
 // Typography
 export { Heading, H1, H2, H3, H4, H5, H6  } from './Heading/Heading';

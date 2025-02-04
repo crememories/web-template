@@ -1,3 +1,8 @@
+import { actionTapfiliate } from '../util/api';
+import * as log from '../util/log';
+import Cookies from 'universal-cookie';
+
+
 export class LoggingAnalyticsHandler {
   trackPageView(url) {
     console.log('Analytics page view:', url);
@@ -22,5 +27,32 @@ export class GoogleAnalyticsHandler {
         });
       }, 300);
     }
+  }
+}
+
+// tapafilliate Analytics 4 (GA4) using gtag.js script, which is included in util/includeScripts.js
+export class TapfiliateAnalyticsHandler {
+  trackPageView(url) {
+
+    const getRefParam = () => {
+      const params = new URLSearchParams(window.location.search);
+      return params.get('ref');
+    };
+
+    const params = getRefParam();
+    if(params){
+      actionTapfiliate(params)
+      .then(res => {
+        const cookies = new Cookies();
+        if(res.data){
+          cookies.set('tapfiliateId', res.data, { path: '/' });
+        }
+        return res;
+      })
+      .catch(e => {
+        log.error(e, 'tapafiliate-failed', { params });
+      });
+    }
+    
   }
 }

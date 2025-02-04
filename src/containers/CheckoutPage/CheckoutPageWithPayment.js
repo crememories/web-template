@@ -75,12 +75,25 @@ const getOrderParams = (pageData, shippingDetails, optionalPaymentParams, config
   const variant = pageData.orderData?.variant;
   const variantMaybe = variant ? { variant } : {};
 
+  const addonVariant = pageData.orderData?.addonVariant;  
+  const addonVariantMaybe = addonVariant ? { addonVariant } : {};
+  
+
   const { listingType, unitType } = pageData?.listing?.attributes?.publicData || {};
+  const testAdittionalData = 'ssssssssssssssssssssss';
   const protectedDataMaybe = {
     protectedData: {
       ...getTransactionTypeData(listingType, unitType, config),
       ...deliveryMethodMaybe,
       ...shippingDetails,
+      testAdittionalData
+    },
+  };
+
+  const metadataMaybe = {
+    metaData: {
+      gsfas: 'gewgdfas',
+      listingType,
     },
   };
 
@@ -91,9 +104,11 @@ const getOrderParams = (pageData, shippingDetails, optionalPaymentParams, config
     ...deliveryMethodMaybe,
     ...quantityMaybe,
     ...variantMaybe,
+    ...addonVariantMaybe,
     ...bookingDatesMaybe(pageData.orderData?.bookingDates),
     ...protectedDataMaybe,
     ...optionalPaymentParams,
+    ...metadataMaybe
   };
   return orderParams;
 };

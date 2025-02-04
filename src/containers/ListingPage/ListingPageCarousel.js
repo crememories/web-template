@@ -7,6 +7,7 @@ import { useHistory, useLocation } from 'react-router-dom';
 import { useConfiguration } from '../../context/configurationContext';
 import { useRouteConfiguration } from '../../context/routeConfigurationContext';
 import { FormattedMessage, intlShape, useIntl } from '../../util/reactIntl';
+import { YoutubeEmbed } from '../PageBuilder/Primitives/YoutubeEmbed';
 import {
   LISTING_STATE_PENDING_APPROVAL,
   LISTING_STATE_CLOSED,
@@ -278,6 +279,8 @@ export const ListingPageComponent = props => {
   const schemaAvailability =
     currentStock > 0 ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock';
 
+  const listingVideo = currentListing.attributes?.publicData?.listing_video || false;
+
   const createFilterOptions = options => options.map(o => ({ key: `${o.option}`, label: o.label }));
 
   return (
@@ -329,7 +332,13 @@ export const ListingPageComponent = props => {
             <SectionGallery
               listing={currentListing}
               variantPrefix={config.layout.listingImage.variantPrefix}
+              showThumbnails={true}
             />
+            <div className={css.videoContainer}>
+             {listingVideo ? (
+                <YoutubeEmbed youtubeVideoId={listingVideo} />
+              ) : null}
+            </div>
             <div className={css.mobileHeading}>
               <H4 as="h1" className={css.orderPanelTitle}>
                 <FormattedMessage id="ListingPage.orderTitle" values={{ title: richTitle }} />

@@ -186,7 +186,7 @@ const OrderPanel = props => {
   } = props;
 
   const publicData = listing?.attributes?.publicData || {};
-  const { listingType, unitType, transactionProcessAlias = '' } = publicData || {};
+  const { listingType, unitType, transactionProcessAlias = '', priceDescription } = publicData || {};
   const processName = resolveLatestProcessName(transactionProcessAlias.split('/')[0]);
   const lineItemUnitType = lineItemUnitTypeMaybe || `line-item/${unitType}`;
 
@@ -257,6 +257,13 @@ const OrderPanel = props => {
   const classes = classNames(rootClassName || css.root, className);
   const titleClasses = classNames(titleClassName || css.orderTitle);
 
+  const userPhoneMetaData = listing.author?.attributes?.profile?.metadata?.phoneNumber;
+
+  const onClickContactUserPhone = e => {
+    e.preventDefault();
+    window.location.href = 'tel:' + userPhoneMetaData;
+  };
+
   const onClickContactUser = e => {
     e.preventDefault();
     onContactUser();
@@ -277,10 +284,10 @@ const OrderPanel = props => {
           <H1 className={css.heading}>{title}</H1>
         </div>
 
-        <div className={css.orderHeading}>
+        {/* <div className={css.orderHeading}>
           {titleDesktop ? titleDesktop : <H2 className={titleClasses}>{title}</H2>}
           {subTitleText ? <div className={css.orderHelp}>{subTitleText}</div> : null}
-        </div>
+        </div> */}
 
         <PriceMaybe
           price={price}
@@ -289,6 +296,9 @@ const OrderPanel = props => {
           intl={intl}
           marketplaceCurrency={marketplaceCurrency}
         />
+        <div className={css.priceDescription}>
+          {priceDescription}
+        </div>
 
         <div className={css.author}>
           <AvatarSmall user={author} className={css.providerAvatar} />
@@ -361,6 +371,7 @@ const OrderPanel = props => {
             displayDeliveryMethod={displayPickup || displayShipping}
             listingId={listing.id}
             variants={listing.attributes.publicData.variants}
+            addons={listing.attributes.publicData.addons}
             isOwnListing={isOwnListing}
             marketplaceName={marketplaceName}
             onFetchTransactionLineItems={onFetchTransactionLineItems}
@@ -369,6 +380,9 @@ const OrderPanel = props => {
             fetchLineItemsInProgress={fetchLineItemsInProgress}
             fetchLineItemsError={fetchLineItemsError}
             payoutDetailsWarning={payoutDetailsWarning}
+            userPhoneMetaData={userPhoneMetaData}
+            listingType={listingType}
+            onClickContactUserPhone={onClickContactUserPhone}
           />
         ) : showInquiryForm ? (
           <InquiryWithoutPaymentForm formId="OrderPanelInquiryForm" onSubmit={onSubmit} />
@@ -379,15 +393,37 @@ const OrderPanel = props => {
         ) : null}
       </ModalInMobile>
       <div className={css.openOrderForm}>
+        <PriceMaybe
+          price={price}
+          publicData={publicData}
+          validListingTypes={validListingTypes}
+          intl={intl}
+          marketplaceCurrency={marketplaceCurrency}
+          showCurrencyMismatch
+        />
+        <div className={css.priceDescription}>
+          {priceDescription}
+        </div>
         <div className={css.orderContainer}>
-          <PriceMaybe
-            price={price}
-            publicData={publicData}
-            validListingTypes={validListingTypes}
-            intl={intl}
-            marketplaceCurrency={marketplaceCurrency}
-            showCurrencyMismatch
-          />
+          <div className={css.contact}>
+            <SecondaryButton
+              onClick={onClickContactUser}
+              enforcePagePreloadFor="SignupPage"
+            >
+              <FormattedMessage id="ProductOrderForm.askAQusetion" />
+            </SecondaryButton>
+          </div>
+
+          {userPhoneMetaData && listingType == 'boatListing' ? ( 
+            <div className={css.contact}>
+              <SecondaryButton
+                onClick={onClickContactUserPhone}
+                enforcePagePreloadFor="SignupPage"
+              >
+                <FormattedMessage id="ProductOrderForm.actionContactPhone" />
+              </SecondaryButton>
+            </div>)
+          : null}
 
           {isClosed ? (
             <div className={css.closedListingButton}>
@@ -416,15 +452,7 @@ const OrderPanel = props => {
               )}
             </PrimaryButton>
           )}
-        </div>
-
-        <div className={css.contact}>
-          <SecondaryButton
-            onClick={onClickContactUser}
-            enforcePagePreloadFor="SignupPage"
-          >
-            <FormattedMessage id="ProductOrderForm.askAQusetion" />
-          </SecondaryButton>
+        
         </div>
       </div>
     </div>

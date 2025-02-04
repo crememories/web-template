@@ -4,6 +4,7 @@ import { denormalisedResponseEntities } from '../../util/data';
 import { storableError } from '../../util/errors';
 import * as log from '../../util/log';
 import { fetchCurrentUserHasOrdersSuccess, fetchCurrentUser } from '../../ducks/user.duck';
+import Cookies from 'universal-cookie';
 
 // ================ Action types ================ //
 
@@ -208,15 +209,21 @@ export const initiateOrder = (
 ) => (dispatch, getState, sdk) => {
   dispatch(initiateOrderRequest());
 
+  const cookies = new Cookies();
+
   // If we already have a transaction ID, we should transition, not
   // initiate.
   const isTransition = !!transactionId;
 
-  const { deliveryMethod, quantity, variant, bookingDates, ...otherOrderParams } = orderParams;
+  const { deliveryMethod, quantity, variant, bookingDates, addonVariant, ...otherOrderParams } = orderParams;
   console.log('initiateOrder');
   console.log(orderParams);
+
+  //set cookie for tapfiliate transaction conversion
+  cookies.set('tapfiliateOrder', orderParams?.listingId?.uuid, { path: '/' });
   const quantityMaybe = quantity ? { stockReservationQuantity: quantity } : {};
   const variantMaybe = quantity ? { stockReservationVariant: variant } : {};
+  const addonMaybe = quantity ? { stockReservationAddon: addonVariant } : {};
   const bookingParamsMaybe = bookingDates || {};
 
   // Parameters only for client app's server
@@ -227,6 +234,7 @@ export const initiateOrder = (
     ...quantityMaybe,
     ...bookingParamsMaybe,
     ...variantMaybe,
+    ...addonMaybe,
     ...otherOrderParams,
   };
 

@@ -30,7 +30,7 @@ import './styles/marketplaceDefaults.css';
 // Configs and store setup
 import appSettings from './config/settings';
 import defaultConfig from './config/configDefault';
-import { LoggingAnalyticsHandler, GoogleAnalyticsHandler } from './analytics/handlers';
+import { LoggingAnalyticsHandler, GoogleAnalyticsHandler, TapfiliateAnalyticsHandler } from './analytics/handlers';
 import configureStore from './store';
 
 // Utils
@@ -115,6 +115,8 @@ const setupAnalyticsHandlers = googleAnalyticsId => {
       handlers.push(new GoogleAnalyticsHandler());
     }
   }
+
+  handlers.push(new TapfiliateAnalyticsHandler());
 
   return handlers;
 };

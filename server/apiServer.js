@@ -9,6 +9,11 @@ const compression = require('compression');
 const cookieParser = require('cookie-parser');
 const bodyParser = require('body-parser');
 const cors = require('cors');
+
+//configure domain in folder
+const { createProxyMiddleware } = require('http-proxy-middleware');
+
+
 const apiRouter = require('./apiRouter');
 const wellKnownRouter = require('./wellKnownRouter');
 const webmanifestResourceRoute = require('./resources/webmanifest');
@@ -18,6 +23,8 @@ const sitemapResourceRoute = require('./resources/sitemap');
 const radix = 10;
 const PORT = parseInt(process.env.REACT_APP_DEV_API_SERVER_PORT, radix);
 const app = express();
+
+console.log('test string api');
 
 // NOTE: CORS is only needed in this dev API server because it's
 // running in a different port than the main app.
@@ -30,6 +37,13 @@ app.use(
 app.use(cookieParser());
 app.use('/.well-known', wellKnownRouter);
 app.use('/api', apiRouter);
+
+const apiProxy = createProxyMiddleware({
+  target: 'https://info.thememorialmarket.com',
+  changeOrigin: true,
+});
+
+app.use('/info', apiProxy);
 
 // Generate web app manifest
 // When developing with "yarn run dev",

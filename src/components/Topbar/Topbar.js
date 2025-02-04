@@ -336,7 +336,7 @@ class TopbarComponent extends Component {
             appConfig={config}
           />
         </div>
-        {topbarCategoriesContent}
+        {/* {topbarCategoriesContent} */}
         <Modal
           id="TopbarMobileMenu"
           isOpen={isMobileMenuOpen}
