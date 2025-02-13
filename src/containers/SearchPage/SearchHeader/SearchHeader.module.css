@@ -38,6 +38,9 @@
   text-align: center;
   flex-direction: column;
   max-width: 50%;
+  .searchContainer{
+    padding-bottom: 16px;
+  }
 }
 
 .rContainer {
