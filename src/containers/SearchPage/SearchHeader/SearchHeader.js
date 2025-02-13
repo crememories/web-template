@@ -57,9 +57,9 @@ const SearchHeader = props => {
             <h2 className={css.title}><FormattedMessage id="SearchHeader.title" /></h2>
           </div>
           <div className={css.searchContainer}>
-            <p>
+            <div>
               <FormattedMessage id="SearchHeader.subTitle" />
-            </p>
+            </div>
           </div>
           <CategoryScroller categories={categories} categoryAction={categoryAction} urlQueryParams={urlQueryParams} />
         </div>
