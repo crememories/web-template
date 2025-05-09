@@ -51,6 +51,7 @@ import SearchResultsPanel from './SearchResultsPanel/SearchResultsPanel';
 import NoSearchResultsMaybe from './NoSearchResultsMaybe/NoSearchResultsMaybe';
 
 import css from './SearchPage.module.css';
+import SectionCarousel from '../PageBuilder/SectionBuilder/SectionCarousel';
 
 const MODAL_BREAKPOINT = 768; // Search is in modal on mobile layout
 const SEARCH_WITH_MAP_DEBOUNCE = 300; // Little bit of debounce before search is initiated.
@@ -69,9 +70,9 @@ export class SearchPageComponent extends Component {
       currentQueryParams: validUrlQueryParamsFromProps(props),
       isSecondaryFiltersOpen: false,
       isFilterModalOpen: false,
-      fullMap : false,
-      isMapShow : false,
-      showAction : false,
+      fullMap: false,
+      isMapShow: false,
+      showAction: false,
     };
 
     this.onMapMoveEnd = debounce(this.onMapMoveEnd.bind(this), SEARCH_WITH_MAP_DEBOUNCE);
@@ -152,11 +153,11 @@ export class SearchPageComponent extends Component {
     this.setState({ isMobileModalOpen: false });
   }
 
-  handleOpenFilterModal () {
+  handleOpenFilterModal() {
     this.setState({ isFilterModalOpen: true });
   }
-  
-  handleCloseFilterModal () {
+
+  handleCloseFilterModal() {
     this.setState({ isFilterModalOpen: false });
   }
 
@@ -172,7 +173,7 @@ export class SearchPageComponent extends Component {
       searchParams,
       listingFieldsConfig,
       defaultFiltersConfig,
-      sortConfig
+      sortConfig,
     );
 
     history.push(createResourceLocatorString('SearchPage', routeConfiguration, {}, search));
@@ -235,7 +236,7 @@ export class SearchPageComponent extends Component {
             searchParams,
             listingFieldsConfig,
             defaultFiltersConfig,
-            sortConfig
+            sortConfig,
           );
           history.push(createResourceLocatorString('SearchPage', routeConfiguration, {}, search));
         }
@@ -256,18 +257,19 @@ export class SearchPageComponent extends Component {
     history.push(createResourceLocatorString('SearchPage', routeConfiguration, {}, queryParams));
   }
 
-  changeMapSize  () {
-    if(this.state.fullMap == true ){
+  changeMapSize() {
+    if (this.state.fullMap == true) {
       this.mapSizeDisableFullWidth();
-    }else{
+    } else {
       this.mapSizeEnableFullWidth();
     }
   }
 
-  mapSizeEnableFullWidth () {
+  mapSizeEnableFullWidth() {
     this.setState({ fullMap: true });
   }
-  mapSizeDisableFullWidth () {
+
+  mapSizeDisableFullWidth() {
     this.setState({ fullMap: false });
   }
 
@@ -276,7 +278,7 @@ export class SearchPageComponent extends Component {
 
     this.setState({ isMapShow: checked });
 
-    if(!checked){
+    if (!checked) {
       const { listingFields: listingFieldsConfig } = config?.listing || {};
       const { defaultFilters: defaultFiltersConfig } = config?.search || {};
 
@@ -291,10 +293,10 @@ export class SearchPageComponent extends Component {
       };
 
       history.push(createResourceLocatorString('SearchPage', routeConfiguration, {}, searchParams));
-    }else{
+    } else {
       this.setState({ showAction: true });
     }
-    
+
   }
 
   updateShowAction() {
@@ -343,14 +345,14 @@ export class SearchPageComponent extends Component {
       listingFieldsConfig,
       defaultFiltersConfig,
       sortConfig,
-      isOriginInUse(config)
+      isOriginInUse(config),
     );
 
     const validQueryParams = validFilterParams(
       searchParamsInURL,
       listingFieldsConfig,
       defaultFiltersConfig,
-      false
+      false,
     );
 
     const isWindowDefined = typeof window !== 'undefined';
@@ -364,7 +366,7 @@ export class SearchPageComponent extends Component {
       : defaultFiltersConfig;
     const [customPrimaryFilters, customSecondaryFilters] = groupListingFieldConfigs(
       listingFieldsConfig,
-      activeListingTypes
+      activeListingTypes,
     );
     const availablePrimaryFilters = [...customPrimaryFilters, ...defaultFilters];
     const availableFilters = [
@@ -379,7 +381,7 @@ export class SearchPageComponent extends Component {
     const selectedFilters = validFilterParams(
       validQueryParams,
       listingFieldsConfig,
-      defaultFiltersConfig
+      defaultFiltersConfig,
     );
     const keysOfSelectedFilters = Object.keys(selectedFilters);
     const selectedFiltersCountForMobile = isKeywordSearch
@@ -398,12 +400,12 @@ export class SearchPageComponent extends Component {
     const isSecondaryFiltersOpen = !!hasSecondaryFilters && this.state.isSecondaryFiltersOpen;
     const propsForSecondaryFiltersToggle = hasSecondaryFilters
       ? {
-          isSecondaryFiltersOpen: this.state.isSecondaryFiltersOpen,
-          toggleSecondaryFiltersOpen: isOpen => {
-            this.setState({ isSecondaryFiltersOpen: isOpen, currentQueryParams: {} });
-          },
-          selectedSecondaryFiltersCount,
-        }
+        isSecondaryFiltersOpen: this.state.isSecondaryFiltersOpen,
+        toggleSecondaryFiltersOpen: isOpen => {
+          this.setState({ isSecondaryFiltersOpen: isOpen, currentQueryParams: {} });
+        },
+        selectedSecondaryFiltersCount,
+      }
       : {};
 
     const hasPaginationInfo = !!pagination && pagination.totalItems != null;
@@ -411,8 +413,8 @@ export class SearchPageComponent extends Component {
       searchParamsAreInSync && hasPaginationInfo
         ? pagination.totalItems
         : pagination?.paginationUnsupported
-        ? listings.length
-        : 0;
+          ? listings.length
+          : 0;
     const listingsAreLoaded =
       !searchInProgress &&
       searchParamsAreInSync &&
@@ -422,7 +424,7 @@ export class SearchPageComponent extends Component {
       sortConfig.conflictingFilters,
       validQueryParams,
       listingFieldsConfig,
-      defaultFiltersConfig
+      defaultFiltersConfig,
     );
     const sortBy = mode => {
       return sortConfig.active ? (
@@ -454,7 +456,7 @@ export class SearchPageComponent extends Component {
       searchParamsInURL || {},
       intl,
       routeConfiguration,
-      config
+      config,
     );
 
     // Set topbar class based on if a modal is open in
@@ -464,8 +466,8 @@ export class SearchPageComponent extends Component {
       : css.topbar;
 
     let onlyCategorries = {};
-    config.listing.listingFields.map((list,key)=>{
-      if(list.key == 'categories'){
+    config.listing.listingFields.map((list, key) => {
+      if (list.key == 'categories') {
         onlyCategorries = list;
         return list;
       }
@@ -491,7 +493,7 @@ export class SearchPageComponent extends Component {
       >
         <TopbarContainer
           rootClassName={topbarClasses}
-          currentPage="SearchPage"
+          currentPage='SearchPage'
           currentSearchParams={urlQueryParams}
           categories={enumOptions}
           searchModalOpen={this.handleOpenFilterModal}
@@ -500,11 +502,11 @@ export class SearchPageComponent extends Component {
           routeConfiguration={routeConfiguration}
         />
         <div className={css.container}>
-        <Modal 
+          <Modal
             id='isFilterModal'
             isOpen={isFilterModalOpen}
             containerClassName={css.modalContainer}
-            contentLabel="Minimal Modal Example"
+            contentLabel='Minimal Modal Example'
             onManageDisableScrolling={onManageDisableScrolling}
             onClose={this.handleCloseFilterModal}
           >
@@ -513,7 +515,7 @@ export class SearchPageComponent extends Component {
                 return (
                   <FilterComponent
                     key={`SearchFiltersMobile.${config.key}`}
-                    idPrefix="SearchFiltersMobile"
+                    idPrefix='SearchFiltersMobile'
                     className={css.filter}
                     config={config}
                     marketplaceCurrency={marketplaceCurrency}
@@ -550,7 +552,7 @@ export class SearchPageComponent extends Component {
               routeConfiguration={routeConfiguration}
             >
             </SearchHeader>
-             
+
             <SearchFiltersMobile
               className={css.searchFiltersMobileMap}
               urlQueryParams={validQueryParams}
@@ -573,7 +575,7 @@ export class SearchPageComponent extends Component {
                 return (
                   <FilterComponent
                     key={`SearchFiltersMobile.${config.scope || 'built-in'}.${config.key}`}
-                    idPrefix="SearchFiltersMobile"
+                    idPrefix='SearchFiltersMobile'
                     config={config}
                     marketplaceCurrency={marketplaceCurrency}
                     urlQueryParams={validQueryParams}
@@ -586,6 +588,13 @@ export class SearchPageComponent extends Component {
                 );
               })}
             </SearchFiltersMobile>
+            {/*TODO add the featured items carousel here*/}
+            {/* May have to build my own iteration of sectionCarousel that takes LISTINGS instead of BLOCKS*/}
+            <div className={css.featuredItemsContainer}>
+              <SectionCarousel sectionId={'featuredItems'} className={css.featuredItemsCarousel}
+                               numColumns={5} blocks={[]} />
+            </div>
+
             <MainPanelHeader
               className={css.mainPanelMapVariant}
               sortByComponent={sortBy('desktop')}
@@ -608,6 +617,9 @@ export class SearchPageComponent extends Component {
               isMapShow={this.state.isMapShow}
             >
             </MainPanelHeader>
+            {/*TODO Add category carousel here and remove all the items*/}
+
+
             {isSecondaryFiltersOpen ? (
               <div className={classNames(css.searchFiltersPanel)}>
                 <SearchFiltersSecondary
@@ -622,7 +634,7 @@ export class SearchPageComponent extends Component {
                     return (
                       <FilterComponent
                         key={`SearchFiltersSecondary.${config.scope || 'built-in'}.${config.key}`}
-                        idPrefix="SearchFiltersSecondary"
+                        idPrefix='SearchFiltersSecondary'
                         config={config}
                         marketplaceCurrency={marketplaceCurrency}
                         urlQueryParams={validQueryParams}
@@ -643,12 +655,12 @@ export class SearchPageComponent extends Component {
               >
                 {searchListingsError ? (
                   <H3 className={css.error}>
-                    <FormattedMessage id="SearchPage.searchError" />
+                    <FormattedMessage id='SearchPage.searchError' />
                   </H3>
                 ) : null}
                 {!isValidDatesFilter ? (
                   <H5>
-                    <FormattedMessage id="SearchPage.invalidDatesFilter" />
+                    <FormattedMessage id='SearchPage.invalidDatesFilter' />
                   </H5>
                 ) : null}
                 <SearchResultsPanel
@@ -665,14 +677,14 @@ export class SearchPageComponent extends Component {
           </div>
           <ModalInMobile
             className={mapPanel}
-            id="SearchPage.map"
+            id='SearchPage.map'
             isModalOpenOnMobile={this.state.isSearchMapOpenOnMobile}
             onClose={() => this.setState({ isSearchMapOpenOnMobile: false })}
             showAsModalMaxWidth={MODAL_BREAKPOINT}
             onManageDisableScrolling={onManageDisableScrolling}
             hideClose={true}
           >
-            <div className={css.mapWrapper} data-testid="searchMapContainer">
+            <div className={css.mapWrapper} data-testid='searchMapContainer'>
               {shouldShowSearchMap ? (
                 <SearchMap
                   reusableContainerClassName={mapSizeClass}
@@ -802,8 +814,8 @@ const mapDispatchToProps = dispatch => ({
 const SearchPage = compose(
   connect(
     mapStateToProps,
-    mapDispatchToProps
-  )
+    mapDispatchToProps,
+  ),
 )(EnhancedSearchPage);
 
 export default SearchPage;
