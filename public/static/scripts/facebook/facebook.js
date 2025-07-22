@@ -27,11 +27,5 @@
 
   fbq('init', '723653513858411');
   fbq('track', 'PageView');
-
-  const img = window.document.createElement('img');
-  img.height = '1';
-  img.width = '1';
-  img.style.display = 'none';
-  img.src = `https://www.facebook.com/tr?id=723653513858411&ev=PageView&noscript=1`;
-  window.document.body.appendChild(img);
+  
 })();
