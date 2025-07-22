@@ -117,8 +117,6 @@ const setupAnalyticsHandlers = googleAnalyticsId => {
   }
 
   handlers.push(new TapfiliateAnalyticsHandler());
-  handlers.push(new FacebookAnalyticsHandler());
-
   return handlers;
 };
 
