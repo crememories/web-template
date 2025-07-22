@@ -110,6 +110,13 @@ export const IncludeScripts = props => {
     );
   }
 
+  analyticsLibraries.push(
+    <script
+      key="fb"
+      src={`${rootURL}/static/scripts/facebook/facebook.js`}
+    ></script>
+  );
+
   const isBrowser = typeof window !== 'undefined';
   const isMapboxLoaded = isBrowser && window.mapboxgl;
 
