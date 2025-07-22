@@ -1,4 +1,5 @@
 import { actionTapfiliate } from '../util/api';
+// import { FacebookAnalyticsHandler } from './handlers';
 import * as log from '../util/log';
 import Cookies from 'universal-cookie';
 
@@ -54,5 +55,27 @@ export class TapfiliateAnalyticsHandler {
       });
     }
     
+  }
+}
+
+export class FacebookAnalyticsHandler {
+  trackPageView(canonicalPath, previousPath) {
+    // GA4 property. Manually send page_view events
+    // https://developers.google.com/analytics/devguides/collection/gtagjs/single-page-applications
+    // Note 1: You should turn "Enhanced measurement" off.
+    //         It attaches own listeners to elements and that breaks in-app navigation.
+    // Note 2: If previousPath is null (just after page load), gtag script sends page_view event automatically.
+    //         Only in-app navigation needs to be sent manually from SPA.
+    // Note 3: Timeout is needed because gtag script picks up <title>,
+    //         and location change event happens before initial rendering.
+    setTimeout(() => {
+      // window.fbq('track', 'PageView');
+      console.log('window.fbq', window.fbq);
+    }, 300)
+    if (previousPath && window.fbq) {
+      window.setTimeout(() => {
+        console.log('window.fbq', window.fbq);
+      }, 300);
+    }
   }
 }
