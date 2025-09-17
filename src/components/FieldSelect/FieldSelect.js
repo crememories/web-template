@@ -10,6 +10,7 @@ const FieldSelectComponent = props => {
     rootClassName,
     className,
     selectClassName,
+    labelClassName,
     id,
     label,
     input,
@@ -42,6 +43,11 @@ const FieldSelectComponent = props => {
   };
 
   const selectProps = { className: selectClasses, id, ...input, onChange: handleChange, ...rest };
+
+  const labelClasses = classNames({
+    [css.labelDisabled]: showLabelAsDisabled,
+    [labelClassName]: !!labelClassName,
+  });
 
   const classes = classNames(rootClassName || css.root, className);
   return (

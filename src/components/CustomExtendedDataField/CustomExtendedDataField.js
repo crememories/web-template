@@ -55,7 +55,7 @@ const CustomFieldEnum = props => {
       {filterOptions.map(optionConfig => {
         const key = optionConfig.key;
         return (
-          <option key={key} value={key} >
+          <option key={key} value={key}>
             {optionConfig.label}
           </option>
         );

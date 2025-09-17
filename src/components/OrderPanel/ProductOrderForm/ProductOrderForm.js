@@ -23,6 +23,8 @@ import EstimatedCustomerBreakdownMaybe from '../EstimatedCustomerBreakdownMaybe'
 import { types as sdkTypes } from '../../../util/sdkLoader';
 const { Money } = sdkTypes;
 
+import FetchLineItemsError from '../FetchLineItemsError/FetchLineItemsError.js';
+
 import css from './ProductOrderForm.module.css';
 
 // Browsers can't render huge number of select options.
@@ -477,6 +479,8 @@ const renderForm = formRenderProps => {
           />
         </div>
       ) : null}
+
+      <FetchLineItemsError error={fetchLineItemsError} />
 
       <div className={css.submitButton}>
         <PrimaryButton type="submit" inProgress={submitInProgress} disabled={submitDisabled}>

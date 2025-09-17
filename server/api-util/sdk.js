@@ -84,6 +84,18 @@ exports.handleError = (res, error) => {
         data,
       })
       .end();
+  } else if (
+    error.message == 'Minimum commission amount is greater than the amount of money paid in'
+  ) {
+    res
+      .status(400)
+      .json({
+        name: 'LocalAPIError',
+        message: 'Local API request failed',
+        status: 400,
+        statusText: error.message,
+      })
+      .end();
   } else {
     res
       .status(500)
@@ -149,63 +161,6 @@ exports.getTrustedSdk = req => {
       ...baseUrlMaybe,
     });
   });
-};
-
-// Fetch commission asset with 'latest' alias.
-exports.fetchCommission = sdk => {
-  return sdk
-    .assetsByAlias({ paths: ['transactions/commission.json'], alias: 'latest' })
-    .then(response => {
-      // Let's throw an error if we can't fetch commission for some reason
-      const commissionAsset = response?.data?.data?.[0];
-      if (!commissionAsset) {
-        const message = 'Insufficient pricing configuration set.';
-        const error = new Error(message);
-        error.status = 400;
-        error.statusText = message;
-        error.data = {};
-        throw error;
-      }
-      return response;
-    });
-};
-
-// Fetch branding asset with 'latest' alias.
-// This is needed for generating webmanifest on server-side.
-exports.fetchBranding = sdk => {
-  return sdk.assetsByAlias({ paths: ['design/branding.json'], alias: 'latest' }).then(response => {
-    // Let's throw an error if we can't fetch branding for some reason
-    const brandingAsset = response?.data?.data?.[0];
-    if (!brandingAsset) {
-      const message = 'Branding configuration was not available.';
-      const error = new Error(message);
-      error.status = 400;
-      error.statusText = message;
-      error.data = {};
-      throw error;
-    }
-    return response;
-  });
-};
-
-// Fetch branding asset with 'latest' alias.
-// This is needed for generating webmanifest on server-side.
-exports.fetchAccessControlAsset = sdk => {
-  return sdk
-    .assetsByAlias({ paths: ['/general/access-control.json'], alias: 'latest' })
-    .then(response => {
-      // Let's throw an error if we can't fetch branding for some reason
-      const accessControlAsset = response?.data?.data?.[0];
-      if (!accessControlAsset) {
-        const message = 'access-control configuration was not available.';
-        const error = new Error(message);
-        error.status = 404;
-        error.statusText = message;
-        error.data = {};
-        throw error;
-      }
-      return response;
-    });
 };
 
 // Fetch commission asset with 'latest' alias.

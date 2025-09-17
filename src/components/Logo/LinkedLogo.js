@@ -32,7 +32,6 @@ const LinkedLogo = props => {
     ...rest
   } = props;
   const classes = classNames(rootClassName || css.root, className);
-
   // Note: href might come as an empty string (falsy), in which case we default to 'LandingPage'.
   return linkToExternalSite?.href ? (
     <ExternalLink className={classes} href={linkToExternalSite.href} target="_self" {...rest}>

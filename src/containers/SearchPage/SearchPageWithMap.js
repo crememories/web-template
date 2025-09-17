@@ -449,9 +449,6 @@ export class SearchPageComponent extends Component {
     // query parameter ?pub_listingType=[queryParamListingType] is used.
     const { listingType: listingTypePathParam } = currentPathParams;
 
-    console.log('config');
-    console.log(config);
-
     const { listingFields } = config?.listing || {};
     const { defaultFilters: defaultFiltersRaw, sortConfig } = config?.search || {};
 

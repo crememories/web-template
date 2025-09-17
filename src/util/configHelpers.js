@@ -790,14 +790,6 @@ const validListingFields = (listingFields, listingTypesInUse, categoriesInUse) =
   }, []);
 };
 
-///////////////////////////////////
-// Validate listing types config //
-///////////////////////////////////
-
-const getListingTypeStringsInUse = listingTypes => {
-  return listingTypes.map(lt => `${lt.listingType}`);
-};
-
 const validUserTypes = userTypes => {
   const validTypes = userTypes.filter(config => {
     const { userType, label } = config;

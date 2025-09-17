@@ -13,7 +13,6 @@ import css from './TopbarSearchForm.module.css';
 const identity = v => v;
 
 const KeywordSearchField = props => {
-
   const { keywordSearchWrapperClasses, iconClass, intl, isMobile = false, inputRef } = props;
   return (
     <div className={keywordSearchWrapperClasses}>

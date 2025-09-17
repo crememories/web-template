@@ -32,6 +32,7 @@ export const NoShipping = {
     ready: false,
     listingTypeConfig: { type: 'sell-bikes', defaultListingFields: { shipping: false } },
     initialValues: { deliveryOptions: ['pickup'] },
+    formId: 'NoShipping',
   },
   group: 'page:EditListingPage',
 };
@@ -50,6 +51,7 @@ export const NoPickup = {
     ready: false,
     listingTypeConfig: { type: 'sell-bikes', defaultListingFields: { pickup: false } },
     initialValues: { deliveryOptions: ['shipping'] },
+    formId: 'NoPickup',
   },
   group: 'page:EditListingPage',
 };

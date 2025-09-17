@@ -176,7 +176,7 @@ const EditListingPricingAndStockPanel = props => {
   }
 
   return (
-    <div className={classes}>
+    <main className={classes}>
       <H3 as="h1">
         {isPublished ? (
           <FormattedMessage
@@ -314,7 +314,7 @@ const EditListingPricingAndStockPanel = props => {
           />
         </div>
       )}
-    </div>
+    </main>
   );
 };
 

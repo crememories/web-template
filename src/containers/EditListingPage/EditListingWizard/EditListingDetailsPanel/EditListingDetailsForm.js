@@ -352,9 +352,6 @@ const EditListingDetailsForm = props => (
 
       values.pub_categories = typeCategory.label ? typeCategory.label.toLowerCase() : typeCategory.label;
 
-      console.log('values.categories');
-      console.log(values.pub_categories);
-
       const titleRequiredMessage = intl.formatMessage({
         id: 'EditListingDetailsForm.titleRequired',
       });

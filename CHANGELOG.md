@@ -14,6 +14,47 @@ way to update this template, but currently, we follow a pattern:
 
 ## Upcoming version 2025-XX-XX
 
+- [add] Add currently available translations for DE, ES, FR.
+  [#664](https://github.com/sharetribe/web-template/pull/664)
+
+## [v8.8.0] 2025-09-11
+
+- [add] Add ability to sort user inbox messages
+  [#656](https://github.com/sharetribe/web-template/pull/656)
+- [add] Update one Marketplace text (to be aligned with the corresponding copy in Email texts).
+  [#661](https://github.com/sharetribe/web-template/pull/661)
+- [add] Add currently available translations for DE, ES, FR.
+  [#658](https://github.com/sharetribe/web-template/pull/658)
+- [add] Add accessibility improvements to components related to
+    - search pages
+    - listing page
+    - listing editing pages
+    - transaction page
+  
+  [#649](https://github.com/sharetribe/web-template/pull/649)
+
+- [change] Remove pickup fee line-item from the order breakdown.
+  [#655](https://github.com/sharetribe/web-template/pull/655)
+- [add] Update EditListingPage README.md to describe the data gathered and updated.
+  [#654](https://github.com/sharetribe/web-template/pull/654)
+- [fix] SearchPage.shared.js: category ids are always strings, so we need to convert query params to
+  strings. [#653](https://github.com/sharetribe/web-template/pull/653)
+- [fix] SearchPage: fix a bug with integer range values. The range end value was not exclusive.
+  [#652](https://github.com/sharetribe/web-template/pull/652)
+- [fix] IntegerRangeFilter: fix a bug with small text on grid layout.
+  [#650](https://github.com/sharetribe/web-template/pull/650)
+
+- [add] render potential errors in EditListingStylePanel.
+  [#647](https://github.com/sharetribe/web-template/pull/647)
+
+  [v8.8.0]: https://github.com/sharetribe/web-template/compare/v8.7.0...v8.8.0
+
+## [v8.7.0] 2025-07-30
+
+- [add] Add currently available translations for DE, ES, FR.
+  [#644](https://github.com/sharetribe/web-template/pull/644)
+- [add] Added support for Provider and Customer minimum commission handling
+  [#631](https://github.com/sharetribe/web-template/pull/635)
 - [add] Add some accessibility improvements to Topbar, Footer, and AuthenticationPage.
   [#639](https://github.com/sharetribe/web-template/pull/639)
 - [add] Add currently available translations for DE, ES, FR.
@@ -21,6 +62,8 @@ way to update this template, but currently, we follow a pattern:
 - [fix] SearchPageWithMap: existing pagination page needs to be reset with map-based search. When
   bounds change, the search results are different and the previous pagination page number is not
   valid anymore. [#640](https://github.com/sharetribe/web-template/pull/640)
+
+  [v8.7.0]: https://github.com/sharetribe/web-template/compare/v8.6.0...v8.7.0
 
 ## [v8.6.0] 2025-07-17
 
