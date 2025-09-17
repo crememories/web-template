@@ -1,5 +1,3 @@
-import React from 'react';
-import { string } from 'prop-types';
 import classNames from 'classnames';
 
 import css from './IconMap.module.css';
@@ -17,13 +15,6 @@ const IconMap = props => {
       />
     </svg>
   );
-};
-
-IconMap.defaultProps = { className: null };
-
-IconMap.propTypes = {
-  className: string,
-  rootClassName: string,
 };
 
 export default IconMap;

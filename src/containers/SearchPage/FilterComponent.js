@@ -1,15 +1,17 @@
 import React from 'react';
 
-import { SCHEMA_TYPE_ENUM, SCHEMA_TYPE_MULTI_ENUM } from '../../util/types';
-import { constructQueryParamName } from './SearchPage.shared';
+// utils
+import { SCHEMA_TYPE_ENUM, SCHEMA_TYPE_MULTI_ENUM, SCHEMA_TYPE_LONG } from '../../util/types';
+import { convertCategoriesToSelectTreeOptions, constructQueryParamName } from '../../util/search';
+
+// component imports
 import SelectSingleFilter from './SelectSingleFilter/SelectSingleFilter';
 import SelectMultipleFilter from './SelectMultipleFilter/SelectMultipleFilter';
 import BookingDateRangeFilter from './BookingDateRangeFilter/BookingDateRangeFilter';
 import KeywordFilter from './KeywordFilter/KeywordFilter';
 import PriceFilter from './PriceFilter/PriceFilter';
-
-// Helper: get enumOptions in a format that works as query parameter
-const createFilterOptions = options => options.map(o => ({ key: `${o.option}`, label: o.label }));
+import IntegerRangeFilter from './IntegerRangeFilter/IntegerRangeFilter';
+import SeatsFilter from './SeatsFilter/SeatsFilter';
 
 /**
  * FilterComponent is used to map configured filter types
@@ -22,6 +24,7 @@ const FilterComponent = props => {
     urlQueryParams,
     initialValues,
     getHandleChangedValueFn,
+    listingCategories,
     marketplaceCurrency,
     intl,
     ...rest
@@ -36,10 +39,43 @@ const FilterComponent = props => {
   const useHistoryPush = liveEdit || showAsPopup;
   const prefix = idPrefix || 'SearchPage';
   const componentId = `${prefix}.${key.toLowerCase()}`;
-  const name = key.replace(/\s+/g, '-').toLowerCase();
+  const name = key.replace(/\s+/g, '-');
 
   // Default filters: price, keywords, dates
   switch (schemaType) {
+    case 'category': {
+      const { scope, isNestedEnum, nestedParams } = config;
+      const queryParamNames = nestedParams?.map(p => constructQueryParamName(p, scope));
+      return (
+        <SelectSingleFilter
+          id={componentId}
+          name={key}
+          label={intl.formatMessage({ id: 'FilterComponent.categoryLabel' })}
+          queryParamNames={queryParamNames}
+          initialValues={initialValues(queryParamNames, liveEdit)}
+          onSubmit={getHandleChangedValueFn(useHistoryPush)}
+          options={convertCategoriesToSelectTreeOptions(listingCategories)}
+          isNestedEnum={isNestedEnum}
+          {...rest}
+        />
+      );
+    }
+    case 'listingType': {
+      const { scope, options } = config;
+      const paramNames = [constructQueryParamName(key, scope)];
+      return (
+        <SelectSingleFilter
+          id={componentId}
+          name={key}
+          label={intl.formatMessage({ id: 'FilterComponent.listingTypeLabel' })}
+          queryParamNames={[paramNames]}
+          initialValues={initialValues(paramNames, liveEdit)}
+          onSubmit={getHandleChangedValueFn(useHistoryPush)}
+          options={options}
+          {...rest}
+        />
+      );
+    }
     case 'price': {
       const { min, max, step } = config;
       return (
@@ -84,32 +120,48 @@ const FilterComponent = props => {
         />
       );
     }
+    case 'seats': {
+      return (
+        <SeatsFilter
+          id={componentId}
+          name={name}
+          label={intl.formatMessage({ id: 'FilterComponent.seatsLabel' })}
+          queryParamNames={[key]}
+          initialValues={initialValues([key], liveEdit)}
+          onSubmit={getHandleChangedValueFn(useHistoryPush)}
+          {...rest}
+        />
+      );
+    }
   }
 
   // Custom extended data filters
   switch (schemaType) {
     case SCHEMA_TYPE_ENUM: {
       const { scope, enumOptions, filterConfig = {} } = config;
+      const { label, filterType } = filterConfig;
       const queryParamNames = [constructQueryParamName(key, scope)];
-      return filterConfig.filterType === 'SelectSingleFilter' ? (
+      return filterType === 'SelectSingleFilter' ? (
         <SelectSingleFilter
           id={componentId}
-          label={filterConfig.label}
+          label={label}
+          name={name}
           queryParamNames={queryParamNames}
           initialValues={initialValues(queryParamNames, liveEdit)}
-          onSelect={getHandleChangedValueFn(useHistoryPush)}
-          options={createFilterOptions(enumOptions)}
+          onSubmit={getHandleChangedValueFn(useHistoryPush)}
+          options={enumOptions}
+          isNestedEnum={false}
           {...rest}
         />
       ) : (
         <SelectMultipleFilter
           id={componentId}
-          label={filterConfig.label}
+          label={label}
           name={name}
           queryParamNames={queryParamNames}
           initialValues={initialValues(queryParamNames, liveEdit)}
           onSubmit={getHandleChangedValueFn(useHistoryPush)}
-          options={createFilterOptions(enumOptions)}
+          options={enumOptions}
           schemaType={schemaType}
           {...rest}
         />
@@ -127,9 +179,28 @@ const FilterComponent = props => {
           queryParamNames={queryParamNames}
           initialValues={initialValues(queryParamNames, liveEdit)}
           onSubmit={getHandleChangedValueFn(useHistoryPush)}
-          options={createFilterOptions(enumOptions)}
+          options={enumOptions}
           schemaType={schemaType}
           searchMode={searchMode}
+          {...rest}
+        />
+      );
+    }
+    case SCHEMA_TYPE_LONG: {
+      const { minimum, maximum, scope, step, filterConfig = {} } = config;
+      const { label } = filterConfig;
+      const queryParamNames = [constructQueryParamName(key, scope)];
+      return (
+        <IntegerRangeFilter
+          id={componentId}
+          label={label}
+          name={name}
+          queryParamNames={queryParamNames}
+          initialValues={initialValues(queryParamNames, liveEdit)}
+          onSubmit={getHandleChangedValueFn(useHistoryPush)}
+          min={minimum}
+          max={maximum}
+          step={step}
           {...rest}
         />
       );

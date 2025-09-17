@@ -139,21 +139,4 @@ const ImageCarousel = props => {
   );
 };
 
-ImageCarousel.defaultProps = {
-  rootClassName: null,
-  className: null,
-};
-
-const { string, arrayOf } = PropTypes;
-
-ImageCarousel.propTypes = {
-  rootClassName: string,
-  className: string,
-  images: arrayOf(propTypes.image).isRequired,
-  imageVariants: arrayOf(string).isRequired,
-
-  // from injectIntl
-  intl: intlShape.isRequired,
-};
-
 export default injectIntl(ImageCarousel);

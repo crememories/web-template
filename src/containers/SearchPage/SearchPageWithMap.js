@@ -1,5 +1,4 @@
 import React, { Component } from 'react';
-import { array, arrayOf, bool, func, object, oneOf, shape, string } from 'prop-types';
 import { connect } from 'react-redux';
 import { compose } from 'redux';
 import { useHistory, useLocation } from 'react-router-dom';
@@ -7,23 +6,37 @@ import debounce from 'lodash/debounce';
 import omit from 'lodash/omit';
 import classNames from 'classnames';
 
-import { useIntl, intlShape, FormattedMessage } from '../../util/reactIntl';
 import { useConfiguration } from '../../context/configurationContext';
 import { useRouteConfiguration } from '../../context/routeConfigurationContext';
 
-import { createResourceLocatorString, pathByRouteName } from '../../util/routes';
+import { useIntl, FormattedMessage } from '../../util/reactIntl';
 import {
   isAnyFilterActive,
   isMainSearchTypeKeywords,
   isOriginInUse,
   getQueryParamNames,
 } from '../../util/search';
-import { parse } from '../../util/urlHelpers';
+import {
+  NO_ACCESS_PAGE_USER_PENDING_APPROVAL,
+  NO_ACCESS_PAGE_VIEW_LISTINGS,
+  parse,
+} from '../../util/urlHelpers';
+import { createResourceLocatorString, pathByRouteName } from '../../util/routes';
 import { propTypes } from '../../util/types';
+import {
+  isErrorNoViewingPermission,
+  isErrorUserPendingApproval,
+  isForbiddenError,
+} from '../../util/errors';
+import {
+  hasPermissionToViewData,
+  isUserAuthorized,
+  showCreateListingLinkForUser,
+} from '../../util/userHelpers';
 import { getListingsById } from '../../ducks/marketplaceData.duck';
 import { manageDisableScrolling, isScrollingDisabled } from '../../ducks/ui.duck';
 
-import { H3, H5, ModalInMobile, Page, Modal, FooterSearch } from '../../components';
+import { H3, H5, ModalInMobile, NamedRedirect, Page, Modal, FooterSearch } from '../../components';
 import TopbarContainer from '../../containers/TopbarContainer/TopbarContainer';
 import FooterContainer from '../FooterContainer/FooterContainer';
 
@@ -36,6 +49,10 @@ import {
   validFilterParams,
   cleanSearchFromConflictingParams,
   createSearchResultSchema,
+  pickListingFieldFilters,
+  omitLimitedListingFieldParams,
+  getDatesAndSeatsMaybe,
+  getSearchPageResourceLocatorStringParams,
 } from './SearchPage.shared';
 
 import FilterComponent from './FilterComponent';
@@ -58,6 +75,27 @@ const SEARCH_WITH_MAP_DEBOUNCE = 300; // Little bit of debounce before search is
 // Primary filters have their content in dropdown-popup.
 // With this offset we move the dropdown to the left a few pixels on desktop layout.
 const FILTER_DROPDOWN_OFFSET = -14;
+
+const getSelectedSecondaryFiltersCount = (
+  validQueryParams,
+  filterConfigs,
+  customSecondaryFilters
+) => {
+  const hasSecondaryFilters = !!(customSecondaryFilters && customSecondaryFilters.length > 0);
+  const potentialSecondaryFilters = hasSecondaryFilters
+    ? validFilterParams(validQueryParams, {
+        ...filterConfigs,
+        listingFieldsConfig: customSecondaryFilters,
+      })
+    : {};
+
+  const relevantQueryParamNames = customSecondaryFilters.map(f => {
+    return f.scope === 'public' ? `pub_${f.key}` : f.key;
+  });
+  const pickRelevant = name => relevantQueryParamNames.includes(name);
+  const selectedSecondaryFilters = Object.keys(potentialSecondaryFilters).filter(pickRelevant);
+  return selectedSecondaryFilters?.length;
+};
 
 export class SearchPageComponent extends Component {
   constructor(props) {
@@ -101,9 +139,12 @@ export class SearchPageComponent extends Component {
   // when map is moved by user or viewport has changed
   onMapMoveEnd(viewportBoundsChanged, data) {
     const { viewportBounds, viewportCenter } = data;
+    const { params: currentPathParams } = this.props;
 
     const routes = this.props.routeConfiguration;
-    const searchPagePath = pathByRouteName('SearchPage', routes);
+    const searchPagePath = currentPathParams.listingType
+      ? pathByRouteName('SearchPageWithListingType', routes, currentPathParams)
+      : pathByRouteName('SearchPage', routes);
     const currentPath =
       typeof window !== 'undefined' && window.location && window.location.pathname;
 
@@ -118,9 +159,19 @@ export class SearchPageComponent extends Component {
       const { history, location, config } = this.props;
       const { listingFields: listingFieldsConfig } = config?.listing || {};
       const { defaultFilters: defaultFiltersConfig } = config?.search || {};
+      const activeListingTypes = config?.listing?.listingTypes.map(config => config.listingType);
+      const listingCategories = config.categoryConfiguration.categories;
+      const filterConfigs = {
+        listingFieldsConfig,
+        defaultFiltersConfig,
+        listingCategories,
+        activeListingTypes,
+        currentPathParams,
+      };
 
       // parse query parameters, including a custom attribute named category
-      const { address, bounds, mapSearch, ...rest } = parse(location.search, {
+      // when onMapMoveEnd is called, pagination needs to be reset.
+      const { address, bounds, mapSearch, page, ...rest } = parse(location.search, {
         latlng: ['origin'],
         latlngBounds: ['bounds'],
       });
@@ -133,10 +184,12 @@ export class SearchPageComponent extends Component {
         ...originMaybe,
         bounds: viewportBounds,
         mapSearch: true,
-        ...validFilterParams(rest, listingFieldsConfig, defaultFiltersConfig, dropNonFilterParams),
+        ...validFilterParams(rest, filterConfigs, dropNonFilterParams),
       };
 
-      history.push(createResourceLocatorString('SearchPage', routes, {}, searchParams));
+      const { routeName, pathParams } = getSearchPageResourceLocatorStringParams(routes, location);
+
+      history.push(createResourceLocatorString(routeName, routes, pathParams, searchParams));
     }
   }
 
@@ -162,20 +215,29 @@ export class SearchPageComponent extends Component {
 
   // Apply the filters by redirecting to SearchPage with new filters.
   applyFilters() {
-    const { history, routeConfiguration, config } = this.props;
+    const { history, routeConfiguration, config, params: currentPathParams, location } = this.props;
     const { listingFields: listingFieldsConfig } = config?.listing || {};
     const { defaultFilters: defaultFiltersConfig, sortConfig } = config?.search || {};
+    const activeListingTypes = config?.listing?.listingTypes.map(config => config.listingType);
+    const listingCategories = config.categoryConfiguration.categories;
+    const filterConfigs = {
+      listingFieldsConfig,
+      defaultFiltersConfig,
+      listingCategories,
+      activeListingTypes,
+      currentPathParams,
+    };
 
     const urlQueryParams = validUrlQueryParamsFromProps(this.props);
     const searchParams = { ...urlQueryParams, ...this.state.currentQueryParams };
-    const search = cleanSearchFromConflictingParams(
-      searchParams,
-      listingFieldsConfig,
-      defaultFiltersConfig,
-      sortConfig
+    const search = cleanSearchFromConflictingParams(searchParams, filterConfigs, sortConfig);
+
+    const { routeName, pathParams } = getSearchPageResourceLocatorStringParams(
+      routeConfiguration,
+      location
     );
 
-    history.push(createResourceLocatorString('SearchPage', routeConfiguration, {}, search));
+    history.push(createResourceLocatorString(routeName, routeConfiguration, pathParams, search));
   }
 
   // Close the filters by clicking cancel, revert to the initial params
@@ -185,7 +247,7 @@ export class SearchPageComponent extends Component {
 
   // Reset all filter query parameters
   resetAll(e) {
-    const { history, routeConfiguration, config } = this.props;
+    const { history, routeConfiguration, config, location } = this.props;
     const { listingFields: listingFieldsConfig } = config?.listing || {};
     const { defaultFilters: defaultFiltersConfig } = config?.search || {};
 
@@ -197,13 +259,36 @@ export class SearchPageComponent extends Component {
 
     // Reset routing params
     const queryParams = omit(urlQueryParams, filterQueryParamNames);
-    history.push(createResourceLocatorString('SearchPage', routeConfiguration, {}, queryParams));
+
+    const { routeName, pathParams } = getSearchPageResourceLocatorStringParams(
+      routeConfiguration,
+      location
+    );
+
+    history.push(
+      createResourceLocatorString(routeName, routeConfiguration, pathParams, queryParams)
+    );
   }
 
   getHandleChangedValueFn(useHistoryPush) {
-    const { history, routeConfiguration, config } = this.props;
+    const {
+      history,
+      routeConfiguration,
+      config,
+      location,
+      params: currentPathParams = {},
+    } = this.props;
     const { listingFields: listingFieldsConfig } = config?.listing || {};
     const { defaultFilters: defaultFiltersConfig, sortConfig } = config?.search || {};
+    const activeListingTypes = config?.listing?.listingTypes.map(config => config.listingType);
+    const listingCategories = config.categoryConfiguration.categories;
+    const filterConfigs = {
+      listingFieldsConfig,
+      defaultFiltersConfig,
+      listingCategories,
+      activeListingTypes,
+      currentPathParams,
+    };
 
     const urlQueryParams = validUrlQueryParamsFromProps(this.props);
 
@@ -217,27 +302,37 @@ export class SearchPageComponent extends Component {
         // We should always trust urlQueryParams with those.
         // The same applies to keywords, if the main search type is keyword search.
         const keywordsMaybe = isMainSearchTypeKeywords(config) ? { keywords } : {};
+
+        const datesAndSeatsMaybe = getDatesAndSeatsMaybe(mergedQueryParams, updatedURLParams);
+
         return {
-          currentQueryParams: {
-            ...mergedQueryParams,
-            ...updatedURLParams,
-            ...keywordsMaybe,
-            address,
-            bounds,
-          },
+          currentQueryParams: omitLimitedListingFieldParams(
+            {
+              ...mergedQueryParams,
+              ...updatedURLParams,
+              ...keywordsMaybe,
+              ...datesAndSeatsMaybe,
+              address,
+              bounds,
+            },
+            filterConfigs
+          ),
         };
       };
 
       const callback = () => {
         if (useHistoryPush) {
           const searchParams = this.state.currentQueryParams;
-          const search = cleanSearchFromConflictingParams(
-            searchParams,
-            listingFieldsConfig,
-            defaultFiltersConfig,
-            sortConfig
+          const search = cleanSearchFromConflictingParams(searchParams, filterConfigs, sortConfig);
+
+          const { routeName, pathParams } = getSearchPageResourceLocatorStringParams(
+            routeConfiguration,
+            location
           );
-          history.push(createResourceLocatorString('SearchPage', routeConfiguration, {}, search));
+
+          history.push(
+            createResourceLocatorString(routeName, routeConfiguration, pathParams, search)
+          );
         }
       };
 
@@ -246,14 +341,21 @@ export class SearchPageComponent extends Component {
   }
 
   handleSortBy(urlParam, values) {
-    const { history, routeConfiguration } = this.props;
+    const { history, routeConfiguration, location } = this.props;
     const urlQueryParams = validUrlQueryParamsFromProps(this.props);
 
     const queryParams = values
       ? { ...urlQueryParams, [urlParam]: values }
       : omit(urlQueryParams, urlParam);
 
-    history.push(createResourceLocatorString('SearchPage', routeConfiguration, {}, queryParams));
+    const { routeName, pathParams } = getSearchPageResourceLocatorStringParams(
+      routeConfiguration,
+      location
+    );
+
+    history.push(
+      createResourceLocatorString(routeName, routeConfiguration, pathParams, queryParams)
+    );
   }
 
   changeMapSize  () {
@@ -311,28 +413,71 @@ export class SearchPageComponent extends Component {
     }
   }
 
+  // Reset all filter query parameters
+  handleResetAll(e) {
+    this.resetAll(e);
+
+    // blur event target if event is passed
+    if (e && e.currentTarget) {
+      e.currentTarget.blur();
+    }
+  }
+
   render() {
     const {
       intl,
-      listings,
+      listings = [],
       location,
       onManageDisableScrolling,
       pagination,
       scrollingDisabled,
       searchInProgress,
       searchListingsError,
-      searchParams,
+      searchParams = {},
       activeListingId,
       onActivateListing,
       routeConfiguration,
       config,
+      params: currentPathParams = {},
+      currentUser,
     } = this.props;
 
-    const { listingFields: listingFieldsConfig } = config?.listing || {};
-    const { defaultFilters: defaultFiltersConfig, sortConfig } = config?.search || {};
+    // If the search page variant is of type /s/:listingType, this defines the :listingType
+    // path parameter used to filter the whole page.
+    //
+    // On a default search page (/s), this constant does not have a value, even when a
+    // query parameter ?pub_listingType=[queryParamListingType] is used.
+    const { listingType: listingTypePathParam } = currentPathParams;
+
+    console.log('config');
+    console.log(config);
+
+    const { listingFields } = config?.listing || {};
+    const { defaultFilters: defaultFiltersRaw, sortConfig } = config?.search || {};
 
     const activeListingTypes = config?.listing?.listingTypes.map(config => config.listingType);
+    const defaultFiltersConfig = listingTypePathParam
+      ? defaultFiltersRaw.filter(f => f.key !== 'listingType')
+      : defaultFiltersRaw;
+
     const marketplaceCurrency = config.currency;
+    const categoryConfiguration = config.categoryConfiguration;
+    const listingCategories = categoryConfiguration.categories;
+    // const listingFieldsConfig = pickListingFieldFilters({
+    //   listingFields,
+    //   locationSearch: location.search,
+    //   categoryConfiguration,
+    //   activeListingTypes,
+    //   currentPathParams,
+    // });
+    const { listingFields: listingFieldsConfig } = config?.listing || {};
+    const filterConfigs = {
+      listingFieldsConfig,
+      defaultFiltersConfig,
+      listingCategories,
+      activeListingTypes,
+      currentPathParams,
+    };
 
     // Page transition might initially use values from previous search
     // urlQueryParams doesn't contain page specific url params
@@ -340,18 +485,12 @@ export class SearchPageComponent extends Component {
     const { searchParamsAreInSync, urlQueryParams, searchParamsInURL } = searchParamsPicker(
       location.search,
       searchParams,
-      listingFieldsConfig,
-      defaultFiltersConfig,
+      filterConfigs,
       sortConfig,
       isOriginInUse(config)
     );
 
-    const validQueryParams = validFilterParams(
-      searchParamsInURL,
-      listingFieldsConfig,
-      defaultFiltersConfig,
-      false
-    );
+    const validQueryParams = urlQueryParams;
 
     const isWindowDefined = typeof window !== 'undefined';
     const isMobileLayout = isWindowDefined && window.innerWidth < MODAL_BREAKPOINT;
@@ -359,28 +498,40 @@ export class SearchPageComponent extends Component {
       !isMobileLayout || (isMobileLayout && this.state.isSearchMapOpenOnMobile);
 
     const isKeywordSearch = isMainSearchTypeKeywords(config);
-    const defaultFilters = isKeywordSearch
-      ? defaultFiltersConfig.filter(f => f.key !== 'keywords')
-      : defaultFiltersConfig;
+    const builtInPrimaryFilters = defaultFiltersConfig.filter(f =>
+      ['categoryLevel', 'listingType'].includes(f.key)
+    );
+    const builtInFilters = isKeywordSearch
+      ? defaultFiltersConfig.filter(
+          f => !['keywords', 'categoryLevel', 'listingType'].includes(f.key)
+        )
+      : defaultFiltersConfig.filter(f => !['categoryLevel', 'listingType'].includes(f.key));
     const [customPrimaryFilters, customSecondaryFilters] = groupListingFieldConfigs(
       listingFieldsConfig,
       activeListingTypes
     );
-    const availablePrimaryFilters = [...customPrimaryFilters, ...defaultFilters];
-    const availableFilters = [
+    const availablePrimaryFilters = [
+      ...builtInPrimaryFilters,
       ...customPrimaryFilters,
-      ...defaultFilters,
+      ...builtInFilters,
+    ];
+    const availableFilters = [
+      ...builtInPrimaryFilters,
+      ...customPrimaryFilters,
+      ...builtInFilters,
       ...customSecondaryFilters,
     ];
+
+    console.log('activeListingTypes');
+    console.log(activeListingTypes);
+    console.log('listingFieldsConfig');
+    console.log(listingFieldsConfig);
+    
 
     const hasSecondaryFilters = !!(customSecondaryFilters && customSecondaryFilters.length > 0);
 
     // Selected aka active filters
-    const selectedFilters = validFilterParams(
-      validQueryParams,
-      listingFieldsConfig,
-      defaultFiltersConfig
-    );
+    const selectedFilters = validQueryParams;
     const keysOfSelectedFilters = Object.keys(selectedFilters);
     const selectedFiltersCountForMobile = isKeywordSearch
       ? keysOfSelectedFilters.filter(f => f !== 'keywords').length
@@ -389,11 +540,11 @@ export class SearchPageComponent extends Component {
       searchParamsInURL.dates == null ||
       (searchParamsInURL.dates != null && searchParamsInURL.dates === selectedFilters.dates);
 
-    // Selected aka active secondary filters
-    const selectedSecondaryFilters = hasSecondaryFilters
-      ? validFilterParams(validQueryParams, customSecondaryFilters, [])
-      : {};
-    const selectedSecondaryFiltersCount = Object.keys(selectedSecondaryFilters).length;
+    const selectedSecondaryFiltersCount = getSelectedSecondaryFiltersCount(
+      validQueryParams,
+      filterConfigs,
+      customSecondaryFilters
+    );
 
     const isSecondaryFiltersOpen = !!hasSecondaryFilters && this.state.isSecondaryFiltersOpen;
     const propsForSecondaryFiltersToggle = hasSecondaryFilters
@@ -405,6 +556,9 @@ export class SearchPageComponent extends Component {
           selectedSecondaryFiltersCount,
         }
       : {};
+
+      console.log('propsForSecondaryFiltersToggle');
+      console.log(propsForSecondaryFiltersToggle);
 
     const hasPaginationInfo = !!pagination && pagination.totalItems != null;
     const totalItems =
@@ -421,9 +575,10 @@ export class SearchPageComponent extends Component {
     const conflictingFilterActive = isAnyFilterActive(
       sortConfig.conflictingFilters,
       validQueryParams,
-      listingFieldsConfig,
-      defaultFiltersConfig
+      filterConfigs
     );
+
+    const showCreateListingsLink = showCreateListingLinkForUser(config, currentUser);
     const sortBy = mode => {
       return sortConfig.active ? (
         <SortBy
@@ -444,6 +599,7 @@ export class SearchPageComponent extends Component {
         totalItems={totalItems}
         location={location}
         resetAll={this.resetAll}
+        showCreateListingsLink={showCreateListingsLink}
       />
     );
 
@@ -491,7 +647,6 @@ export class SearchPageComponent extends Component {
       >
         <TopbarContainer
           rootClassName={topbarClasses}
-          currentPage="SearchPage"
           currentSearchParams={urlQueryParams}
           categories={enumOptions}
           searchModalOpen={this.handleOpenFilterModal}
@@ -567,14 +722,19 @@ export class SearchPageComponent extends Component {
               resetAll={this.resetAll}
               selectedFiltersCount={selectedFiltersCountForMobile}
               noResultsInfo={noResultsInfo}
+              location={location}
               isMapVariant
             >
-              {availableFilters.map(config => {
+              {availableFilters.map(filterConfig => {
+                const key = `SearchFiltersMobile.${filterConfig.scope || 'built-in'}.${
+                  filterConfig.key
+                }`;
                 return (
                   <FilterComponent
-                    key={`SearchFiltersMobile.${config.scope || 'built-in'}.${config.key}`}
+                    key={key}
                     idPrefix="SearchFiltersMobile"
-                    config={config}
+                    config={filterConfig}
+                    listingCategories={listingCategories}
                     marketplaceCurrency={marketplaceCurrency}
                     urlQueryParams={validQueryParams}
                     initialValues={initialValues(this.props, this.state.currentQueryParams)}
@@ -595,18 +755,38 @@ export class SearchPageComponent extends Component {
               searchInProgress={searchInProgress}
               searchListingsError={searchListingsError}
               noResultsInfo={noResultsInfo}
-              propsForSecondaryFiltersToggle={propsForSecondaryFiltersToggle}
               availablePrimaryFilters={availablePrimaryFilters}
-              config={config}
-              marketplaceCurrency={marketplaceCurrency}
-              validQueryParams={validQueryParams}
+              isMapShow={this.state.isMapShow}
+              handleShowMap={this.handleShowMap}
               initialValues={initialValues(this.props, this.state.currentQueryParams)}
               getHandleChangedValueFn={this.getHandleChangedValueFn}
+              propsForSecondaryFiltersToggle={propsForSecondaryFiltersToggle}
               intl={intl}
-              contentPlacementOffset={FILTER_DROPDOWN_OFFSET}
-              handleShowMap={this.handleShowMap}
-              isMapShow={this.state.isMapShow}
             >
+              {/* <SearchFiltersPrimary {...propsForSecondaryFiltersToggle}>
+                {availablePrimaryFilters.map(filterConfig => {
+                  const key = `SearchFiltersPrimary.${filterConfig.scope || 'built-in'}.${
+                    filterConfig.key
+                  }`;
+                  return (
+                    <FilterComponent
+                      key={key}
+                      idPrefix="SearchFiltersPrimary"
+                      config={filterConfig}
+                      listingCategories={listingCategories}
+                      marketplaceCurrency={marketplaceCurrency}
+                      urlQueryParams={validQueryParams}
+                      initialValues={initialValues(this.props, this.state.currentQueryParams)}
+                      getHandleChangedValueFn={this.getHandleChangedValueFn}
+                      intl={intl}
+                      showAsPopup
+                      contentPlacementOffset={FILTER_DROPDOWN_OFFSET}
+                      handleShowMap={this.handleShowMap}
+                      isMapShow={this.state.isMapShow}
+                    />
+                  );
+                })}
+              </SearchFiltersPrimary> */}
             </MainPanelHeader>
             {isSecondaryFiltersOpen ? (
               <div className={classNames(css.searchFiltersPanel)}>
@@ -618,12 +798,16 @@ export class SearchPageComponent extends Component {
                   resetAll={this.resetAll}
                   onClosePanel={() => this.setState({ isSecondaryFiltersOpen: false })}
                 >
-                  {customSecondaryFilters.map(config => {
+                  {customSecondaryFilters.map(filterConfig => {
+                    const key = `SearchFiltersSecondary.${filterConfig.scope || 'built-in'}.${
+                      filterConfig.key
+                    }`;
                     return (
                       <FilterComponent
-                        key={`SearchFiltersSecondary.${config.scope || 'built-in'}.${config.key}`}
+                        key={key}
                         idPrefix="SearchFiltersSecondary"
-                        config={config}
+                        config={filterConfig}
+                        listingCategories={listingCategories}
                         marketplaceCurrency={marketplaceCurrency}
                         urlQueryParams={validQueryParams}
                         initialValues={initialValues(this.props, this.state.currentQueryParams)}
@@ -659,13 +843,14 @@ export class SearchPageComponent extends Component {
                   setActiveListing={onActivateListing}
                   isMapVariant={this.state.isMapShow}
                   fullMap={this.state.fullMap}
+                  listingTypeParam={listingTypePathParam}
                 />
               </div>
             )}
           </div>
           <ModalInMobile
             className={mapPanel}
-            id="SearchPage.map"
+            id="SearchPage_map"
             isModalOpenOnMobile={this.state.isSearchMapOpenOnMobile}
             onClose={() => this.setState({ isSearchMapOpenOnMobile: false })}
             showAsModalMaxWidth={MODAL_BREAKPOINT}
@@ -676,6 +861,7 @@ export class SearchPageComponent extends Component {
               {shouldShowSearchMap ? (
                 <SearchMap
                   reusableContainerClassName={mapSizeClass}
+                  rootClassName={css.mapRoot}
                   activeListingId={activeListingId}
                   bounds={bounds}
                   // center={origin}
@@ -686,7 +872,7 @@ export class SearchPageComponent extends Component {
                   changeMapSize={this.changeMapSize}
                   fullMap={this.state.fullMap}
                   onCloseAsModal={() => {
-                    onManageDisableScrolling('SearchPage.map', false);
+                    onManageDisableScrolling('SearchPage_map', false);
                   }}
                   messages={intl.messages}
                   showAction={this.state.showAction}
@@ -709,49 +895,62 @@ export class SearchPageComponent extends Component {
   }
 }
 
-SearchPageComponent.defaultProps = {
-  listings: [],
-  pagination: null,
-  searchListingsError: null,
-  searchParams: {},
-  activeListingId: null,
-};
-
-SearchPageComponent.propTypes = {
-  listings: array,
-  onActivateListing: func.isRequired,
-  onManageDisableScrolling: func.isRequired,
-  pagination: propTypes.pagination,
-  scrollingDisabled: bool.isRequired,
-  searchInProgress: bool.isRequired,
-  searchListingsError: propTypes.error,
-  searchParams: object,
-
-  // from useHistory
-  history: shape({
-    push: func.isRequired,
-  }).isRequired,
-  // from useLocation
-  location: shape({
-    search: string.isRequired,
-  }).isRequired,
-
-  // from useIntl
-  intl: intlShape.isRequired,
-
-  // from useConfiguration
-  config: object.isRequired,
-
-  // from useRouteConfiguration
-  routeConfiguration: arrayOf(propTypes.route).isRequired,
-};
-
+/**
+ * SearchPage component with map layout
+ *
+ * @param {Object} props
+ * @param {propTypes.uuid} [props.activeListingId] - The active listing ID
+ * @param {propTypes.currentUser} [props.currentUser] - The current user
+ * @param {Array<propTypes.listing>} [props.listings] - The listings
+ * @param {propTypes.pagination} [props.pagination] - The pagination
+ * @param {boolean} [props.scrollingDisabled] - Whether the scrolling is disabled
+ * @param {boolean} [props.searchInProgress] - Whether the search is in progress
+ * @param {propTypes.error} [props.searchListingsError] - The search listings error
+ * @param {Object} [props.searchParams] - The search params from the Redux state
+ * @param {Function} [props.onActivateListing] - The function to activate a listing
+ * @param {Function} [props.onManageDisableScrolling] - The function to manage the disable scrolling
+ * @returns {JSX.Element}
+ */
 const EnhancedSearchPage = props => {
   const config = useConfiguration();
   const routeConfiguration = useRouteConfiguration();
   const intl = useIntl();
   const history = useHistory();
   const location = useLocation();
+
+  const searchListingsError = props.searchListingsError;
+  if (isForbiddenError(searchListingsError)) {
+    // This can happen if private marketplace mode is active
+    return (
+      <NamedRedirect
+        name="SignupPage"
+        state={{ from: `${location.pathname}${location.search}${location.hash}` }}
+      />
+    );
+  }
+
+  const { currentUser, ...restOfProps } = props;
+  const isPrivateMarketplace = config.accessControl.marketplace.private === true;
+  const isUnauthorizedUser = currentUser && !isUserAuthorized(currentUser);
+  const hasNoViewingRightsUser = currentUser && !hasPermissionToViewData(currentUser);
+  const hasUserPendingApprovalError = isErrorUserPendingApproval(searchListingsError);
+  const hasNoViewingRightsError = isErrorNoViewingPermission(searchListingsError);
+
+  if ((isPrivateMarketplace && isUnauthorizedUser) || hasUserPendingApprovalError) {
+    return (
+      <NamedRedirect
+        name="NoAccessPage"
+        params={{ missingAccessRight: NO_ACCESS_PAGE_USER_PENDING_APPROVAL }}
+      />
+    );
+  } else if (hasNoViewingRightsUser || hasNoViewingRightsError) {
+    return (
+      <NamedRedirect
+        name="NoAccessPage"
+        params={{ missingAccessRight: NO_ACCESS_PAGE_VIEW_LISTINGS }}
+      />
+    );
+  }
 
   return (
     <SearchPageComponent
@@ -760,12 +959,14 @@ const EnhancedSearchPage = props => {
       intl={intl}
       history={history}
       location={location}
-      {...props}
+      currentUser={currentUser}
+      {...restOfProps}
     />
   );
 };
 
 const mapStateToProps = state => {
+  const { currentUser } = state.user;
   const {
     currentPageResultIds,
     pagination,
@@ -777,6 +978,7 @@ const mapStateToProps = state => {
   const listings = getListingsById(state, currentPageResultIds);
 
   return {
+    currentUser,
     listings,
     pagination,
     scrollingDisabled: isScrollingDisabled(state),

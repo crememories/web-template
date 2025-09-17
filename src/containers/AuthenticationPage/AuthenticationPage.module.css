@@ -1,5 +1,8 @@
 @import '../../styles/customMediaQueries.css';
 
+.layoutWrapperMain {
+}
+
 .root {
   flex-grow: 1;
 }
@@ -24,6 +27,13 @@
     margin-bottom: 7.5vh;
     min-height: 700px;
   }
+}
+
+.spinnerContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
 }
 
 /* ================ Tabs & Form ================ */
@@ -108,6 +118,29 @@
   @media (--viewportMedium) {
     width: 604px;
     padding-top: 11px;
+  }
+}
+
+/* userType selection */
+.userTypeSelect {
+  margin-bottom: 24px;
+
+  @media (--viewportMedium) {
+    margin-bottom: 32px;
+  }
+}
+
+.selectedLabel {
+  composes: label from global;
+}
+.selectedValue {
+  margin-top: 0;
+  margin-bottom: 6px;
+
+  @media (--viewportMedium) {
+    margin-top: 0;
+    margin-bottom: 0;
+    padding: 2px 0 6px 0;
   }
 }
 

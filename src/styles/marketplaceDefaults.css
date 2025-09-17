@@ -16,16 +16,6 @@
 :root {
   /* ================ Colors ================ */
 
-  /**
-   * Marketplace color comes by default from src/config/brandingConfig.js
-   * It overwrites these CSS Properties.
-   * In the future, we are planning to bring more --marketplace* CSS Properties
-   * from hosted assets, which means that they could be managed through Console.
-   */
-  --marketplaceColor: #5d2bc0; /* hsl(260, 63%, 46%) */
-  --marketplaceColorLight: #7748d5; /* hsl(260, 63%, 56%), +10L from marketplaceColor */
-  --marketplaceColorDark: #492296; /* hsl(260, 63%, 26%), -10L from marketplaceColor */
-
   /* Colors used for different functions (like error texts) */
 
   --marketplaceColor: #0095cd;
@@ -61,6 +51,31 @@
   --colorBlack: hsl(0 0% 0%);
 
   --colorLightTransparent: rgba(255, 255, 255, 0.65);
+
+  /**
+  * Marketplace color comes by default from src/config/brandingConfig.js
+  * It overwrites these CSS Properties.
+  * In the future, we are planning to bring more --marketplace* CSS Properties
+  * from hosted assets, which means that they could be managed through Console.
+  */
+  --marketplaceColor: #5d2bc0; /* hsl(260, 63%, 46%) */
+  --marketplaceColorLight: #7748d5; /* hsl(260, 63%, 56%), +10L from marketplaceColor */
+  --marketplaceColorDark: #492296; /* hsl(260, 63%, 26%), -10L from marketplaceColor */
+
+  /** 
+   * The fill color used by <PrimaryButton>
+   * These might be overwritten by values from hosted assets
+   */
+  --colorPrimaryButton: var(--colorSuccess);
+  --colorPrimaryButtonDark: var(--colorSuccessDark);
+  --colorPrimaryButtonLight: var(--colorSuccessLight);
+
+  /** 
+   * The fill color used by <SecondaryButton>
+   */
+  --colorSecondaryButton: var(--colorWhite);
+  --colorSecondaryButtonDark: var(--colorWhite);
+  --colorSecondaryButtonLight: var(--colorWhite);
 
   /* ================ Font ================ */
   --fontFamily: -apple-system, BlinkMacSystemFont, 'Inter', Helvetica, Arial, sans-serif,
@@ -146,15 +161,23 @@
   /* ================ Filters ================ */
   --marketplaceButtonSmallDesktopPadding: 9px 16px 9px 16px;
 
-  /* ================ DateInput, DateRangeInput, DateRangeController ================ */
-  --ReactDates_selectionHeight: 36px;
-  --ReactDates_hoveredOverlayColor: rgba(255, 255, 255, 0.2);
-
-  --DateInput_selectionHeight: var(--ReactDates_selectionHeight);
-  --DateInput_hoveredOverlayColor: var(--ReactDates_hoveredOverlayColor);
-  --DateRangeInput_selectionHeight: var(--ReactDates_selectionHeight);
-  --DateRangeInput_hoveredOverlayColor: var(--ReactDates_hoveredOverlayColor);
-  --DateRangeController_selectionHeight: var(--ReactDates_selectionHeight);
+  /* ================ DatePicker ================ */
+  --datepickerFgColor: var(--colorWhite);
+  --datepickerBgColor: var(--marketplaceColor);
+  --datepickerBorderColor: var(--colorGrey50);
+  --datepickerDisabledFgColor: var(--marketplaceColorDark);
+  --datepickerDisabledTextDeco: unset;
+  --datepickerHoveredFgColor: inherit;
+  --datepickerHoveredBgColor: rgba(255, 255, 255, 0.2);
+  --datepickerHeaderFgColor: var(--colorWhite);
+  --datepickerHeaderFgColorDisabled: var(--colorGrey100);
+  --datepickerHeaderArrowColor: var(--colorWhite);
+  --datepickerDateOutline: white solid 1px;
+  --datepickerButtonOutlineColor: var(--colorGrey50);
+  --datepickerSelectedFgColor: var(--colorWhite);
+  --datepickerSelectedBgColor: var(--colorSuccess);
+  --datepickerSelectedHoveredFgColor: inherit;
+  --datepickerSelectedHoveredBgColor: rgba(255, 255, 255, 0.2);
 
   /* ================ SectionHero ================ */
   --SectionHero_desktopTitleMaxWidth: 625px;
@@ -208,6 +231,18 @@ body {
 ::-moz-selection {
   background: var(--marketplaceColor); /* Gecko Browsers */
   color: var(--colorWhite);
+}
+
+/* Default elements that are targets */
+/* In addition, let's ensure that section components have scroll-margin */
+/* Since target does not work in every situation */
+:target,
+section {
+  scroll-margin-top: var(--topbarHeight);
+
+  @media (--viewportMedium) {
+    scroll-margin-top: var(--topbarHeightDesktop);
+  }
 }
 
 a {
@@ -381,11 +416,6 @@ html {
   color: var(--colorGrey700);
   padding: 0;
   margin: 0;
-  scroll-padding-top: calc(var(--topbarHeight) + 1px);
-
-  @media (--viewportMedium) {
-    scroll-padding-top: calc(var(--topbarHeightDesktop) + 1px);
-  }
 }
 
 ul {
@@ -426,8 +456,8 @@ label {
     line-height: 16px;
     margin-top: 0;
     margin-bottom: 0;
-    padding-top: 3px;
-    padding-bottom: 13px;
+    padding-top: 4px;
+    padding-bottom: 12px;
   }
 }
 
@@ -463,7 +493,6 @@ select {
   transition: all ease-in-out 100ms;
 
   padding: 6px 24px 4px 12px;
-  box-shadow: 0 2px 3px 0 rgba(216, 220, 230, 0.7);
 
   /* Unset user agent styles */
   appearance: none;
@@ -497,6 +526,8 @@ select:focus {
 }
 select:disabled {
   opacity: 0.5;
+  appearance: none;
+  color: var(--colorGrey300);
 
   &:hover {
     cursor: not-allowed;
@@ -1033,7 +1064,7 @@ textarea {
 
   /* Button colors */
   /* Primary button uses success color */
-  background-color: var(--colorSuccess);
+  background-color: var(--colorPrimaryButton);
   color: var(--colorWhite);
 
   @media (--viewportMedium) {
@@ -1044,7 +1075,7 @@ textarea {
 .buttonPrimary:hover {
   outline: none;
   box-shadow: var(--boxShadowButton);
-  background-color: var(--colorSuccessDark);
+  background-color: var(--colorPrimaryButtonDark);
   color: var(--colorWhite);
 }
 .buttonPrimary:hover {
@@ -1081,7 +1112,7 @@ textarea {
   border: none;
   border-radius: var(--borderRadiusMedium);
 
-  background-color: var(--colorSuccess);
+  background-color: var(--colorPrimaryButton);
   color: var(--colorWhite);
 
   @media (--viewportMedium) {
@@ -1093,7 +1124,7 @@ textarea {
   outline: none;
   box-shadow: var(--boxShadowButton);
   text-decoration: none;
-  background-color: var(--colorSuccessDark);
+  background-color: var(--colorPrimaryButtonDark);
   color: var(--colorWhite);
 }
 .buttonPrimaryInline:disabled {
@@ -1137,7 +1168,7 @@ textarea {
   border-radius: var(--borderRadiusMedium);
 
   /* Button colors: secondary */
-  background-color: var(--colorWhite);
+  background-color: var(--colorSecondaryButton);
   color: var(--colorGrey700);
 
   @media (--viewportMedium) {
@@ -1149,7 +1180,7 @@ textarea {
   outline: none;
   box-shadow: var(--boxShadowButton);
   border-color: var(--colorGrey300);
-  background-color: var(--colorWhite);
+  background-color: var(--colorSecondaryButton);
 }
 .buttonSecondary:hover {
   text-decoration: none;
@@ -1200,7 +1231,7 @@ textarea {
   border-radius: var(--borderRadiusMedium);
 
   /* Button colors: secondary */
-  background-color: var(--colorWhite);
+  background-color: var(--colorSecondaryButton);
   color: var(--colorGrey700);
 
   @media (--viewportMedium) {
@@ -1212,7 +1243,7 @@ textarea {
   outline: none;
   box-shadow: var(--boxShadowButton);
   border-color: var(--colorGrey300);
-  background-color: var(--colorWhite);
+  background-color: var(--colorSecondaryButton);
 }
 .buttonSecondaryInline:hover {
   text-decoration: none;
@@ -1221,6 +1252,42 @@ textarea {
   box-shadow: none;
   cursor: not-allowed;
   border-color: var(--colorGrey100);
+}
+
+.buttonSmall {
+  font-family: var(--fontFamily);
+  font-weight: var(--fontWeightMedium);
+
+  font-size: 14px;
+  line-height: 16px;
+  padding: 6px 16px;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+
+  /* Colors */
+  background-color: var(--colorWhite);
+  color: var(--colorGrey700);
+
+  /* Borders */
+  border-radius: var(--borderRadius);
+  border: 1px solid var(--colorGrey100);
+  background: var(--colorWhite);
+
+  cursor: pointer;
+  transition: var(--transitionStyleButton);
+
+  @media (--viewportMedium) {
+    padding: 7px 16px;
+  }
+}
+.buttonSmall:focus,
+.buttonSmall:hover {
+  background-color: var(--marketplaceColor);
+  border-color: var(--marketplaceColor);
+  color: var(--colorWhite);
 }
 
 /* ================ Modals ================ */
@@ -1377,6 +1444,16 @@ textarea {
 }
 
 /* Modal Close icon */
+
+.marketplaceModalCloseNav {
+  /* Position inside modal */
+  position: fixed;
+  top: 0;
+  right: 0;
+
+  /* Some content (like map) is positioning itself on top of close button without z-index handling */
+  z-index: calc(var(--zIndexModal) + 1);
+}
 
 .marketplaceModalCloseStyles {
   /* Position inside modal */

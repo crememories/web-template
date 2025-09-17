@@ -19,11 +19,4 @@ const IconList = props => {
   );
 };
 
-IconList.defaultProps = { className: null };
-
-IconList.propTypes = {
-  className: string,
-  rootClassName: string,
-};
-
 export default IconList;

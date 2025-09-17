@@ -75,16 +75,4 @@ const TopbarCategories = (props) => {
   );
 };
 
-TopbarCategories.propTypes = {
-  rootClassName: string,
-  className: string,
-  currentUserHasListings: bool.isRequired,
-  currentUser: propTypes.currentUser,
-  currentPage: string,
-  notificationCount: number,
-  initialSearchFormValues: object,
-  intl: intlShape.isRequired,
-  appConfig: object,
-};
-
 export default TopbarCategories;

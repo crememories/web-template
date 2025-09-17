@@ -124,6 +124,7 @@ export const CheckoutPageWithInquiryProcess = props => {
     pageData,
     listingTitle,
     title,
+    showListingImage,
     initiateInquiryError,
   } = props;
 
@@ -148,13 +149,14 @@ export const CheckoutPageWithInquiryProcess = props => {
 
   return (
     <Page title={title} scrollingDisabled={scrollingDisabled}>
-      <CustomTopbar intl={intl} />
+      <CustomTopbar intl={intl} linkToExternalSite={config?.topbar?.logoLink} />
       <div className={css.contentContainer}>
         <MobileListingImage
           listingTitle={listingTitle}
           author={listing?.author}
           firstImage={firstImage}
           layoutListingImageConfig={config.layout.listingImage}
+          showListingImage={showListingImage}
         />
         <div className={css.orderFormContainer}>
           <div className={css.headingContainer}>
@@ -252,6 +254,7 @@ export const CheckoutPageWithInquiryProcess = props => {
           layoutListingImageConfig={config.layout.listingImage}
           processName={processName}
           showPrice={showPrice && !!price}
+          showListingImage={showListingImage}
           intl={intl}
         />
       </div>

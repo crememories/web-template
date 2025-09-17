@@ -20,10 +20,4 @@ const IconCopy = props => {
   );
 };
 
-IconCopy.defaultProps = { rootClassName: null, className: null };
-
-const { string } = PropTypes;
-
-IconCopy.propTypes = { rootClassName: string, className: string };
-
 export default IconCopy;

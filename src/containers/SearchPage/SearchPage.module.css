@@ -1,11 +1,5 @@
 @import '../../styles/customMediaQueries.css';
 
-/* Can be given to Topbar when a modal is opened
- * so that the Topbar is not rendered on top of it.*/
-.topbarBehindModal {
-  z-index: initial;
-}
-
 .topbar {
   width: 100%;
 
@@ -20,6 +14,12 @@
     /* We need to raise Topbar above .container */
     z-index: var(--zIndexTopbar);
   }
+}
+
+/* Can be given to Topbar when a modal is opened
+ * so that the Topbar is not rendered on top of it.*/
+.topbarBehindModal {
+  z-index: initial;
 }
 
 .container {
@@ -323,6 +323,7 @@
     position: fixed;
     top: var(--topbarHeightDesktop);
     right: 0;
+    left: unset;
 
     /* Fixed content needs width relative to viewport */
     width: 50vw;
@@ -331,6 +332,63 @@
 
   @media (--viewportLarge) {
     width: 37.5vw;
+  }
+}
+
+.mapRoot {
+  background-color: var(--colorGrey100);
+}
+.mapRoot {
+  background-color: var(--colorGrey100);
+}
+.mapPanelHidden{
+  display: none;
+}
+.mapSub {
+  width: 100vw;
+  height: 100vh;
+  @media (--viewportMedium) {
+    /* Map is fixed so that it doesn't scroll along search results */
+    position: fixed;
+    top: var(--topbarHeightDesktopSearch);
+    right: 0;
+
+    /* Fixed content needs width relative to viewport */
+    width: 50vw;
+    height: calc(100vh - var(--topbarHeightDesktopSearch));
+  }
+
+  @media (--viewportLarge) {
+    width: 37.5vw;
+  }
+}
+
+.mapSubFullwidth {
+  width: 100vw;
+  height: 100vh;
+  z-index: 2;
+
+  @media (--viewportMedium) {
+    /* Map is fixed so that it doesn't scroll along search results */
+    position: fixed;
+    top: var(--topbarHeightDesktopSearch);
+    right: 0;
+
+    /* Fixed content needs width relative to viewport */
+    width: 100vw;
+    height: calc(100vh - var(--topbarHeightDesktopSearch));
+  }
+}
+
+.searchHeader {
+  composes: mainPanel;
+}
+
+.searchHeaderMobile {
+  padding: 16px 24px;
+
+  @media (--viewportMedium) {
+    display: none !important;
   }
 }
 

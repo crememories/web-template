@@ -42,6 +42,7 @@ const initialState = {
   speculateTransactionInProgress: false,
   speculateTransactionError: null,
   speculatedTransaction: null,
+  isClockInSync: false,
   transaction: null,
   initiateOrderError: null,
   confirmPaymentError: null,
@@ -64,12 +65,18 @@ export default function checkoutPageReducer(state = initialState, action = {}) {
         speculateTransactionError: null,
         speculatedTransaction: null,
       };
-    case SPECULATE_TRANSACTION_SUCCESS:
+    case SPECULATE_TRANSACTION_SUCCESS: {
+      // Check that the local devices clock is within a minute from the server
+      const lastTransitionedAt = payload.transaction?.attributes?.lastTransitionedAt;
+      const localTime = new Date();
+      const minute = 60000;
       return {
         ...state,
         speculateTransactionInProgress: false,
         speculatedTransaction: payload.transaction,
+        isClockInSync: Math.abs(lastTransitionedAt?.getTime() - localTime.getTime()) < minute,
       };
+    }
     case SPECULATE_TRANSACTION_ERROR:
       console.error(payload); // eslint-disable-line no-console
       return {
@@ -254,7 +261,7 @@ export const initiateOrder = (
     expand: true,
   };
 
-  const handleSucces = response => {
+  const handleSuccess = response => {
     const entities = denormalisedResponseEntities(response);
     const order = entities[0];
     dispatch(initiateOrderSuccess(order));
@@ -277,25 +284,25 @@ export const initiateOrder = (
 
   if (isTransition && isPrivilegedTransition) {
     // transition privileged
-    return transitionPrivileged({ isSpeculative: false, orderData, bodyParams, queryParams, commission })
-      .then(handleSucces)
+    return transitionPrivileged({ isSpeculative: false, orderData, bodyParams, queryParams })
+      .then(handleSuccess)
       .catch(handleError);
   } else if (isTransition) {
     // transition non-privileged
     return sdk.transactions
       .transition(bodyParams, queryParams)
-      .then(handleSucces)
+      .then(handleSuccess)
       .catch(handleError);
   } else if (isPrivilegedTransition) {
     // initiate privileged
-    return initiatePrivileged({ isSpeculative: false, orderData, bodyParams, queryParams, commission })
-      .then(handleSucces)
+    return initiatePrivileged({ isSpeculative: false, orderData, bodyParams, queryParams })
+      .then(handleSuccess)
       .catch(handleError);
   } else {
     // initiate non-privileged
     return sdk.transactions
       .initiate(bodyParams, queryParams)
-      .then(handleSucces)
+      .then(handleSuccess)
       .catch(handleError);
   }
 };
@@ -450,15 +457,23 @@ export const speculateTransaction = (
   // initiate.
   const isTransition = !!transactionId;
 
-  const { deliveryMethod, quantity, variant, bookingDates, ...otherOrderParams } = orderParams;
-  console.log('initiateOrder');
-  console.log(orderParams);
+  const {
+    deliveryMethod,
+    priceVariantName,
+    quantity,
+    variant,
+    bookingDates,
+    ...otherOrderParams
+  } = orderParams;
   const quantityMaybe = quantity ? { stockReservationQuantity: quantity } : {};
   const variantMaybe = quantity ? { stockReservationVariant: variant } : {};
   const bookingParamsMaybe = bookingDates || {};
 
   // Parameters only for client app's server
-  const orderData = deliveryMethod ? { deliveryMethod } : {};
+  const orderData = {
+    ...(deliveryMethod ? { deliveryMethod } : {}),
+    ...(priceVariantName ? { priceVariantName } : {}),
+  };
 
   // Parameters for Marketplace API
   const transitionParams = {
@@ -534,8 +549,14 @@ export const speculateTransaction = (
 // We need to fetch currentUser with correct params to include relationship
 export const stripeCustomer = () => (dispatch, getState, sdk) => {
   dispatch(stripeCustomerRequest());
+  const fetchCurrentUserOptions = {
+    callParams: { include: ['stripeCustomer.defaultPaymentMethod'] },
+    updateHasListings: false,
+    updateNotifications: false,
+    enforce: true,
+  };
 
-  return dispatch(fetchCurrentUser({ include: ['stripeCustomer.defaultPaymentMethod'] }))
+  return dispatch(fetchCurrentUser(fetchCurrentUserOptions))
     .then(response => {
       dispatch(stripeCustomerSuccess());
     })

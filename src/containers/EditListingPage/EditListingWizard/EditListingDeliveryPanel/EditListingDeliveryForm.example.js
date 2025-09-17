@@ -13,6 +13,7 @@ export const BothPickupAndShipping = {
     updateInProgress: false,
     disabled: false,
     ready: false,
+    formId: 'BothPickupAndShipping',
   },
   group: 'page:EditListingPage',
 };

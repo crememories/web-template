@@ -1,9 +1,9 @@
-import React, { useState } from 'react';
-import { bool, func, oneOfType, string } from 'prop-types';
+import React, { useEffect, useState } from 'react';
 import truncate from 'lodash/truncate';
 import classNames from 'classnames';
 
 import { FormattedMessage } from '../../../util/reactIntl';
+import { richText } from '../../../util/richText';
 import { ensureUser, ensureCurrentUser } from '../../../util/data';
 import { propTypes } from '../../../util/types';
 
@@ -14,6 +14,7 @@ import css from './UserCard.module.css';
 // Approximated collapsed size so that there are ~three lines of text
 // in the desktop layout in the author section of the ListingPage.
 const BIO_COLLAPSED_LENGTH = 170;
+const MIN_LENGTH_FOR_LONG_WORDS = 20;
 
 const truncated = s => {
   return truncate(s, {
@@ -33,7 +34,17 @@ const truncated = s => {
 const ExpandableBio = props => {
   const [expand, setExpand] = useState(false);
   const { className, bio } = props;
-  const truncatedBio = truncated(bio);
+  const bioWithLinks = richText(bio, {
+    linkify: true,
+    longWordMinLength: MIN_LENGTH_FOR_LONG_WORDS,
+    longWordClass: css.longWord,
+  });
+  const truncatedBio = richText(truncated(bio), {
+    linkify: true,
+    longWordMinLength: MIN_LENGTH_FOR_LONG_WORDS,
+    longWordClass: css.longWord,
+    breakChars: '/',
+  });
 
   const handleShowMoreClick = () => {
     setExpand(true);
@@ -45,21 +56,32 @@ const ExpandableBio = props => {
   );
   return (
     <p className={className}>
-      {expand ? bio : truncatedBio}
-      {bio !== truncatedBio && !expand ? showMore : null}
+      {expand ? bioWithLinks : truncatedBio}
+      {bio.length >= BIO_COLLAPSED_LENGTH && !expand ? showMore : null}
     </p>
   );
 };
 
-ExpandableBio.defaultProps = { className: null };
-
-ExpandableBio.propTypes = {
-  className: string,
-  bio: string.isRequired,
-};
-
+/**
+ * The UserCard component.
+ *
+ * @component
+ * @param {Object} props
+ * @param {string} [props.className] - Custom class that extends the default class for the root element
+ * @param {string} [props.rootClassName] - Custom class that overrides the default class for the root element
+ * @param {propTypes.user | propTypes.currentUser} props.user - The user
+ * @param {propTypes.currentUser} props.currentUser - The current user
+ * @param {function} props.onContactUser - The on contact user function
+ * @param {boolean} [props.showContact] - Whether to show the contact user button
+ * @returns {JSX.Element} user card component
+ */
 const UserCard = props => {
-  const { rootClassName, className, user, currentUser, onContactUser, showContact } = props;
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  const { rootClassName, className, user, currentUser, onContactUser, showContact = true } = props;
 
   const userIsCurrentUser = user && user.type === 'currentUser';
   const ensuredUser = userIsCurrentUser ? ensureCurrentUser(user) : ensureUser(user);
@@ -80,7 +102,9 @@ const UserCard = props => {
   });
 
   const separator =
-    isCurrentUser || !showContact ? null : <span className={css.linkSeparator}>•</span>;
+    (mounted && isCurrentUser) || !showContact ? null : (
+      <span className={css.linkSeparator}>•</span>
+    );
 
   const contact = showContact ? (
     <InlineTextButton
@@ -101,11 +125,12 @@ const UserCard = props => {
     </span>
   );
 
-  const editProfileDesktop = isCurrentUser ? (
-    <NamedLink className={css.editProfileDesktop} name="ProfileSettingsPage">
-      <FormattedMessage id="ListingPage.editProfileLink" />
-    </NamedLink>
-  ) : null;
+  const editProfileDesktop =
+    mounted && isCurrentUser ? (
+      <NamedLink className={css.editProfileDesktop} name="ProfileSettingsPage">
+        <FormattedMessage id="ListingPage.editProfileLink" />
+      </NamedLink>
+    ) : null;
 
   const links = ensuredUser.id ? (
     <p className={linkClasses}>
@@ -113,7 +138,7 @@ const UserCard = props => {
         <FormattedMessage id="UserCard.viewProfileLink" />
       </NamedLink>
       {separator}
-      {isCurrentUser ? editProfileMobile : contact}
+      {mounted && isCurrentUser ? editProfileMobile : contact}
     </p>
   ) : null;
 
@@ -133,23 +158,6 @@ const UserCard = props => {
       {hasBio ? <ExpandableBio className={css.mobileBio} bio={bio} /> : null}
     </div>
   );
-};
-
-UserCard.defaultProps = {
-  rootClassName: null,
-  className: null,
-  user: null,
-  currentUser: null,
-  showContact: true,
-};
-
-UserCard.propTypes = {
-  rootClassName: string,
-  className: string,
-  user: oneOfType([propTypes.user, propTypes.currentUser]),
-  currentUser: propTypes.currentUser,
-  onContactUser: func.isRequired,
-  showContact: bool,
 };
 
 export default UserCard;

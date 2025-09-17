@@ -92,6 +92,15 @@
     width: unset;
     padding: 2px 0;
   }
+  &.noListingImage {
+    margin-top: 24px;
+    @media (--viewportMedium) {
+      margin-top: 32px;
+    }
+    @media (--viewportLarge) {
+      margin-top: 40px;
+    }
+  }
 }
 
 /* Passed-in props for DetailCardImage subcomponent */
@@ -259,6 +268,9 @@
   @media (--viewportLarge) {
     display: block;
     margin: 24px 48px 32px 48px;
+    &.noListingImage {
+      margin-top: 32px;
+    }
   }
 }
 
@@ -311,12 +323,23 @@
   /* default "root" class for breakdown container */
 }
 
+.bookingPriceVariant {
+  margin: 0 24px 18px 24px;
+
+  @media (--viewportMedium) {
+    margin: 0 24px 16px 24px;
+  }
+  @media (--viewportLarge) {
+    margin: 0 48px;
+  }
+}
+
 .orderBreakdownTitle {
   letter-spacing: 1px;
   font-weight: var(--fontWeightMedium);
   margin: 0 24px;
 
-  @media (--viewportMedium) {
+  @media (--viewportLarge) {
     margin: 0 48px;
   }
 }
@@ -329,7 +352,7 @@
   border: none;
   background-color: var(--colorGrey100);
 
-  @media (--viewportMedium) {
+  @media (--viewportLarge) {
     margin: 7px 48px 0 48px;
   }
 }
@@ -406,6 +429,16 @@
   color: var(--colorWhite);
 }
 
+.ownMessageContentLink {
+  color: var(--colorWhite);
+  text-decoration: underline;
+
+  &:hover {
+    text-decoration: none;
+    background-color: var(--marketplaceColorDark);
+  }
+}
+
 .messageError {
   color: var(--colorFail);
   margin: 13px 0 22px 0;
@@ -417,6 +450,11 @@
   @media (--viewportLarge) {
     margin: 12px 0 23px 0;
   }
+}
+
+.longWord {
+  word-break: break-word;
+  hyphens: auto;
 }
 
 /* Passed-in props for FeedSection subcomponent */

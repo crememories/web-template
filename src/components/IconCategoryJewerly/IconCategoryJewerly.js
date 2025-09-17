@@ -1,5 +1,3 @@
-import React from 'react';
-import PropTypes from 'prop-types';
 import classNames from 'classnames';
 
 import css from './IconCategoryJewerly.module.css';
@@ -20,11 +18,5 @@ const IconCategoryJewerly = props => {
     </svg>
   );
 };
-
-IconCategoryJewerly.defaultProps = { rootClassName: null, className: null };
-
-const { string } = PropTypes;
-
-IconCategoryJewerly.propTypes = { rootClassName: string, className: string };
 
 export default IconCategoryJewerly;

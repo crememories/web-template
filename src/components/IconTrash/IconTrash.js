@@ -25,18 +25,4 @@ const IconTrash = props => {
   );
 };
 
-IconTrash.defaultProps = {
-  rootClassName: null,
-  className: null,
-  pencilClassName: null,
-};
-
-const { string } = PropTypes;
-
-IconTrash.propTypes = {
-  rootClassName: string,
-  className: string,
-  pencilClassName: string,
-};
-
 export default IconTrash;

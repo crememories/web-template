@@ -21,10 +21,4 @@ const IconFacebook = props => {
   );
 };
 
-IconFacebook.defaultProps = { rootClassName: null, className: null };
-
-const { string } = PropTypes;
-
-IconFacebook.propTypes = { rootClassName: string, className: string };
-
 export default IconFacebook;

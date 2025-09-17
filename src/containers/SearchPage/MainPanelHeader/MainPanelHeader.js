@@ -1,5 +1,4 @@
 import React from 'react';
-import { bool, func, node, number, string } from 'prop-types';
 import classNames from 'classnames';
 
 import { FormattedMessage } from '../../../util/reactIntl';
@@ -10,6 +9,22 @@ import Switch from "react-switch";  // Keep the switch logic intact
 
 import css from './MainPanelHeader.module.css';
 
+/**
+ * MainPanelHeader component
+ *
+ * @component
+ * @param {Object} props
+ * @param {string} [props.className] - Custom class that extends the default class for the root element
+ * @param {string} [props.rootClassName] - Custom class that overrides the default class for the root element
+ * @param {React.Node} props.children - The children
+ * @param {React.Node} props.sortByComponent - The sort by component
+ * @param {boolean} props.isSortByActive - Whether the sort by is active
+ * @param {boolean} props.listingsAreLoaded - Whether the listings are loaded
+ * @param {number} props.resultsCount - The results count
+ * @param {boolean} props.searchInProgress - Whether the search is in progress
+ * @param {React.Node} props.noResultsInfo - The no results info
+ * @returns {JSX.Element}
+ */
 const MainPanelHeader = props => {
   const {
     intl,
@@ -20,7 +35,7 @@ const MainPanelHeader = props => {
     isSortByActive,
     listingsAreLoaded,
     resultsCount,
-    searchInProgress,
+    searchInProgress = false,
     noResultsInfo,
     propsForSecondaryFiltersToggle,
     availablePrimaryFilters,
@@ -106,23 +121,6 @@ const MainPanelHeader = props => {
       {noResultsInfo ? noResultsInfo : null}
     </div>
   );
-};
-
-MainPanelHeader.defaultProps = {
-  rootClassName: null,
-  className: null,
-  resultsCount: null,
-  searchInProgress: false,
-  sortByComponent: null,
-};
-
-MainPanelHeader.propTypes = {
-  rootClassName: string,
-  className: string,
-  listingsAreLoaded: bool.isRequired,
-  resultsCount: number,
-  searchInProgress: bool,
-  sortByComponent: node,
 };
 
 export default MainPanelHeader;

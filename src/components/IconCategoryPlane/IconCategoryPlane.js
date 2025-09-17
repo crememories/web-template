@@ -1,5 +1,3 @@
-import React from 'react';
-import PropTypes from 'prop-types';
 import classNames from 'classnames';
 
 import css from './IconCategoryPlane.module.css';
@@ -22,11 +20,5 @@ const IconCategoryPlane = props => {
     </svg>
   );
 };
-
-IconCategoryPlane.defaultProps = { rootClassName: null, className: null };
-
-const { string } = PropTypes;
-
-IconCategoryPlane.propTypes = { rootClassName: string, className: string };
 
 export default IconCategoryPlane;

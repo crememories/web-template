@@ -1,5 +1,4 @@
 import React, { Component } from 'react';
-import { string } from 'prop-types';
 import { FormattedMessage } from '../../util/reactIntl';
 import classNames from 'classnames';
 import { propTypes } from '../../util/types';
@@ -8,6 +7,17 @@ import { Heading, Map } from '../../components';
 
 import css from './ListingPage.module.css';
 
+/**
+ * The SectionMapMaybe component.
+ *
+ * @component
+ * @param {Object} props
+ * @param {string} [props.className] - Custom class that extends the default class for the root element
+ * @param {string} [props.rootClassName] - Custom class that overrides the default class for the root element
+ * @param {propTypes.latlng} [props.geolocation] - The geolocation
+ * @param {propTypes.uuid} props.listingId - The listing id
+ * @returns {JSX.Element} section map maybe component
+ */
 class SectionMapMaybe extends Component {
   constructor(props) {
     super(props);
@@ -31,7 +41,7 @@ class SectionMapMaybe extends Component {
     const map = <Map {...mapProps} useStaticMap={this.state.isStatic} />;
 
     return (
-      <div className={classes}>
+      <section className={classes} id="listing-location">
         <Heading as="h2" rootClassName={css.sectionHeadingWithExtraMargin}>
           <FormattedMessage id="ListingPage.locationTitle" />
         </Heading>
@@ -47,23 +57,9 @@ class SectionMapMaybe extends Component {
         ) : (
           <div className={css.map}>{map}</div>
         )}
-      </div>
+      </section>
     );
   }
 }
-
-SectionMapMaybe.defaultProps = {
-  rootClassName: null,
-  className: null,
-  geolocation: null,
-  listingId: null,
-};
-
-SectionMapMaybe.propTypes = {
-  rootClassName: string,
-  className: string,
-  geolocation: propTypes.latlng,
-  listingId: propTypes.uuid,
-};
 
 export default SectionMapMaybe;

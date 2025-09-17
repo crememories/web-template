@@ -20,10 +20,4 @@ const IconMoreOptions = props => {
   );
 };
 
-IconMoreOptions.defaultProps = { rootClassName: null, className: null };
-
-const { string } = PropTypes;
-
-IconMoreOptions.propTypes = { rootClassName: string, className: string };
-
 export default IconMoreOptions;

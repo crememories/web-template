@@ -46,6 +46,12 @@
   overflow: hidden;
 }
 
+.actionBarWithCTAEnabled {
+  display: inline-flex;
+  flex-wrap: wrap;
+  padding: 0 8px;
+}
+
 .actionBar {
   display: flex;
   justify-content: space-between;
@@ -54,21 +60,25 @@
   color: var(--colorGrey100);
   background-color: var(--colorGrey700);
   z-index: 1; /* bring on top of mobile image */
+  padding: 0 24px;
 
   /* Action bar prevents the image click events going to the parent and
    should not show a pointer */
   cursor: initial;
 
-  border-radius: var(--borderRadius);
-
   @media (--viewportMedium) {
     flex-direction: row;
+    border-radius: var(--borderRadiusMedium);
   }
 }
 
 .actionBarForProductLayout {
-  margin: 24px;
-  width: calc(100% - 48px);
+  margin: 0;
+  width: 100%;
+
+  &:nth-child(even) {
+    margin-top: 24px;
+  }
 
   @media (--viewportMedium) {
     margin: 24px 0 24px 0;
@@ -90,10 +100,61 @@
   gap: 24px;
 }
 
+.actionBarContainerForNoListingImage {
+  /* Mobile positioning for action bar when no listing image is present */
+  position: absolute;
+  width: 100%;
+  border-radius: 0;
+
+  @media (--viewportMedium) {
+    position: relative;
+    top: auto;
+    left: auto;
+    width: auto;
+    padding: 12px;
+  }
+}
+
 .actionBarForHeroLayout {
   /* Action bar prevents the image click events going to the parent and
    should not show a pointer */
   cursor: initial;
+  border-radius: var(--borderRadiusMedium);
+
+  &.actionBarNoBorderRadiusOnMobile {
+    border-radius: 0;
+    @media (--viewportMedium) {
+      border-radius: var(--borderRadiusMedium);
+    }
+  }
+}
+
+.actionBarCTA {
+  composes: buttonSmall from global;
+  display: inline-block;
+  width: 100%;
+  margin: 10px 0px 20px 0px;
+
+  &:hover,
+  &:focus {
+    background-color: var(--marketplaceColor);
+    border-color: var(--marketplaceColor);
+    color: var(--colorWhite);
+    text-decoration: none;
+  }
+
+  @media (--viewportMedium) {
+    width: auto;
+    margin: 20px 0 20px 15px;
+  }
+}
+
+.linkContainer {
+  display: inline-flex;
+  justify-content: center;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 0 8px;
 }
 
 .ownListingText {
@@ -101,8 +162,21 @@
   margin: 14px 24px 11px 24px;
 
   @media (--viewportMedium) {
-    margin: 24px 12px 24px 24px;
+    margin: 24px 24px 24px 0;
   }
+
+  &.CTAEnabled {
+    margin-bottom: 0;
+
+    @media (--viewportMedium) {
+      margin: 24px 0 0px 0;
+    }
+  }
+}
+
+.noShrink {
+  display: flex;
+  flex-shrink: 0;
 }
 
 .ownListingTextPendingApproval {
@@ -137,6 +211,20 @@
   @media (--viewportMedium) {
     margin: 24px 24px 24px 12px;
   }
+
+  &.CTAEnabled {
+    margin: 24px 0 0 0;
+  }
+}
+
+.missingPayoutDetailsText {
+  color: var(--colorAttention);
+}
+
+.payoutDetailsWarning {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
 }
 
 .missingPayoutDetailsText {
@@ -170,8 +258,7 @@
 }
 
 .viewPhotos {
-  composes: marketplaceTinyFontStyles from global;
-  font-weight: var(--fontWeightMedium);
+  composes: buttonSmall from global;
 
   /* Position and dimensions */
   position: absolute;
@@ -440,12 +527,16 @@
 .productOrderPanel {
   @media (--viewportLarge) {
     display: block;
-    margin-top: 24px;
   }
   /* Note: panel height might be too much on small viewport - hence min-height */
   @media (--viewportLarge) and (min-height: 950px) {
     position: sticky;
     top: 108px;
+  }
+  &.imagesEnabled {
+    @media (--viewportLarge) {
+      margin-top: 24px;
+    }
   }
 }
 
@@ -457,6 +548,12 @@
   width: 100%;
   margin-top: 0;
   margin-bottom: 0;
+  &.titleMarginForOwnListingNoImage {
+    margin-top: 100px;
+    @media (--viewportMedium) {
+      margin-top: 0;
+    }
+  }
 }
 
 .sectionAvatar {
@@ -675,7 +772,8 @@
 }
 
 .sectionDetails,
-.sectionMultiEnum {
+.sectionMultiEnum,
+.sectionEmbeddedYoutubeVideo {
   padding: 0 24px;
   margin-bottom: 32px;
 
@@ -699,10 +797,12 @@
 .sectionAuthor {
   padding: 0 24px;
   margin-top: 42px;
+  scroll-margin-top: calc(var(--topbarHeight) + 24px);
 
   @media (--viewportMedium) {
     padding: 0;
     margin-top: 40px;
+    scroll-margin-top: calc(var(--topbarHeightDesktop) + 24px);
   }
   @media (--viewportLarge) {
     padding: 8px 0;
@@ -718,10 +818,11 @@
   display: inline-flex;
   justify-content: space-between;
   width: 100%;
-  padding: 1px 0 4px 0;
-  line-height: 36px;
   list-style: none;
   font-weight: var(--fontWeightRegular);
+  line-height: 24px;
+  padding: 7px 0px 10px;
+  gap: 8px;
 
   &:not(:last-child) {
     border-bottom: 1px solid var(--colorGrey100);
@@ -794,9 +895,6 @@
 }
 
 .longWord {
-  /* fallback option */
-  word-break: break-all;
-  /* use break-word if available */
   word-break: break-word;
   hyphens: auto;
 }
@@ -822,6 +920,31 @@
 
   @media (--viewportLarge) {
     display: none;
+  }
+}
+
+.noListingImageHeading {
+  margin: 0 24px 24px 24px;
+  padding-top: 36px;
+
+  @media (--viewportMedium) {
+    margin: 0 0 24px 0;
+  }
+}
+
+.noListingImageHeadingHero {
+  composes: noListingImageHeading;
+
+  @media (--viewportMedium) {
+    padding-top: 0;
+  }
+}
+
+.noListingImageHeadingProduct {
+  composes: noListingImageHeading;
+
+  @media (--viewportLarge) {
+    padding-top: 0;
   }
 }
 
@@ -928,4 +1051,18 @@
 }
 .iconShareInline:hover{
   text-decoration: underline;
+}
+.video {
+  position: relative;
+  overflow: hidden;
+  border-radius: 8px;
+}
+.iframe {
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+  width: 100%;
+  height: 100%;
 }

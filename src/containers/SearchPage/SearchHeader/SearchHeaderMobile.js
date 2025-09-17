@@ -73,14 +73,4 @@ const SearchHeaderMobile = props => {
   );
 };
 
-SearchHeaderMobile.defaultProps = {
-  rootClassName: null,
-  className: null,
-};
-
-SearchHeaderMobile.propTypes = {
-  rootClassName: string,
-  className: string,
-};
-
 export default SearchHeaderMobile;

@@ -22,10 +22,4 @@ const IconButtonDots = props => {
   );
 };
 
-IconButtonDots.defaultProps = { rootClassName: null, className: null };
-
-const { string } = PropTypes;
-
-IconButtonDots.propTypes = { rootClassName: string, className: string };
-
 export default IconButtonDots;

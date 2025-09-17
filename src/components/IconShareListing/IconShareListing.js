@@ -20,10 +20,4 @@ const IconShareListing = props => {
   );
 };
 
-IconShareListing.defaultProps = { rootClassName: null, className: null };
-
-const { string } = PropTypes;
-
-IconShareListing.propTypes = { rootClassName: string, className: string };
-
 export default IconShareListing;

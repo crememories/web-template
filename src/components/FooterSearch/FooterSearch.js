@@ -1,5 +1,3 @@
-import React from 'react';
-import { string, bool, func } from 'prop-types';
 import classNames from 'classnames';
 
 import { useConfiguration } from '../../context/configurationContext';
@@ -41,24 +39,6 @@ const FooterSearch = props => {
       </div>
     </div>
   );
-};
-
-FooterSearch.defaultProps = {
-  rootClassName: null,
-  className: null,
-  changeMapSize: null,
-  handleShowMap: null,
-  isMapShow: null,
-  fullMap: null,
-};
-
-FooterSearch.propTypes = {
-  rootClassName: string,
-  className: string,
-  changeMapSize: func,
-  handleShowMap: func,
-  isMapShow: bool,
-  fullMap: bool
 };
 
 export default injectIntl(FooterSearch);

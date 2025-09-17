@@ -1,6 +1,5 @@
 import React, { Component } from 'react';
 import ReactDOM from 'react-dom';
-import { arrayOf, func, node, number, object, shape, string, bool } from 'prop-types';
 import differenceBy from 'lodash/differenceBy';
 import isEqual from 'lodash/isEqual';
 import classNames from 'classnames';
@@ -237,6 +236,23 @@ const infoCardComponent = (
 
 /**
  * SearchMap component using Mapbox as map provider
+ *
+ * @component
+ * @param {Object} props
+ * @param {string} [props.id] - The ID
+ * @param {string} [props.className] - Custom class that extends the default class for the root element
+ * @param {propTypes.latlngBounds} [props.bounds] - The bounds
+ * @param {propTypes.latlng} [props.center] - The center
+ * @param {Object} props.location - The location
+ * @param {string} props.location.search - The search query params
+ * @param {propTypes.uuid} [props.activeListingId] - The active listing ID
+ * @param {Array<propTypes.listing>} [props.listings] - The listings
+ * @param {Function} props.onMapMoveEnd - The function to move end
+ * @param {Function} props.onMapLoad - The function to load
+ * @param {number} [props.zoom] - The zoom
+ * @param {string} [props.reusableMapHiddenHandle] - The handle for the reusable map hidden
+ * @param {Object} props.config - The configuration
+ * @returns {JSX.Element}
  */
 class SearchMapWithMapbox extends Component {
   constructor(props) {
@@ -297,6 +313,7 @@ class SearchMapWithMapbox extends Component {
       this.props.onMapLoad(this.map);
     } else if (prevProps.mapComponentRefreshToken !== this.props.mapComponentRefreshToken) {
       /* Notify parent component that Mapbox map is loaded */
+      this.map.resize();
       this.props.onMapLoad(this.map);
       this.fullMapButton.actionSwithc(this.fullMap);
       this.map.resize();
@@ -397,9 +414,9 @@ class SearchMapWithMapbox extends Component {
 
   render() {
     const {
-      id,
+      id = 'searchMap',
       className,
-      listings,
+      listings = [],
       activeListingId,
       infoCardOpen,
       onListingClicked,
@@ -481,6 +498,17 @@ class SearchMapWithMapbox extends Component {
       }
     }
 
+    const CurrentInfoCardMaybe = props => {
+      const { mapContainer, currentInfoCard, config } = props;
+      const shouldRender = mapContainer && currentInfoCard;
+      const { key, ...componentProps } = shouldRender ? currentInfoCard?.componentProps : {};
+      return shouldRender
+        ? ReactDOM.createPortal(
+            <SearchMapInfoCard key={key} {...componentProps} config={config} />,
+            currentInfoCard.markerContainer
+          )
+        : null;
+    };
     return (
       <div
         id={id}
@@ -489,9 +517,11 @@ class SearchMapWithMapbox extends Component {
         onClick={this.props.onClick}
       >
         {this.currentMarkers.map(m => {
+          const { key, ...compProps } = m.componentProps || {};
+
           // Remove existing activeLabel classes and add it only to the correct container
           m.markerContainer.classList.remove(css.activeLabel);
-          if (activeListingId && activeListingId.uuid === m.componentProps.key) {
+          if (activeListingId && activeListingId.uuid === key) {
             m.markerContainer.classList.add(css.activeLabel);
           }
 
@@ -504,53 +534,25 @@ class SearchMapWithMapbox extends Component {
           // Create component portals for correct marker containers
           if (isMapReadyForMarkers && m.type === 'price') {
             return ReactDOM.createPortal(
-              <SearchMapPriceLabel {...m.componentProps} config={config} />,
+              <SearchMapPriceLabel key={key} {...compProps} config={config} />,
               portalDOMContainer
             );
           } else if (isMapReadyForMarkers && m.type === 'group') {
             return ReactDOM.createPortal(
-              <SearchMapGroupLabel {...m.componentProps} />,
+              <SearchMapGroupLabel key={key} {...compProps} />,
               portalDOMContainer
             );
           }
           return null;
         })}
-        {this.state.mapContainer && this.currentInfoCard
-          ? ReactDOM.createPortal(
-              <SearchMapInfoCard {...this.currentInfoCard.componentProps} config={config} />,
-              this.currentInfoCard.markerContainer
-            )
-          : null}
+        <CurrentInfoCardMaybe
+          mapContainer={this.state.mapContainer}
+          currentInfoCard={this.currentInfoCard}
+          config={config}
+        />
       </div>
     );
   }
 }
-
-SearchMapWithMapbox.defaultProps = {
-  id: 'map',
-  center: null,
-  priceLabels: [],
-  infoCard: null,
-  zoom: 6,
-  reusableMapHiddenHandle: null,
-  showAction: false,
-};
-
-SearchMapWithMapbox.propTypes = {
-  id: string,
-  center: propTypes.latlng,
-  location: shape({
-    search: string.isRequired,
-  }).isRequired,
-  priceLabels: arrayOf(node),
-  infoCard: node,
-  onClick: func.isRequired,
-  onMapMoveEnd: func.isRequired,
-  onMapLoad: func.isRequired,
-  zoom: number,
-  reusableMapHiddenHandle: string,
-  config: object.isRequired,
-  showAction: bool,
-};
 
 export default SearchMapWithMapbox;

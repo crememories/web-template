@@ -1,5 +1,3 @@
-import React from 'react';
-import PropTypes from 'prop-types';
 import classNames from 'classnames';
 
 import css from './IconCategoryArt.module.css';
@@ -54,11 +52,5 @@ l40 -57 -502 -602 c-276 -331 -506 -605 -512 -609 -6 -4 -559 -8 -1230 -8
     </svg>
   );
 };
-
-IconCategoryArt.defaultProps = { rootClassName: null, className: null };
-
-const { string } = PropTypes;
-
-IconCategoryArt.propTypes = { rootClassName: string, className: string };
 
 export default IconCategoryArt;

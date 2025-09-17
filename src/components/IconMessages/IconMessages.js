@@ -21,10 +21,4 @@ const IconMessages = props => {
   );
 };
 
-IconMessages.defaultProps = { rootClassName: null, className: null };
-
-const { string } = PropTypes;
-
-IconMessages.propTypes = { rootClassName: string, className: string };
-
 export default IconMessages;

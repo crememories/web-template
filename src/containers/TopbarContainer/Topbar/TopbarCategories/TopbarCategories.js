@@ -138,26 +138,4 @@ const TopbarDesktop = props => {
   );
 };
 
-TopbarDesktop.defaultProps = {
-  rootClassName: null,
-  className: null,
-  currentUser: null,
-  currentPage: null,
-  notificationCount: 0,
-  initialSearchFormValues: {},
-  appConfig: null,
-};
-
-TopbarDesktop.propTypes = {
-  rootClassName: string,
-  className: string,
-  currentUserHasListings: bool.isRequired,
-  currentUser: propTypes.currentUser,
-  currentPage: string,
-  notificationCount: number,
-  initialSearchFormValues: object,
-  intl: intlShape.isRequired,
-  appConfig: object,
-};
-
 export default TopbarDesktop;

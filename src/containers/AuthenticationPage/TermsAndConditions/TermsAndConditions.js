@@ -1,5 +1,4 @@
 import React from 'react';
-import { func } from 'prop-types';
 
 import { requiredFieldArrayCheckbox } from '../../../util/validators';
 import { FieldCheckboxGroup } from '../../../components';
@@ -10,8 +9,19 @@ import css from './TermsAndConditions.module.css';
 
 const KEY_CODE_ENTER = 13;
 
+/**
+ * A component that renders the terms and conditions.
+ *
+ * @component
+ * @param {Object} props
+ * @param {Function} props.onOpenTermsOfService - The function to open the terms of service modal
+ * @param {Function} props.onOpenPrivacyPolicy - The function to open the privacy policy modal
+ * @param {string} props.formId - The form id
+ * @param {intlShape} props.intl - The intl object
+ * @returns {JSX.Element}
+ */
 const TermsAndConditions = props => {
-  const { onOpenTermsOfService, onOpenPrivacyPolicy, intl } = props;
+  const { onOpenTermsOfService, onOpenPrivacyPolicy, formId, intl } = props;
 
   const handleClick = callback => e => {
     e.preventDefault();
@@ -52,7 +62,7 @@ const TermsAndConditions = props => {
     <div className={css.root}>
       <FieldCheckboxGroup
         name="terms"
-        id="terms-accepted"
+        id={formId ? `${formId}.terms-accepted` : 'terms-accepted'}
         optionLabelClassName={css.finePrint}
         options={[
           {
@@ -69,14 +79,6 @@ const TermsAndConditions = props => {
       />
     </div>
   );
-};
-
-// TermsAndConditions.defaultProps = {};
-
-TermsAndConditions.propTypes = {
-  onOpenTermsOfService: func.isRequired,
-  onOpenPrivacyPolicy: func.isRequired,
-  intl: intlShape.isRequired,
 };
 
 export default TermsAndConditions;

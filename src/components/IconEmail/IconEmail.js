@@ -21,10 +21,4 @@ const IconEmail = props => {
   );
 };
 
-IconEmail.defaultProps = { rootClassName: null, className: null };
-
-const { string } = PropTypes;
-
-IconEmail.propTypes = { rootClassName: string, className: string };
-
 export default IconEmail;

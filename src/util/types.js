@@ -48,12 +48,14 @@ export const SCHEMA_TYPE_MULTI_ENUM = 'multi-enum';
 export const SCHEMA_TYPE_TEXT = 'text';
 export const SCHEMA_TYPE_LONG = 'long';
 export const SCHEMA_TYPE_BOOLEAN = 'boolean';
+export const SCHEMA_TYPE_YOUTUBE = 'youtubeVideoUrl';
 export const EXTENDED_DATA_SCHEMA_TYPES = [
   SCHEMA_TYPE_ENUM,
   SCHEMA_TYPE_MULTI_ENUM,
   SCHEMA_TYPE_TEXT,
   SCHEMA_TYPE_LONG,
   SCHEMA_TYPE_BOOLEAN,
+  SCHEMA_TYPE_YOUTUBE,
 ];
 
 const propTypes = {};
@@ -125,7 +127,7 @@ propTypes.imageAsset = shape({
 });
 
 // Denormalised user object
-propTypes.currentUser = shape({
+const currentUser = shape({
   id: propTypes.uuid.isRequired,
   type: propTypes.value('currentUser').isRequired,
   attributes: shape({
@@ -143,6 +145,21 @@ propTypes.currentUser = shape({
   }),
   profileImage: propTypes.image,
 });
+const currentUserBanned = shape({
+  id: propTypes.uuid.isRequired,
+  type: propTypes.value('currentUser').isRequired,
+  attributes: shape({
+    banned: propTypes.value(true).isRequired,
+  }),
+});
+const currentUserDeleted = shape({
+  id: propTypes.uuid.isRequired,
+  type: propTypes.value('currentUser').isRequired,
+  attributes: shape({
+    deleted: propTypes.value(true).isRequired,
+  }),
+});
+propTypes.currentUser = oneOfType([currentUser, currentUserBanned, currentUserDeleted]);
 
 const userAttributes = shape({
   banned: propTypes.value(false).isRequired,
@@ -321,6 +338,10 @@ export const STOCK_TYPES = [
   STOCK_INFINITE_MULTIPLE_ITEMS,
 ];
 
+export const AVAILABILITY_ONE_SEAT = 'oneItem';
+export const AVAILABILITY_MULTIPLE_SEATS = 'multipleSeats';
+export const AVAILABILITY_TYPES = [AVAILABILITY_ONE_SEAT, AVAILABILITY_MULTIPLE_SEATS];
+
 propTypes.transition = shape({
   createdAt: instanceOf(Date).isRequired,
   by: oneOf(TX_TRANSITION_ACTORS).isRequired,
@@ -376,6 +397,7 @@ propTypes.defaultPaymentMethod = shape({
 export const LINE_ITEM_NIGHT = 'line-item/night';
 export const LINE_ITEM_DAY = 'line-item/day';
 export const LINE_ITEM_HOUR = 'line-item/hour';
+export const LINE_ITEM_FIXED = 'line-item/fixed';
 export const LINE_ITEM_ITEM = 'line-item/item';
 export const LINE_ITEM_CUSTOMER_COMMISSION = 'line-item/customer-commission';
 export const LINE_ITEM_PROVIDER_COMMISSION = 'line-item/provider-commission';
@@ -386,13 +408,20 @@ export const LINE_ITEMS = [
   LINE_ITEM_NIGHT,
   LINE_ITEM_DAY,
   LINE_ITEM_HOUR,
+  LINE_ITEM_FIXED,
   LINE_ITEM_ITEM,
   LINE_ITEM_CUSTOMER_COMMISSION,
   LINE_ITEM_PROVIDER_COMMISSION,
   LINE_ITEM_SHIPPING_FEE,
   LINE_ITEM_PICKUP_FEE,
 ];
-export const LISTING_UNIT_TYPES = [LINE_ITEM_NIGHT, LINE_ITEM_DAY, LINE_ITEM_HOUR, LINE_ITEM_ITEM];
+export const LISTING_UNIT_TYPES = [
+  LINE_ITEM_NIGHT,
+  LINE_ITEM_DAY,
+  LINE_ITEM_HOUR,
+  LINE_ITEM_FIXED,
+  LINE_ITEM_ITEM,
+];
 
 propTypes.lineItemUnitType = oneOf(LISTING_UNIT_TYPES);
 
@@ -484,37 +513,106 @@ propTypes.defaultFiltersConfig = arrayOf(
     step: number,
   }).isRequired
 );
+
 // Extended data config
-propTypes.listingFieldsConfig = arrayOf(
+propTypes.userType = shape({
+  userType: string.isRequired,
+  label: string.isRequired,
+  defaultUserFields: shape({
+    displayName: bool,
+    phoneNumber: bool,
+  }),
+  displayNameSettings: shape({
+    displayInSignUp: bool,
+    required: bool,
+  }),
+  phoneNumberSettings: shape({
+    displayInSignUp: bool,
+    required: bool,
+  }),
+});
+propTypes.userTypes = arrayOf(propTypes.userType);
+
+propTypes.fieldEnumOptions = arrayOf(
   shape({
-    key: string.isRequired,
-    scope: string,
-    includeForListingTypes: arrayOf(string),
-    schemaType: oneOf(EXTENDED_DATA_SCHEMA_TYPES).isRequired,
-    enumOptions: arrayOf(
-      shape({
-        option: oneOfType([string, number]).isRequired,
-        label: string.isRequired,
-      })
-    ),
-    filterConfig: shape({
-      indexForSearch: bool,
-      label: string.isRequired,
-      group: oneOf(['primary', 'secondary']),
-      filterType: string,
-    }),
-    showConfig: shape({
-      label: string.isRequired,
-      isDetail: bool,
-    }),
-    saveConfig: shape({
-      label: string.isRequired,
-      placeholderMessage: string,
-      isRequired: bool,
-      requiredMessage: string,
-    }).isRequired,
+    option: oneOfType([string, number]).isRequired,
+    label: string.isRequired,
   })
 );
+
+propTypes.userField = shape({
+  key: string.isRequired,
+  scope: string,
+  schemaType: oneOf(EXTENDED_DATA_SCHEMA_TYPES).isRequired,
+  enumOptions: propTypes.fieldEnumOptions,
+  showConfig: shape({
+    label: string.isRequired,
+    displayInProfile: bool,
+  }),
+  saveConfig: shape({
+    label: string.isRequired,
+    placeholderMessage: string,
+    isRequired: bool,
+    requiredMessage: string,
+    displayInSignUp: bool,
+  }).isRequired,
+  userTypeConfig: shape({
+    limitToUserTypeIds: bool.isRequired,
+    userTypeIds: arrayOf(string),
+  }),
+});
+propTypes.userFields = arrayOf(propTypes.userField);
+
+propTypes.listingType = shape({
+  listingType: string.isRequired,
+  label: string.isRequired,
+  transactionType: shape({
+    process: string.isRequired,
+    alias: string.isRequired,
+    unitType: string.isRequired,
+  }).isRequired,
+  defaultListingFields: shape({
+    price: bool,
+    location: bool,
+    payoutDetails: bool,
+    shipping: bool,
+    pickup: bool,
+  }),
+});
+propTypes.listingTypes = arrayOf(propTypes.userType);
+
+propTypes.listingField = shape({
+  key: string.isRequired,
+  scope: string,
+  schemaType: oneOf(EXTENDED_DATA_SCHEMA_TYPES).isRequired,
+  enumOptions: propTypes.fieldEnumOptions,
+  filterConfig: shape({
+    indexForSearch: bool,
+    label: string.isRequired,
+    group: oneOf(['primary', 'secondary']),
+    filterType: string,
+  }),
+  showConfig: shape({
+    label: string.isRequired,
+    isDetail: bool,
+  }),
+  saveConfig: shape({
+    label: string.isRequired,
+    placeholderMessage: string,
+    isRequired: bool,
+    requiredMessage: string,
+  }).isRequired,
+  listingTypeConfig: shape({
+    limitToListingTypeIds: bool.isRequired,
+    listingTypeIds: arrayOf(string),
+  }),
+  categoryConfig: shape({
+    limitToCategoryIds: bool.isRequired,
+    categoryIds: arrayOf(string),
+  }),
+});
+
+propTypes.listingFields = arrayOf(propTypes.listingField);
 
 const sortConfigOptionWithLabel = shape({
   key: oneOf(['createdAt', '-createdAt', 'price', '-price', 'relevance']).isRequired,
@@ -559,6 +657,12 @@ export const ERROR_CODE_NOT_FOUND = 'not-found';
 export const ERROR_CODE_FORBIDDEN = 'forbidden';
 export const ERROR_CODE_MISSING_STRIPE_ACCOUNT = 'transaction-missing-stripe-account';
 export const ERROR_CODE_STOCK_OLD_TOTAL_MISMATCH = 'old-total-mismatch';
+export const ERROR_CODE_PERMISSION_DENIED_POST_LISTINGS = 'permission-denied-post-listings';
+export const ERROR_CODE_PERMISSION_DENIED_PENDING_APPROVAL = 'permission-denied-pending-approval';
+export const ERROR_CODE_USER_PENDING_APPROVAL = 'user-pending-approval';
+export const ERROR_CODE_PERMISSION_DENIED_INITIATE_TRANSACTIONS =
+  'permission-denied-initiate-transactions';
+export const ERROR_CODE_PERMISSION_DENIED_READ = 'permission-denied-read';
 
 const ERROR_CODES = [
   ERROR_CODE_TRANSACTION_LISTING_NOT_FOUND,
@@ -578,6 +682,11 @@ const ERROR_CODES = [
   ERROR_CODE_FORBIDDEN,
   ERROR_CODE_MISSING_STRIPE_ACCOUNT,
   ERROR_CODE_STOCK_OLD_TOTAL_MISMATCH,
+  ERROR_CODE_PERMISSION_DENIED_POST_LISTINGS,
+  ERROR_CODE_PERMISSION_DENIED_PENDING_APPROVAL,
+  ERROR_CODE_USER_PENDING_APPROVAL,
+  ERROR_CODE_PERMISSION_DENIED_INITIATE_TRANSACTIONS,
+  ERROR_CODE_PERMISSION_DENIED_READ,
 ];
 
 // API error
@@ -612,5 +721,9 @@ export const DATE_TYPE_TIME = 'time';
 export const DATE_TYPE_DATETIME = 'datetime';
 
 propTypes.dateType = oneOf([DATE_TYPE_DATE, DATE_TYPE_TIME, DATE_TYPE_DATETIME]);
+
+// This array defines the color schemes that are in use when listing images are disabled.
+// These values are stored in the listing public data, under the property "cardStyle".
+export const colorSchemes = ['white', 'grey', 'black', 'main-brand', 'primary-button'];
 
 export { propTypes };

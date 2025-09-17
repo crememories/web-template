@@ -21,10 +21,4 @@ const IconWhatsApp = props => {
   );
 };
 
-IconWhatsApp.defaultProps = { rootClassName: null, className: null };
-
-const { string } = PropTypes;
-
-IconWhatsApp.propTypes = { rootClassName: string, className: string };
-
 export default IconWhatsApp;

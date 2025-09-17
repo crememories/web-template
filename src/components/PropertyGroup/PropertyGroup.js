@@ -7,7 +7,6 @@
  */
 
 import React from 'react';
-import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import includes from 'lodash/includes';
 
@@ -51,12 +50,41 @@ const Item = props => {
   );
 };
 
+/**
+ * @typedef {Object} Option
+ * @property {string} key - The key of the option
+ * @property {string} label - The label of the option
+ */
+/**
+ * A component that renders a set of options with selected and non-selected values.
+ *
+ * @component
+ * @param {Object} props
+ * @param {string} [props.rootClassName] - Custom class that overrides the default class for the root element
+ * @param {string} [props.className] - Custom class that extends the default class for the root element
+ * @param {string} props.id - The id of the property group
+ * @param {Array<Option>} props.options - The options to render
+ * @param {Array<string>} props.selectedOptions - The selected options
+ * @param {boolean} props.twoColumns - Whether to render the options in two columns
+ * @param {boolean} props.showUnselectedOptions - Whether to show the unselected options
+ * @returns {JSX.Element}
+ */
 const PropertyGroup = props => {
-  const { rootClassName, className, id, options, selectedOptions, twoColumns } = props;
+  const {
+    rootClassName,
+    className,
+    id,
+    options,
+    selectedOptions = [],
+    twoColumns,
+    showUnselectedOptions,
+  } = props;
   const classes = classNames(rootClassName || css.root, className);
   const listClasses = twoColumns ? classNames(classes, css.twoColumns) : classes;
 
-  const checked = checkSelected(options, selectedOptions);
+  const checked = showUnselectedOptions
+    ? checkSelected(options, selectedOptions)
+    : checkSelected(options, selectedOptions).filter(o => o.isSelected);
 
   return (
     <ul className={listClasses}>
@@ -65,29 +93,6 @@ const PropertyGroup = props => {
       ))}
     </ul>
   );
-};
-
-PropertyGroup.defaultProps = {
-  rootClassName: null,
-  className: null,
-  selectedOptions: [],
-  twoColumns: false,
-};
-
-const { arrayOf, bool, node, shape, string } = PropTypes;
-
-PropertyGroup.propTypes = {
-  rootClassName: string,
-  className: string,
-  id: string.isRequired,
-  options: arrayOf(
-    shape({
-      key: string.isRequired,
-      label: node.isRequired,
-    })
-  ),
-  selectedOptions: arrayOf(string),
-  twoColumns: bool,
 };
 
 export default PropertyGroup;

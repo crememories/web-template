@@ -1,5 +1,3 @@
-import React from 'react';
-import PropTypes from 'prop-types';
 import classNames from 'classnames';
 
 import css from './IconCategoryTrees.module.css';
@@ -28,12 +26,6 @@ const IconCategoryTrees = props => {
     </svg>
   );
 };
-
-IconCategoryTrees.defaultProps = { rootClassName: null, className: null };
-
-const { string } = PropTypes;
-
-IconCategoryTrees.propTypes = { rootClassName: string, className: string };
 
 export default IconCategoryTrees;
 

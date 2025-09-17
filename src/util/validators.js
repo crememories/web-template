@@ -1,6 +1,7 @@
 import toPairs from 'lodash/toPairs';
 import { types as sdkTypes } from './sdkLoader';
 import { diffInTime } from './dates';
+import { extractYouTubeID } from './string';
 
 const { LatLng, Money } = sdkTypes;
 
@@ -44,6 +45,24 @@ export const requiredAndNonEmptyString = message => value => {
   return isNonEmptyString(value) ? VALID : message;
 };
 
+/**
+ * Validates that a string is unique in an array of strings.
+ * @param {Array<string>} stringArray - Array of strings to check against.
+ * @param {Function} getMessage - Function that returns an error message.
+ * @param {Function} toSlug - Function that converts a string to a slug.
+ * @returns {string} - VALID if the string is unique, otherwise the error message.
+ */
+export const uniqueString = (currentIndex, stringArray, getMessage, toSlug) => value => {
+  if (typeof value === 'undefined' || value === null) {
+    // undefined or null values are invalid
+    return getMessage('', '');
+  }
+  const slug = toSlug(value);
+  const otherSlugs = stringArray.map(toSlug).filter((_, i) => i !== currentIndex);
+  const isUnique = !otherSlugs.includes(slug);
+  return isUnique ? VALID : getMessage(value, slug);
+};
+
 export const requiredFieldArrayCheckbox = message => value => {
   if (!value) {
     return message;
@@ -52,6 +71,12 @@ export const requiredFieldArrayCheckbox = message => value => {
   const entries = toPairs(value);
   const hasSelectedValues = entries.filter(e => !!e[1]).length > 0;
   return hasSelectedValues ? VALID : message;
+};
+
+export const requiredSelectTreeOption = message => value => {
+  if (typeof value === 'undefined' || value === null || Object.values(value)?.length === 0) {
+    return message;
+  }
 };
 
 export const minLength = (message, minimumLength) => value => {
@@ -122,6 +147,22 @@ const parseNum = str => {
 export const numberAtLeast = (message, minNumber) => value => {
   const valueNum = parseNum(value);
   return typeof valueNum === 'number' && valueNum >= minNumber ? VALID : message;
+};
+
+export const validateInteger = (value, max, min, numberTooSmallMessage, numberTooBigMessage) => {
+  const parsedValue = Number.parseInt(value, 10);
+  if (parsedValue > max) {
+    return numberTooBigMessage;
+  }
+  if (parsedValue < min) {
+    return numberTooSmallMessage;
+  }
+  return VALID;
+};
+
+// If URL is passed to this function as null, will return VALID
+export const validateYoutubeURL = (url, message) => {
+  return url ? (extractYouTubeID(url) ? VALID : message) : VALID;
 };
 
 export const ageAtLeast = (message, minYears) => value => {

@@ -1,5 +1,3 @@
-import React from 'react';
-import PropTypes from 'prop-types';
 import classNames from 'classnames';
 
 import css from './IconCategoryOmg.module.css';
@@ -20,11 +18,5 @@ const IconCategoryOmg = props => {
     </svg>
   );
 };
-
-IconCategoryOmg.defaultProps = { rootClassName: null, className: null };
-
-const { string } = PropTypes;
-
-IconCategoryOmg.propTypes = { rootClassName: string, className: string };
 
 export default IconCategoryOmg;

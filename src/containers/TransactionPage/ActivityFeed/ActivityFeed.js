@@ -1,9 +1,9 @@
 import React from 'react';
-import { string, arrayOf, bool, func, number, object } from 'prop-types';
 import dropWhile from 'lodash/dropWhile';
 import classNames from 'classnames';
 
-import { FormattedMessage, injectIntl, intlShape } from '../../../util/reactIntl';
+import { FormattedMessage, useIntl } from '../../../util/reactIntl';
+import { richText } from '../../../util/richText';
 import { formatDateWithProximity } from '../../../util/dates';
 import { propTypes } from '../../../util/types';
 import {
@@ -20,41 +20,66 @@ import { stateDataShape } from '../TransactionPage.stateData';
 
 import css from './ActivityFeed.module.css';
 
+const MIN_LENGTH_FOR_LONG_WORDS = 20;
+
+/**
+ * @component
+ * @param {Object} props - The props
+ * @param {propTypes.message} props.message - The message
+ * @param {string} props.formattedDate - The formatted date
+ * @returns {JSX.Element} The Message component
+ */
 const Message = props => {
   const { message, formattedDate } = props;
+  const content = richText(message.attributes.content, {
+    linkify: true,
+    longWordMinLength: MIN_LENGTH_FOR_LONG_WORDS,
+    longWordClass: css.longWord,
+  });
+
   return (
     <div className={css.message}>
       <Avatar className={css.avatar} user={message.sender} />
       <div>
-        <p className={css.messageContent}>{message.attributes.content}</p>
+        <p className={css.messageContent}>{content}</p>
         <p className={css.messageDate}>{formattedDate}</p>
       </div>
     </div>
   );
 };
 
-Message.propTypes = {
-  message: propTypes.message.isRequired,
-  formattedDate: string.isRequired,
-};
-
+/**
+ * @component
+ * @param {Object} props - The props
+ * @param {propTypes.message} props.message - The message
+ * @param {string} props.formattedDate - The formatted date
+ * @returns {JSX.Element} The OwnMessage component
+ */
 const OwnMessage = props => {
   const { message, formattedDate } = props;
+  const content = richText(message.attributes.content, {
+    linkify: true,
+    linkClass: css.ownMessageContentLink,
+    longWordMinLength: MIN_LENGTH_FOR_LONG_WORDS,
+  });
+
   return (
     <div className={css.ownMessage}>
       <div className={css.ownMessageContentWrapper}>
-        <p className={css.ownMessageContent}>{message.attributes.content}</p>
+        <p className={css.ownMessageContent}>{content}</p>
       </div>
       <p className={css.ownMessageDate}>{formattedDate}</p>
     </div>
   );
 };
 
-OwnMessage.propTypes = {
-  message: propTypes.message.isRequired,
-  formattedDate: string.isRequired,
-};
-
+/**
+ * @component
+ * @param {Object} props - The props
+ * @param {string} props.content - The content
+ * @param {number} props.rating - The rating
+ * @returns {JSX.Element} The Review component
+ */
 const Review = props => {
   const { content, rating } = props;
   return (
@@ -69,11 +94,6 @@ const Review = props => {
       ) : null}
     </div>
   );
-};
-
-Review.propTypes = {
-  content: string.isRequired,
-  rating: number.isRequired,
 };
 
 const TransitionMessage = props => {
@@ -122,6 +142,14 @@ const TransitionMessage = props => {
   return message;
 };
 
+/**
+ * @component
+ * @param {Object} props - The props
+ * @param {string} props.transitionMessageComponent - The transition message component
+ * @param {string} props.formattedDate - The formatted date
+ * @param {React.Component} props.reviewComponent - The review component
+ * @returns {JSX.Element} The Transition component
+ */
 const Transition = props => {
   const { transitionMessageComponent, formattedDate, reviewComponent } = props;
   return (
@@ -136,10 +164,6 @@ const Transition = props => {
       </div>
     </div>
   );
-};
-
-Transition.propTypes = {
-  formattedDate: string,
 };
 
 const reviewByAuthorId = (transaction, userId) => {
@@ -184,19 +208,34 @@ const organizedItems = (messages, transitions, hideOldTransitions) => {
   }
 };
 
-export const ActivityFeedComponent = props => {
+/**
+ * @component
+ * @param {Object} props - The props
+ * @param {string} [props.rootClassName] - Custom class that extends the default class for the root element
+ * @param {string} [props.className] - Custom class that extends the default class for the root element
+ * @param {Array<propTypes.message>} props.messages - The messages
+ * @param {propTypes.transaction} props.transaction - The transaction
+ * @param {stateDataShape} props.stateData - The state data
+ * @param {propTypes.currentUser} props.currentUser - The current user
+ * @param {boolean} props.hasOlderMessages - Whether there are older messages
+ * @param {boolean} props.fetchMessagesInProgress - Whether the fetch messages is in progress
+ * @param {Function} props.onOpenReviewModal - The on open review modal function
+ * @param {Function} props.onShowOlderMessages - The on show older messages function
+ * @returns {JSX.Element} The ActivityFeed component
+ */
+export const ActivityFeed = props => {
+  const intl = props.intl || useIntl();
   const {
     rootClassName,
     className,
     messages,
     transaction,
-    stateData,
+    stateData = {},
     currentUser,
     hasOlderMessages,
     fetchMessagesInProgress,
     onOpenReviewModal,
     onShowOlderMessages,
-    intl,
   } = props;
   const classes = classNames(rootClassName || css.root, className);
   const processName = stateData.processName;
@@ -310,30 +349,5 @@ export const ActivityFeedComponent = props => {
     </ul>
   );
 };
-
-ActivityFeedComponent.defaultProps = {
-  rootClassName: null,
-  className: null,
-  stateData: {},
-};
-
-ActivityFeedComponent.propTypes = {
-  rootClassName: string,
-  className: string,
-
-  messages: arrayOf(propTypes.message),
-  transaction: propTypes.transaction,
-  stateData: stateDataShape,
-  currentUser: propTypes.currentUser,
-  hasOlderMessages: bool.isRequired,
-  fetchMessagesInProgress: bool.isRequired,
-  onOpenReviewModal: func.isRequired,
-  onShowOlderMessages: func.isRequired,
-
-  // from injectIntl
-  intl: intlShape.isRequired,
-};
-
-const ActivityFeed = injectIntl(ActivityFeedComponent);
 
 export default ActivityFeed;

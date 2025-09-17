@@ -1,5 +1,4 @@
 import React, { Component } from 'react';
-import { arrayOf, func, number, shape, string } from 'prop-types';
 import classNames from 'classnames';
 import debounce from 'lodash/debounce';
 
@@ -25,43 +24,35 @@ const getKeywordQueryParam = queryParamNames => {
     : 'keywords';
 };
 
+/**
+ * KeywordFilter component
+ * TODO: change to functional component
+ *
+ * @component
+ * @param {Object} props
+ * @param {string} [props.className] - Custom class that extends the default class for the root element
+ * @param {string} [props.rootClassName] - Custom class that overrides the default class for the root element
+ * @param {string} props.id - The ID
+ * @param {string} props.name - The name
+ * @param {React.Node} props.label - The label
+ * @param {Array<string>} props.queryParamNames - The query param names
+ * @param {Object} props.initialValues - The initial values
+ * @param {Object} props.initialValues.keyword - The keyword
+ * @param {Function} props.onSubmit - The function to submit
+ * @param {number} [props.contentPlacementOffset] - The content placement offset
+ * @param {intlShape} props.intl - The intl object
+ * @returns {JSX.Element}
+ */
 class KeywordFilter extends Component {
   constructor(props) {
     super(props);
 
-    this.filter = null;
-    this.filterContent = null;
     this.shortKeywordTimeout = null;
     this.mobileInputRef = React.createRef();
-
-    this.positionStyleForContent = this.positionStyleForContent.bind(this);
   }
 
   componentWillUnmount() {
     window.clearTimeout(this.shortKeywordTimeout);
-  }
-
-  positionStyleForContent() {
-    if (this.filter && this.filterContent) {
-      // Render the filter content to the right from the menu
-      // unless there's no space in which case it is rendered
-      // to the left
-      const distanceToRight = window.innerWidth - this.filter.getBoundingClientRect().right;
-      const labelWidth = this.filter.offsetWidth;
-      const contentWidth = this.filterContent.offsetWidth;
-      const contentWidthBiggerThanLabel = contentWidth - labelWidth;
-      const renderToRight = distanceToRight > contentWidthBiggerThanLabel;
-      const contentPlacementOffset = this.props.contentPlacementOffset;
-
-      const offset = renderToRight
-        ? { left: contentPlacementOffset }
-        : { right: contentPlacementOffset };
-      // set a min-width if the content is narrower than the label
-      const minWidth = contentWidth < labelWidth ? { minWidth: labelWidth } : null;
-
-      return { ...offset, ...minWidth };
-    }
-    return {};
   }
 
   render() {
@@ -72,11 +63,11 @@ class KeywordFilter extends Component {
       name,
       label,
       initialValues,
-      contentPlacementOffset,
+      contentPlacementOffset = 0,
       onSubmit,
       queryParamNames,
       intl,
-      showAsPopup,
+      showAsPopup = true,
       ...rest
     } = this.props;
 
@@ -96,10 +87,7 @@ class KeywordFilter extends Component {
     const labelForPlain = <span className={labelClass}>{label}</span>;
 
     const filterText = intl.formatMessage({ id: 'KeywordFilter.filterText' });
-
     const placeholder = intl.formatMessage({ id: 'KeywordFilter.placeholder' });
-
-    const contentStyle = this.positionStyleForContent();
 
     // pass the initial values with the name key so that
     // they can be passed to the correct field
@@ -177,14 +165,15 @@ class KeywordFilter extends Component {
         isSelected={hasInitialValues}
         id={`${id}.plain`}
         liveEdit
-        contentPlacementOffset={contentStyle}
         onSubmit={handleChangeWithDebounce}
         onClear={handleClear}
         initialValues={namedInitialValues}
         {...rest}
       >
         <fieldset className={css.fieldPlain}>
-          <label className={css.fieldPlainLabel}>{filterText}</label>
+          <label className={css.fieldPlainLabel} htmlFor={`${id}-input`}>
+            {filterText}
+          </label>
           <FieldTextInput
             name={name}
             id={`${id}-input`}
@@ -199,29 +188,5 @@ class KeywordFilter extends Component {
     );
   }
 }
-
-KeywordFilter.defaultProps = {
-  rootClassName: null,
-  className: null,
-  initialValues: null,
-  contentPlacementOffset: 0,
-};
-
-KeywordFilter.propTypes = {
-  rootClassName: string,
-  className: string,
-  id: string.isRequired,
-  name: string.isRequired,
-  queryParamNames: arrayOf(string).isRequired,
-  label: string.isRequired,
-  onSubmit: func.isRequired,
-  initialValues: shape({
-    keyword: string,
-  }),
-  contentPlacementOffset: number,
-
-  // form injectIntl
-  intl: intlShape.isRequired,
-};
 
 export default injectIntl(KeywordFilter);

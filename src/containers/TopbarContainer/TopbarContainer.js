@@ -1,5 +1,4 @@
 import React from 'react';
-import { array, bool, func, number, object, shape, string } from 'prop-types';
 import { compose } from 'redux';
 import { connect } from 'react-redux';
 import { withRouter } from 'react-router-dom';
@@ -13,91 +12,30 @@ import { manageDisableScrolling } from '../../ducks/ui.duck';
 
 const Topbar = loadable(() => import(/* webpackChunkName: "Topbar" */ './Topbar/Topbar'));
 
+/**
+ * Topbar container component, which is connected to Redux Store.
+ * @component
+ * @param {Object} props
+ * @param {number} props.notificationCount number of notifications
+ * @param {Function} props.onLogout logout function
+ * @param {Function} props.onManageDisableScrolling manage disable scrolling function
+ * @param {Function} props.onResendVerificationEmail resend verification email function
+ * @param {Object} props.sendVerificationEmailInProgress send verification email in progress
+ * @param {Object} props.sendVerificationEmailError send verification email error
+ * @param {boolean} props.hasGenericError has generic error
+ * @returns {JSX.Element}
+ */
 export const TopbarContainerComponent = props => {
-  const {
-    authInProgress,
-    currentPage,
-    currentSearchParams,
-    currentUser,
-    currentUserHasListings,
-    currentUserHasOrders,
-    history,
-    isAuthenticated,
-    authScopes,
-    hasGenericError,
-    location,
-    notificationCount,
-    onLogout,
-    onManageDisableScrolling,
-    sendVerificationEmailInProgress,
-    sendVerificationEmailError,
-    onResendVerificationEmail,
-    categories,
-    ...rest
-  } = props;
+  const { notificationCount = 0, hasGenericError, ...rest } = props;
 
   return (
-    <Topbar
-      authInProgress={authInProgress}
-      currentPage={currentPage}
-      currentSearchParams={currentSearchParams}
-      currentUser={currentUser}
-      currentUserHasListings={currentUserHasListings}
-      currentUserHasOrders={currentUserHasOrders}
-      history={history}
-      isAuthenticated={isAuthenticated}
-      authScopes={authScopes}
-      location={location}
-      notificationCount={notificationCount}
-      onLogout={onLogout}
-      onManageDisableScrolling={onManageDisableScrolling}
-      onResendVerificationEmail={onResendVerificationEmail}
-      sendVerificationEmailInProgress={sendVerificationEmailInProgress}
-      sendVerificationEmailError={sendVerificationEmailError}
-      showGenericError={hasGenericError}
-      categories={categories}
-      {...rest}
-    />
+    <Topbar notificationCount={notificationCount} showGenericError={hasGenericError} {...rest} />
   );
 };
 
-TopbarContainerComponent.defaultProps = {
-  currentPage: null,
-  currentSearchParams: null,
-  currentUser: null,
-  currentUserHasOrders: null,
-  notificationCount: 0,
-  sendVerificationEmailError: null,
-  authScopes: null,
-};
-
-TopbarContainerComponent.propTypes = {
-  authInProgress: bool.isRequired,
-  currentPage: string,
-  currentSearchParams: object,
-  currentUser: propTypes.currentUser,
-  currentUserHasListings: bool.isRequired,
-  currentUserHasOrders: bool,
-  isAuthenticated: bool.isRequired,
-  authScopes: array,
-  notificationCount: number,
-  onLogout: func.isRequired,
-  onManageDisableScrolling: func.isRequired,
-  sendVerificationEmailInProgress: bool.isRequired,
-  sendVerificationEmailError: propTypes.error,
-  onResendVerificationEmail: func.isRequired,
-  hasGenericError: bool.isRequired,
-
-  // from withRouter
-  history: shape({
-    push: func.isRequired,
-  }).isRequired,
-  location: shape({ state: object }).isRequired,
-};
-
 const mapStateToProps = state => {
-  // Topbar needs isAuthenticated
-  const { isAuthenticated, logoutError, authScopes } = state.auth;
+  // Topbar needs isAuthenticated and isLoggedInAs
+  const { isAuthenticated, isLoggedInAs, logoutError, authScopes } = state.auth;
   // Topbar needs user info.
   const {
     currentUser,
@@ -115,6 +53,7 @@ const mapStateToProps = state => {
     currentUserHasOrders,
     notificationCount,
     isAuthenticated,
+    isLoggedInAs,
     authScopes,
     sendVerificationEmailInProgress,
     sendVerificationEmailError,

@@ -1,5 +1,3 @@
-import React from 'react';
-import { bool, func, node, number, string } from 'prop-types';
 import classNames from 'classnames';
 
 import SearchFiltersPrimary from '../SearchFiltersPrimary/SearchFiltersPrimary';
@@ -34,8 +32,7 @@ const SearchHeader = props => {
 
   // Now use routeConfiguration in the categoryAction function
   const categoryAction = (name) => {
-
-    console.log(history);
+    // console.log(history);
     urlQueryParams.pub_categories = name;
     // Ensure to use routeConfiguration that was retrieved using the hook
     history.push(createResourceLocatorString('Home', routeConfiguration, {}, urlQueryParams));
@@ -77,16 +74,6 @@ const SearchHeader = props => {
 
     </div>
   );
-};
-
-SearchHeader.defaultProps = {
-  rootClassName: null,
-  className: null,
-};
-
-SearchHeader.propTypes = {
-  rootClassName: string,
-  className: string,
 };
 
 export default SearchHeader;

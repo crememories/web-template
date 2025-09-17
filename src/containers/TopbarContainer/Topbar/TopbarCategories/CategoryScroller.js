@@ -2,6 +2,8 @@ import React, { useState, useEffect, useContext } from 'react';
 import { ScrollMenu, VisibilityContext } from 'react-horizontal-scrolling-menu';
 // import { IconArrowHead } from '../../../../components';
 import classNames from 'classnames';
+import './styles.css';
+import './hideScrollBar.css';
 import css from './TopbarCategories.module.css';
 
 import {

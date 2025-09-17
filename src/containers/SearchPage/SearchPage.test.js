@@ -1,15 +1,21 @@
 import React from 'react';
 import '@testing-library/jest-dom';
 
-import { createListing } from '../../util/testData';
+import { createImageVariantConfig } from '../../util/sdkLoader';
+import { createCurrentUser, createListing } from '../../util/testData';
 import {
   renderWithProviders as render,
   testingLibrary,
   getRouteConfiguration,
   getHostedConfiguration,
+  createFakeDispatch,
+  dispatchedActions,
 } from '../../util/testHelpers';
 
-const { screen, waitFor } = testingLibrary;
+import { loadData, searchListingsRequest, searchListingsSuccess } from './SearchPage.duck';
+import { addMarketplaceEntities } from '../../ducks/marketplaceData.duck';
+
+const { screen, userEvent, waitFor } = testingLibrary;
 
 const noop = () => null;
 
@@ -48,33 +54,92 @@ const listingTypes = [
   },
 ];
 
+const capitalizeFirstLetter = str => str.charAt(0).toUpperCase() + str.slice(1);
+const addSpaces = str => str.split('-').join(' ');
+const labelize = str => addSpaces(capitalizeFirstLetter(str));
+
+const generateCategories = optionStrings => {
+  return optionStrings.reduce((converted, entry) => {
+    const isArray = Array.isArray(entry);
+    const option = isArray
+      ? { id: entry[0], name: labelize(entry[0]), subcategories: generateCategories(entry[1]) }
+      : { id: entry, name: labelize(entry) };
+    return [...converted, option];
+  }, []);
+};
+const categories = generateCategories([
+  ['dogs', ['labradors', 'poodles']],
+  ['cats', ['burmese', 'egyptian-mau']],
+  ['fish', [['freshwater', ['grayling', 'arctic-char', 'pike']], 'saltwater']],
+  ['birds', ['parrot', 'macaw']],
+]);
+//console.log(JSON.stringify(categories, null, 2));
+
 const listingFields = [
   {
-    key: 'category',
+    // Formerly used for category, but now there's dedicated category setup
+    key: 'cat',
     scope: 'public',
-    includeForListingTypes: ['sell-bicycles'],
+    categoryConfig: {
+      limitToCategoryIds: true,
+      categoryIds: ['cats'],
+    },
     schemaType: 'enum',
     enumOptions: [{ option: 'cat_1', label: 'Cat 1' }, { option: 'cat_2', label: 'Cat 2' }],
     filterConfig: {
       indexForSearch: true,
-      label: 'Category',
+      label: 'Cat',
       group: 'primary',
     },
     showConfig: {
-      label: 'Category',
+      label: 'Cat',
     },
     saveConfig: {
-      label: 'Category',
+      label: 'Cat',
+    },
+  },
+  {
+    key: 'boat ',
+    scope: 'public',
+    listingTypeConfig: {
+      limitToListingTypeIds: true,
+      listingTypeIds: ['sell-bicycles'],
+    },
+    schemaType: 'enum',
+    enumOptions: [{ option: 'boat_1', label: 'Boat 1' }, { option: 'boat_2', label: 'Boat 2' }],
+    filterConfig: {
+      indexForSearch: true,
+      label: 'Boat',
+      group: 'primary',
+    },
+    showConfig: {
+      label: 'Boat',
+    },
+    saveConfig: {
+      label: 'Boat',
+    },
+  },
+  {
+    key: 'singleSelectTest',
+    scope: 'public',
+    schemaType: 'enum',
+    enumOptions: [{ option: 'enum1', label: 'Enum 1' }, { option: 'enum2', label: 'Enum 2' }],
+    filterConfig: {
+      indexForSearch: true,
+      filterType: 'SelectSingleFilter',
+      label: 'Single Select Test',
+      group: 'primary',
+    },
+    showConfig: {
+      label: 'Single Select Test',
+    },
+    saveConfig: {
+      label: 'Single Select Test',
     },
   },
   {
     key: 'amenities',
     scope: 'public',
-    includeForListingTypes: [
-      'rent-bicycles-daily',
-      'rent-bicycles-nightly',
-      'rent-bicycles-hourly',
-    ],
     schemaType: 'multi-enum',
     enumOptions: [{ option: 'dog_1', label: 'Dog 1' }, { option: 'dog_2', label: 'Dog 2' }],
     filterConfig: {
@@ -84,15 +149,30 @@ const listingFields = [
       group: 'secondary',
     },
     showConfig: {
-      label: 'Category',
+      label: 'Amenities',
     },
     saveConfig: {
-      label: 'Category',
+      label: 'Amenities',
     },
   },
 ];
 
+const listingTypeOptions = listingTypes.map(lt => ({ option: lt.id, label: labelize(lt.id) }));
+
 const defaultFiltersConfig = [
+  {
+    key: 'categoryLevel',
+    schemaType: 'category',
+    scope: 'public',
+    isNestedEnum: true,
+    nestedParams: ['categoryLevel1', 'categoryLevel2', 'categoryLevel3'],
+  },
+  {
+    key: 'listingType',
+    schemaType: 'listingType',
+    scope: 'public',
+    options: listingTypeOptions,
+  },
   {
     key: 'price',
     schemaType: 'price',
@@ -123,16 +203,17 @@ const sortConfig = {
   ],
 };
 
-const getConfig = variantType => {
+const getConfig = (variantType, customListingFields) => {
   const hostedConfig = getHostedConfiguration();
   return {
     ...hostedConfig,
     listingFields: {
-      listingFields,
+      listingFields: customListingFields || listingFields,
     },
     listingTypes: {
       listingTypes,
     },
+    categories: { categories },
     search: {
       ...hostedConfig.search,
       mainSearch: {
@@ -145,38 +226,84 @@ const getConfig = variantType => {
       ...hostedConfig.layout,
       searchPage: { variantType },
     },
+    topbar: {
+      searchBar: {
+        display: 'always',
+      },
+    },
+  };
+};
+
+const l1 = createListing('l1');
+const l2 = createListing('l2');
+
+// We'll initialize the store with relevant listing data
+const initialState = {
+  SearchPage: {
+    currentPageResultIds: [l1.id, l2.id],
+    pagination: {
+      page: 1,
+      perPage: 1,
+      totalItems: 2,
+      totalPages: 2,
+    },
+    searchInProgress: false,
+    searchListingsError: null,
+    searchParams: null,
+    activeListingId: null,
+  },
+  marketplaceData: {
+    entities: {
+      listing: {
+        l1,
+        l2,
+      },
+    },
+  },
+};
+
+const getSearchParams = config => {
+  const {
+    aspectWidth = 1,
+    aspectHeight = 1,
+    variantPrefix = 'listing-card',
+  } = config.layout.listingImage;
+  const aspectRatio = aspectHeight / aspectWidth;
+  return {
+    page: 1,
+    perPage: 24,
+    include: ['author', 'images'],
+    'fields.listing': [
+      'title',
+      'geolocation',
+      'price',
+      'deleted',
+      'state',
+      'publicData.listingType',
+      'publicData.transactionProcessAlias',
+      'publicData.unitType',
+      'publicData.cardStyle',
+      // These help rendering of 'purchase' listings,
+      // when transitioning from search page to listing page
+      'publicData.pickupEnabled',
+      'publicData.shippingEnabled',
+      'publicData.priceVariationsEnabled',
+      'publicData.priceVariants',
+    ],
+    'fields.user': ['profile.displayName', 'profile.abbreviatedName'],
+    'fields.image': [
+      'variants.scaled-small',
+      'variants.scaled-medium',
+      `variants.${variantPrefix}`,
+      `variants.${variantPrefix}-2x`,
+    ],
+    ...createImageVariantConfig(`${variantPrefix}`, 400, aspectRatio),
+    ...createImageVariantConfig(`${variantPrefix}-2x`, 800, aspectRatio),
+    'limit.images': 1,
   };
 };
 
 describe('SearchPage', () => {
-  const l1 = createListing('l1');
-  const l2 = createListing('l2');
-
-  // We'll initialize the store with relevant listing data
-  const initialState = {
-    SearchPage: {
-      currentPageResultIds: [l1.id, l2.id],
-      pagination: {
-        page: 1,
-        perPage: 1,
-        totalItems: 2,
-        totalPages: 2,
-      },
-      searchInProgress: false,
-      searchListingsError: null,
-      searchParams: null,
-      activeListingId: null,
-    },
-    marketplaceData: {
-      entities: {
-        listing: {
-          l1,
-          l2,
-        },
-      },
-    },
-  };
-
   const commonProps = {
     scrollingDisabled: false,
     onActivateListing: noop,
@@ -191,7 +318,7 @@ describe('SearchPage', () => {
     const searchRouteConfig = routeConfiguration.find(conf => conf.name === 'SearchPage');
     const SearchPage = searchRouteConfig.component;
 
-    const { getByPlaceholderText, getByText, getAllByText, queryByText } = render(
+    const { getByPlaceholderText, getByText, getAllByText, queryByText, getByRole } = render(
       <SearchPage {...props} />,
       {
         initialState,
@@ -215,10 +342,32 @@ describe('SearchPage', () => {
       expect(getAllByText('Newest')).toHaveLength(4); // desktop and mobile dropdowns & selected
       expect(getAllByText('Oldest')).toHaveLength(2); // desktop and mobile dropdowns
 
-      // Has Category filter (primary)
-      expect(getByText('Category')).toBeInTheDocument();
+      // Has no Cat filter (primary filter tied to 'Cats' category)
+      expect(queryByText('Cat')).not.toBeInTheDocument();
+      // Has no Boat filter (primary filter tied to 'sell-bicycles' listing type)
+      expect(queryByText('Boat')).not.toBeInTheDocument();
       // Has(!) Amenities filter (secondary filter)
       expect(getByText('Amenities')).toBeInTheDocument();
+      // Has Single Select Test filter
+      expect(getByText('Single Select Test')).toBeInTheDocument();
+      expect(getByText('Enum 1')).toBeInTheDocument();
+      expect(getByText('Enum 2')).toBeInTheDocument();
+
+      // Has Category filter
+      expect(getByText('FilterComponent.categoryLabel')).toBeInTheDocument();
+      expect(getByText('Dogs')).toBeInTheDocument();
+      expect(queryByText('Poodle')).not.toBeInTheDocument();
+      expect(getByText('Cats')).toBeInTheDocument();
+      expect(queryByText('Burmese')).not.toBeInTheDocument();
+      expect(getByText('Fish')).toBeInTheDocument();
+      expect(queryByText('Freshwater')).not.toBeInTheDocument();
+
+      // Has Listing type filter
+      expect(getByText('FilterComponent.listingTypeLabel')).toBeInTheDocument();
+      expect(getByText('Rent bicycles daily')).toBeInTheDocument();
+      expect(getByText('Rent bicycles nightly')).toBeInTheDocument();
+      expect(getByText('Rent bicycles hourly')).toBeInTheDocument();
+      expect(getByText('Sell bicycles')).toBeInTheDocument();
 
       // Has Price filter
       expect(getByText('FilterComponent.priceLabel')).toBeInTheDocument();
@@ -229,8 +378,22 @@ describe('SearchPage', () => {
       // Has listing with title
       expect(getByText('l2 title')).toBeInTheDocument();
       // 2 listings with the same price
-      expect(getAllByText('$55.00')).toHaveLength(2);
+      expect(getAllByText('ListingCard.price')).toHaveLength(2);
     });
+
+    // Test category intercation: click "Fish"
+    await waitFor(() => {
+      userEvent.click(getByRole('button', { name: 'Fish' }));
+    });
+
+    expect(getByText('Dogs')).toBeInTheDocument();
+    expect(queryByText('Poodle')).not.toBeInTheDocument();
+    expect(getByText('Cats')).toBeInTheDocument();
+    expect(queryByText('Burmese')).not.toBeInTheDocument();
+    // Subcategories of Fish should be visible
+    expect(getByText('Fish')).toBeInTheDocument();
+    expect(getByText('Freshwater')).toBeInTheDocument();
+    expect(getByText('Saltwater')).toBeInTheDocument();
   });
 
   it('Check that map and filters exist in map variant', async () => {
@@ -241,7 +404,7 @@ describe('SearchPage', () => {
     const searchRouteConfig = routeConfiguration.find(conf => conf.name === 'SearchPage');
     const SearchPage = searchRouteConfig.component;
 
-    const { getByPlaceholderText, getByText, getAllByText, queryByText } = render(
+    const { getByPlaceholderText, getByText, getAllByText, queryByText, getByRole } = render(
       <SearchPage {...props} />,
       {
         initialState,
@@ -265,10 +428,27 @@ describe('SearchPage', () => {
       expect(getAllByText('Newest')).toHaveLength(4); // desktop and mobile dropdowns & selected
       expect(getAllByText('Oldest')).toHaveLength(2); // desktop and mobile dropdowns
 
-      // Has Category filter (primary)
-      expect(getByText('Category')).toBeInTheDocument();
+      // Has no Cat filter (primary filter tied to 'Cats' category)
+      expect(queryByText('Cat')).not.toBeInTheDocument();
       // Does not have Amenities filter (secondary)
       expect(queryByText('Amenities')).not.toBeInTheDocument();
+      // Has Single Select Test filter
+      expect(getByText('Single Select Test')).toBeInTheDocument();
+      expect(queryByText('Enum 1')).not.toBeInTheDocument();
+      expect(queryByText('Enum 2')).not.toBeInTheDocument();
+
+      // Has Category filter
+      expect(getByText('FilterComponent.categoryLabel')).toBeInTheDocument();
+      expect(queryByText('Dogs')).not.toBeInTheDocument();
+      expect(queryByText('Cats')).not.toBeInTheDocument();
+      expect(queryByText('Fish')).not.toBeInTheDocument();
+
+      // Has Listing type filter
+      expect(getByText('FilterComponent.listingTypeLabel')).toBeInTheDocument();
+      expect(queryByText('Rent bicycles daily')).not.toBeInTheDocument();
+      expect(queryByText('Rent bicycles nightly')).not.toBeInTheDocument();
+      expect(queryByText('Rent bicycles hourly')).not.toBeInTheDocument();
+      expect(queryByText('Sell bicycles')).not.toBeInTheDocument();
 
       // Has "more filters" button for secondary filters
       expect(getByText('SearchFiltersPrimary.moreFiltersButton')).toBeInTheDocument();
@@ -282,7 +462,223 @@ describe('SearchPage', () => {
       // Has listing with title
       expect(getByText('l2 title')).toBeInTheDocument();
       // 2 listings with the same price
-      expect(getAllByText('$55.00')).toHaveLength(2);
+      expect(getAllByText('ListingCard.price')).toHaveLength(2);
+    });
+
+    // Test category intercation
+    await waitFor(() => {
+      userEvent.click(getByRole('button', { name: 'FilterComponent.categoryLabel' }));
+    });
+    expect(getByText('Dogs')).toBeInTheDocument();
+    expect(queryByText('Poodle')).not.toBeInTheDocument();
+    expect(getByText('Cats')).toBeInTheDocument();
+    expect(queryByText('Burmese')).not.toBeInTheDocument();
+    expect(getByText('Fish')).toBeInTheDocument();
+    expect(queryByText('Freshwater')).not.toBeInTheDocument();
+
+    // Test category intercation: click "Fish"
+    await waitFor(() => {
+      userEvent.click(getByRole('button', { name: 'Fish' }));
+    });
+    expect(getByText('Dogs')).toBeInTheDocument();
+    expect(queryByText('Poodle')).not.toBeInTheDocument();
+    expect(getByText('Cats')).toBeInTheDocument();
+    expect(queryByText('Burmese')).not.toBeInTheDocument();
+    // Subcategories of Fish should be visible
+    expect(getByText('Fish')).toBeInTheDocument();
+    expect(getByText('Freshwater')).toBeInTheDocument();
+    expect(getByText('Saltwater')).toBeInTheDocument();
+  });
+
+  it('Check that Cat filters is revealed in grid variant', async () => {
+    // Select correct SearchPage variant according to route configuration
+    const config = getConfig('grid');
+    const routeConfiguration = getRouteConfiguration(config.layout);
+    const props = { ...commonProps };
+    const searchRouteConfig = routeConfiguration.find(conf => conf.name === 'SearchPage');
+    const SearchPage = searchRouteConfig.component;
+
+    const { getByPlaceholderText, getByText, getAllByText, queryByText, getByRole } = render(
+      <SearchPage {...props} />,
+      {
+        initialState,
+        config,
+        routeConfiguration,
+      }
+    );
+
+    await waitFor(() => {
+      // Has no Cat filter (primary)
+      expect(queryByText('Cat')).not.toBeInTheDocument();
+
+      // Has Category filter
+      expect(getByText('FilterComponent.categoryLabel')).toBeInTheDocument();
+      expect(getByText('Dogs')).toBeInTheDocument();
+      expect(queryByText('Poodle')).not.toBeInTheDocument();
+      expect(getByText('Cats')).toBeInTheDocument();
+      expect(queryByText('Burmese')).not.toBeInTheDocument();
+      expect(getByText('Fish')).toBeInTheDocument();
+      expect(queryByText('Freshwater')).not.toBeInTheDocument();
+    });
+
+    // Test category intercation: click "Fish"
+    await waitFor(() => {
+      userEvent.click(getByRole('button', { name: 'Cats' }));
+    });
+
+    // Has no Cat filter (primary)
+    expect(getByText('Cat')).toBeInTheDocument();
+
+    expect(getByText('Dogs')).toBeInTheDocument();
+    expect(queryByText('Poodle')).not.toBeInTheDocument();
+    expect(getByText('Cats')).toBeInTheDocument();
+    // Subcategories of Cats should be visible
+    expect(queryByText('Burmese')).toBeInTheDocument();
+    expect(queryByText('Egyptian mau')).toBeInTheDocument();
+    expect(getByText('Fish')).toBeInTheDocument();
+    expect(queryByText('Freshwater')).not.toBeInTheDocument();
+    expect(queryByText('Saltwater')).not.toBeInTheDocument();
+  });
+
+  it('Check that Boat filters is revealed in grid variant', async () => {
+    // Select correct SearchPage variant according to route configuration
+    const config = getConfig('grid');
+    const routeConfiguration = getRouteConfiguration(config.layout);
+    const props = { ...commonProps };
+    const searchRouteConfig = routeConfiguration.find(conf => conf.name === 'SearchPage');
+    const SearchPage = searchRouteConfig.component;
+
+    const { getByPlaceholderText, getByText, getAllByText, queryByText, getByRole } = render(
+      <SearchPage {...props} />,
+      {
+        initialState,
+        config,
+        routeConfiguration,
+      }
+    );
+
+    await waitFor(() => {
+      // Has no Boat filter (primary)
+      expect(queryByText('Boat')).not.toBeInTheDocument();
+
+      // Has Listing type filter
+      expect(getByText('FilterComponent.listingTypeLabel')).toBeInTheDocument();
+      expect(getByText('Rent bicycles daily')).toBeInTheDocument();
+      expect(getByText('Rent bicycles nightly')).toBeInTheDocument();
+      expect(getByText('Rent bicycles hourly')).toBeInTheDocument();
+      expect(getByText('Sell bicycles')).toBeInTheDocument();
+    });
+
+    // Test category intercation: click "Sell bicycles"
+    await waitFor(() => {
+      userEvent.click(getByRole('button', { name: 'Sell bicycles' }));
+    });
+
+    // Has Boat filter filter (primary)
+    expect(getByText('Boat')).toBeInTheDocument();
+  });
+
+  it('Check that Listing type filter is not revealed when using a listing type path param', async () => {
+    // Select correct SearchPage variant according to route configuration
+    const config = getConfig('grid');
+    const routeConfiguration = getRouteConfiguration(config.layout);
+    const props = { ...commonProps, params: { listingType: 'sell-bicycles' } };
+    const searchRouteConfig = routeConfiguration.find(
+      conf => conf.name === 'SearchPageWithListingType'
+    );
+    const SearchPage = searchRouteConfig.component;
+
+    const { getByPlaceholderText, getByText, getAllByText, queryByText, getByRole } = render(
+      <SearchPage {...props} />,
+      {
+        initialState,
+        config,
+        routeConfiguration,
+      }
+    );
+
+    await waitFor(() => {
+      // Does not have Listing type filter
+      expect(queryByText('FilterComponent.listingTypeLabel')).not.toBeInTheDocument();
+      expect(queryByText('Rent bicycles daily')).not.toBeInTheDocument();
+      expect(queryByText('Rent bicycles nightly')).not.toBeInTheDocument();
+      expect(queryByText('Rent bicycles hourly')).not.toBeInTheDocument();
+      expect(queryByText('Sell bicycles')).not.toBeInTheDocument();
+    });
+  });
+});
+
+describe('Duck', () => {
+  const defaultConfig = getConfig('map');
+
+  const config = {
+    ...defaultConfig,
+    categoryConfiguration: {
+      categories: [...defaultConfig.categories.categories],
+      categoryLevelKeys: ['categoryLevel1', 'categoryLevel2', 'categoryLevel3'],
+      key: 'categoryLevel',
+      scope: 'public',
+    },
+    listing: {
+      ...defaultConfig.listingFields,
+      ...defaultConfig.listingTypes,
+    },
+    accessControl: { marketplace: { private: true } },
+  };
+  // Shared parameters for viewing rights loadData tests
+  const fakeResponse = resource => ({ data: { data: resource, include: [] } });
+  const sdkFn = response => jest.fn(() => Promise.resolve(response));
+  const currentUser = createCurrentUser('userId');
+
+  it('loadData() for full viewing rights user loads listings', () => {
+    const getState = () => ({
+      ...initialState,
+      user: { currentUser },
+      auth: { isAuthenticated: true },
+    });
+
+    const sdk = {
+      currentUser: { show: sdkFn(fakeResponse(currentUser)) },
+      listings: { query: sdkFn(fakeResponse([l1, l2])) },
+      authInfo: sdkFn({}),
+    };
+
+    const dispatch = createFakeDispatch(getState, sdk);
+
+    const searchParams = getSearchParams(config);
+    const listingFields = config?.listing?.listingFields;
+    const sanitizeConfig = { listingFields };
+
+    // Tests the actions that get dispatched to the Redux store when SearchPage.duck.js
+    // loadData() function is called. If you make customizations to the loadData() logic,
+    // update this test accordingly!
+    return loadData(null, null, config)(dispatch, getState, sdk).then(data => {
+      expect(dispatchedActions(dispatch)).toEqual([
+        searchListingsRequest(searchParams),
+        addMarketplaceEntities(fakeResponse([l1, l2]), sanitizeConfig),
+        searchListingsSuccess(fakeResponse([l1, l2])),
+      ]);
+    });
+  });
+
+  it('loadData() for restricted viewing rights user does not load listings', () => {
+    currentUser.effectivePermissionSet.attributes.read = 'permissions/deny';
+
+    const getState = () => ({
+      ...initialState,
+      user: { currentUser },
+      auth: { isAuthenticated: true },
+    });
+
+    const sdk = {};
+
+    const dispatch = createFakeDispatch(getState, sdk);
+
+    // Tests the actions that get dispatched to the Redux store when SearchPage.duck.js
+    // loadData() function is called. If you make customizations to the loadData() logic,
+    // update this test accordingly!
+    return loadData(null, null, config)(dispatch, getState, sdk).then(data => {
+      expect(dispatchedActions(dispatch)).toEqual([]);
     });
   });
 });

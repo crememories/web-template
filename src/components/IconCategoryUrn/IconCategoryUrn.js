@@ -1,5 +1,3 @@
-import React from 'react';
-import PropTypes from 'prop-types';
 import classNames from 'classnames';
 
 import css from './IconCategoryUrn.module.css';
@@ -92,11 +90,5 @@ m-769 -647 c121 -73 464 -178 725 -223 772 -131 1749 -91 2361 96 114 34 268
     </svg>
   );
 };
-
-IconCategoryUrn.defaultProps = { rootClassName: null, className: null };
-
-const { string } = PropTypes;
-
-IconCategoryUrn.propTypes = { rootClassName: string, className: string };
 
 export default IconCategoryUrn;

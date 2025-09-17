@@ -2,13 +2,16 @@ import { types as sdkTypes } from './sdkLoader';
 import {
   required,
   requiredStringNoTrim,
+  uniqueString,
   minLength,
   maxLength,
   moneySubUnitAmountAtLeast,
   composeValidators,
   validBusinessURL,
   validHKID,
+  requiredSelectTreeOption,
 } from './validators';
+import { createSlug } from '../util/urlHelpers';
 
 const { Money } = sdkTypes;
 
@@ -66,6 +69,35 @@ describe('validators', () => {
     });
     it('should allow string with chars', () => {
       expect(requiredStringNoTrim('fail')('abc')).toBeUndefined();
+    });
+  });
+  describe('uniqueString()', () => {
+    const stringArray = ['foo', 'bar'];
+    const getMessage = () => 'fail';
+    const toSlug = value => createSlug(value || '');
+
+    it('should not allow undefined', () => {
+      expect(uniqueString(0, stringArray, getMessage, toSlug)(undefined)).toEqual('fail');
+      expect(uniqueString(1, stringArray, getMessage, toSlug)()).toEqual('fail');
+    });
+    it('should not allow non-unique strings', () => {
+      expect(uniqueString(1, stringArray, getMessage, toSlug)('foo')).toEqual('fail');
+    });
+    it('should allow unique strings', () => {
+      expect(uniqueString(1, stringArray, getMessage, toSlug)('')).toBeUndefined();
+      expect(uniqueString(1, stringArray, getMessage, toSlug)('asdf')).toBeUndefined();
+      expect(uniqueString(1, stringArray, getMessage, toSlug)('fo')).toBeUndefined();
+    });
+  });
+  describe('requiredSelectTreeOption()', () => {
+    it('should not allow no value', () => {
+      expect(requiredSelectTreeOption('fail')()).toEqual('fail');
+    });
+    it('should not allow empty object as value', () => {
+      expect(requiredSelectTreeOption('fail')({})).toEqual('fail');
+    });
+    it('should allow empty object as value', () => {
+      expect(requiredSelectTreeOption('fail')({ nestedLevel1: 'foobar' })).toBeUndefined();
     });
   });
   describe('minLength()', () => {

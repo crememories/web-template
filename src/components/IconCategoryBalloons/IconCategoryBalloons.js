@@ -1,5 +1,3 @@
-import React from 'react';
-import PropTypes from 'prop-types';
 import classNames from 'classnames';
 
 import css from './IconCategoryBalloons.module.css';
@@ -25,12 +23,6 @@ const IconCategoryBalloons = props => {
     </svg>
   );
 };
-
-IconCategoryBalloons.defaultProps = { rootClassName: null, className: null };
-
-const { string } = PropTypes;
-
-IconCategoryBalloons.propTypes = { rootClassName: string, className: string };
 
 export default IconCategoryBalloons;
 

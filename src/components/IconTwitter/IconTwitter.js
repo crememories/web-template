@@ -21,10 +21,4 @@ const IconTwitter = props => {
   );
 };
 
-IconTwitter.defaultProps = { rootClassName: null, className: null };
-
-const { string } = PropTypes;
-
-IconTwitter.propTypes = { rootClassName: string, className: string };
-
 export default IconTwitter;
