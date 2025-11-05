@@ -40,9 +40,13 @@ app.use('/api', apiRouter);
 const apiProxy = createProxyMiddleware({
   target: 'https://info.thememorialmarket.com',
   changeOrigin: true,
+  onProxyReq: (proxyReq, req, res) => {
+    console.log(`Proxying request: ${req.method} ${req.url}`);  // Log each request that's being proxied
+  },
 });
 
 app.use('/info', apiProxy);
+
 
 // Generate web app manifest
 // When developing with "yarn run dev",

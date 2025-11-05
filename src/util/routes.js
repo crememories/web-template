@@ -149,6 +149,8 @@ export const generateLinkProps = (type, href, routeConfiguration, userId, userEm
 
   const isInternalLink = type === 'internal' || href.charAt(0) === '/';
 
+  console.log('sssssssssssssssssssss');
+
   if (isInternalLink) {
     const testURL = new URL('http://my.marketplace.com' + processedLink);
 
