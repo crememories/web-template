@@ -143,7 +143,7 @@ const frameSrcOverride = frameSrc.concat(
 );
 
 const { connectSrc = [self] } = defaultDirectives;
-const connectSrcOverride = connectSrc.concat('www.facebook.com');
+const connectSrcOverride = connectSrc.concat('www.facebook.com','info.thememorialmarket.com');
 
 /**
  * Middleware for creating a Content Security Policy
