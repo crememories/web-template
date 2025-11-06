@@ -164,6 +164,7 @@ app.use(cookieParser());
 const apiProxy = createProxyMiddleware({
   target: 'https://info.thememorialmarket.com',
   changeOrigin: true,
+  pathRewrite: { '^/info': '' }, // removes /info prefix
 });
 
 app.use('/info', apiProxy);
