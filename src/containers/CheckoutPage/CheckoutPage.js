@@ -78,6 +78,8 @@ const EnhancedCheckoutPage = props => {
       transaction,
       fetchSpeculatedTransaction,
       fetchStripeCustomer,
+      fetchCommission,
+      comissionValue
     } = props;
     const initialData = { orderData, listing, transaction };
     const data = handlePageData(initialData, STORAGE_KEY, history);
