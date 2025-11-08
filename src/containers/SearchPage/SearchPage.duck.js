@@ -413,7 +413,10 @@ export const loadData = (params, search, config) => (dispatch, getState, sdk) =>
   } = config.layout.listingImage;
   const aspectRatio = aspectHeight / aspectWidth;
 
-  const NEW_RESULT_PAGE_SIZE = window.innerWidth < PAGE_SIZE_BREAKPOINT ? RESULT_PAGE_SIZE : 25;;
+  const isBrowser = typeof window !== 'undefined';
+  const NEW_RESULT_PAGE_SIZE = isBrowser && window.innerWidth < PAGE_SIZE_BREAKPOINT
+    ? RESULT_PAGE_SIZE
+    : 25;
 
   const searchListingsCall = searchListings(
     {
