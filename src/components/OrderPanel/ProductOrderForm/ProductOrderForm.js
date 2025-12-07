@@ -259,6 +259,12 @@ const renderForm = formRenderProps => {
       e.preventDefault();  // Prevent form submission
       return;
     }
+    // Track Add To Cart
+    fbq('track', 'AddToCart', {
+      content_ids: listingId,
+      content_type: 'product',
+    });
+
     // If all validation passes, submit the form
     handleSubmit(e);
   };
@@ -271,6 +277,11 @@ const renderForm = formRenderProps => {
 
   const onClickContactUser = e => {
     e.preventDefault();
+    // Track Ask A Question
+    fbq('track', 'AskAQuestion', {
+      content_ids: listingId,
+      content_type: 'product',
+    });
     onContactUser();
   };
 
