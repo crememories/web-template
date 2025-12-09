@@ -418,8 +418,10 @@ class StripePaymentForm extends Component {
       ),
     };
 
+    // console.log(this.props);
+
     // FB pixel tracking
-    fbq('track', 'ConfirmAndPay', {
+    fbq('track', 'Purchase', {
       value: this.props.totalPrice,
       currency: this.props.locale,
       content_type: 'listing',
