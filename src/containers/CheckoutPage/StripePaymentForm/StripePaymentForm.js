@@ -445,6 +445,17 @@ class StripePaymentForm extends Component {
         ensurePaymentMethodCard(defaultPaymentMethod).id
       ),
     };
+
+    // console.log(this.props);
+
+    // FB pixel tracking
+    fbq('track', 'Purchase', {
+      value: this.props.totalPrice,
+      currency: this.props.locale,
+      content_type: 'listing',
+      content_ids: [this.props.listingId],
+    });
+
     onSubmit(params);
   }
 
