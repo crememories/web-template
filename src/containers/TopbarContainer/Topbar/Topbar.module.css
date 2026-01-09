@@ -151,7 +151,7 @@
 }
 
 .mobileHelp {
-  color: var(--colorGrey300);
+  color: var(--colorGrey600);
   margin: 0 24px;
 
   /* Absolute position to avoid affecting the layout of the autocomplete
@@ -164,6 +164,8 @@
 
 .modalContainer {
   composes: marketplaceModalInMobileBaseStyles from global;
+  height: unset;
+  min-height: 100vh;
   padding: 0;
   padding: var(--modalPadding);
 

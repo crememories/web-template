@@ -145,7 +145,6 @@ export const createUserWithIdp = body => {
   return post('/api/auth/create-user-with-idp', body);
 };
 
-
 // admin without description yet
 //
 export const getUsersAdmin = body => {
@@ -179,4 +178,10 @@ export const actionTapfiliate = body => {
 //
 export const purchaseTapfiliate = body => {
   return post('/api/purchase-tapfiliate', body);
+};
+// Check if user can be deleted and then delete the user. Endpoint logic
+// must be modified to accommodate the transaction processes used in
+// the marketplace.
+export const deleteUserAccount = body => {
+  return post('/api/delete-account', body);
 };

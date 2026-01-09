@@ -90,6 +90,8 @@ const EditListingPricingAndStockPanel = props => {
     panelUpdated,
     updateInProgress,
     errors,
+    updatePageTitle: UpdatePageTitle,
+    intl,
   } = props;
 
   const classes = classNames(rootClassName || css.root, className);
@@ -175,20 +177,28 @@ const EditListingPricingAndStockPanel = props => {
     initialValues.addonVariant = pricingAddonVariant;
   }
 
+  const panelHeadingProps = isPublished
+    ? {
+        id: 'EditListingPricingAndStockPanel.title',
+        values: { listingTitle: <ListingLink listing={listing} />, lineBreak: <br /> },
+        messageProps: { listingTitle: listing.attributes.title },
+      }
+    : {
+        id: 'EditListingPricingAndStockPanel.createListingTitle',
+        values: { lineBreak: <br /> },
+        messageProps: {},
+      };
+
   return (
     <main className={classes}>
-      <H3 as="h1">
-        {isPublished ? (
-          <FormattedMessage
-            id="EditListingPricingAndStockPanel.title"
-            values={{ listingTitle: <ListingLink listing={listing} />, lineBreak: <br /> }}
-          />
-        ) : (
-          <FormattedMessage
-            id="EditListingPricingAndStockPanel.createListingTitle"
-            values={{ lineBreak: <br /> }}
-          />
+      <UpdatePageTitle
+        panelHeading={intl.formatMessage(
+          { id: panelHeadingProps.id },
+          { ...panelHeadingProps.messageProps }
         )}
+      />
+      <H3 as="h1">
+        <FormattedMessage id={panelHeadingProps.id} values={{ ...panelHeadingProps.values }} />
       </H3>
       {priceCurrencyValid ? (
         <EditListingPricingAndStockForm

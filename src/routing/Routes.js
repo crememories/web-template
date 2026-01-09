@@ -23,9 +23,9 @@ const isBanned = currentUser => {
 };
 
 const canShowComponent = props => {
-  const { isAuthenticated, currentUser, route } = props;
+  const { isAuthenticated, currentUser, route, accountMarkedDeleted } = props;
   const { auth } = route;
-  return !auth || (isAuthenticated && !isBanned(currentUser));
+  return !auth || (isAuthenticated && !isBanned(currentUser) && !accountMarkedDeleted);
 };
 
 const callLoadData = props => {
@@ -89,7 +89,7 @@ const setPageScrollPosition = (location, delayed) => {
 const handleLocationChanged = (dispatch, location, routeConfiguration, delayed) => {
   setPageScrollPosition(location, delayed);
   const path = canonicalRoutePath(routeConfiguration, location);
-  dispatch(locationChanged(location, path));
+  dispatch(locationChanged({ location, canonicalPath: path }));
 };
 
 /**
@@ -145,7 +145,14 @@ class RouteComponentRenderer extends Component {
   }
 
   render() {
-    const { route, match, location, staticContext = {}, currentUser } = this.props;
+    const {
+      route,
+      match,
+      location,
+      staticContext = {},
+      currentUser,
+      accountMarkedDeleted,
+    } = this.props;
     const { component: RouteComponent, authPage = 'SignupPage', extraProps } = route;
     const canShow = canShowComponent(this.props);
     if (!canShow) {
@@ -165,7 +172,7 @@ class RouteComponentRenderer extends Component {
           {...extraProps}
         />
       </LoadableComponentErrorBoundary>
-    ) : isBannedFromAuthPages ? (
+    ) : isBannedFromAuthPages || accountMarkedDeleted ? (
       <NamedRedirect name="LandingPage" />
     ) : (
       <NamedRedirect
@@ -178,8 +185,15 @@ class RouteComponentRenderer extends Component {
 
 const mapStateToProps = state => {
   const { isAuthenticated, logoutInProgress } = state.auth;
-  const { currentUser } = state.user;
-  return { isAuthenticated, logoutInProgress, currentUser };
+  const { currentUser } = state?.user || {};
+  const { accountMarkedDeleted } = state.ManageAccountPage;
+
+  return {
+    isAuthenticated,
+    logoutInProgress,
+    currentUser,
+    accountMarkedDeleted,
+  };
 };
 const RouteComponentContainer = compose(connect(mapStateToProps))(RouteComponentRenderer);
 

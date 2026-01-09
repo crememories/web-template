@@ -197,10 +197,11 @@ class Menu extends Component {
   }
 
   render() {
-    const { id, className, rootClassName } = this.props;
+    const { id, className, rootClassName, ariaLabel } = this.props;
     const rootClass = rootClassName || css.root;
     const classes = classNames(rootClass, className);
     const menuChildren = this.state.ready ? this.prepareChildren() : null;
+    const ariaLabelMaybe = ariaLabel ? { ['aria-label']: ariaLabel } : {};
 
     return (
       <div
@@ -211,6 +212,7 @@ class Menu extends Component {
         ref={c => {
           this.menu = c;
         }}
+        {...ariaLabelMaybe}
       >
         {menuChildren}
       </div>

@@ -356,12 +356,18 @@ export class SearchPageComponent extends Component {
       />
     );
 
+    // Parse page heading to be included in the title
+    const pageHeading = searchInProgress
+      ? intl.formatMessage({ id: 'MainPanelHeader.loadingResults' })
+      : intl.formatMessage({ id: 'MainPanelHeader.foundResults' }, { count: totalItems });
+
     const { title, description, schema } = createSearchResultSchema(
       listings,
       searchParamsInURL || {},
       intl,
       routeConfiguration,
-      config
+      config,
+      pageHeading
     );
 
     // Set topbar class based on if a modal is open in
@@ -387,10 +393,11 @@ export class SearchPageComponent extends Component {
                 const key = `SearchFiltersDesktop.${filterConfig.scope || 'built-in'}.${
                   filterConfig.key
                 }`;
+                const filterId = `SearchFiltersDesktop.${filterConfig.key.toLowerCase()}`;
                 return (
                   <FilterComponent
                     key={key}
-                    idPrefix="SearchFiltersDesktop"
+                    id={filterId}
                     className={css.filter}
                     config={filterConfig}
                     listingCategories={listingCategories}
@@ -435,11 +442,12 @@ export class SearchPageComponent extends Component {
                   const key = `SearchFiltersMobile.${filterConfig.scope || 'built-in'}.${
                     filterConfig.key
                   }`;
+                  const filterId = `SearchFiltersMobile.${filterConfig.key.toLowerCase()}`;
 
                   return (
                     <FilterComponent
                       key={key}
-                      idPrefix="SearchFiltersMobile"
+                      id={filterId}
                       config={filterConfig}
                       listingCategories={listingCategories}
                       marketplaceCurrency={marketplaceCurrency}
@@ -485,6 +493,7 @@ export class SearchPageComponent extends Component {
                   search={parse(location.search)}
                   isMapVariant={false}
                   listingTypeParam={listingTypePathParam}
+                  intl={intl}
                 />
               </div>
             </div>
