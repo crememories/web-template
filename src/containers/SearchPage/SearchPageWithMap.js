@@ -600,6 +600,11 @@ export class SearchPageComponent extends Component {
       />
     );
 
+    // Parse page heading to be included in the title
+    const pageHeading = searchInProgress
+      ? intl.formatMessage({ id: 'MainPanelHeader.loadingResults' })
+      : intl.formatMessage({ id: 'MainPanelHeader.foundResults' }, { count: totalItems });
+
     const { bounds, origin } = searchParamsInURL || {};
     // console.log(searchParamsInURL);
     const { title, description, schema } = createSearchResultSchema(
@@ -607,7 +612,8 @@ export class SearchPageComponent extends Component {
       searchParamsInURL || {},
       intl,
       routeConfiguration,
-      config
+      config,
+      pageHeading
     );
 
     // Set topbar class based on if a modal is open in
@@ -651,7 +657,7 @@ export class SearchPageComponent extends Component {
           isMapShow={this.state.isMapShow}
           routeConfiguration={routeConfiguration}
         />
-        <div className={css.container}>
+        <div className={css.container} role="main">
         <Modal 
             id='isFilterModal'
             isOpen={isFilterModalOpen}
@@ -726,10 +732,11 @@ export class SearchPageComponent extends Component {
                 const key = `SearchFiltersMobile.${filterConfig.scope || 'built-in'}.${
                   filterConfig.key
                 }`;
+                const filterId = `SearchFiltersMobile.${filterConfig.key.toLowerCase()}`;
                 return (
                   <FilterComponent
                     key={key}
-                    idPrefix="SearchFiltersMobile"
+                    id={filterId}
                     config={filterConfig}
                     listingCategories={listingCategories}
                     marketplaceCurrency={marketplaceCurrency}
@@ -765,10 +772,11 @@ export class SearchPageComponent extends Component {
                   const key = `SearchFiltersPrimary.${filterConfig.scope || 'built-in'}.${
                     filterConfig.key
                   }`;
+                  const filterId = `SearchFiltersPrimary.${filterConfig.key.toLowerCase()}`;
                   return (
                     <FilterComponent
                       key={key}
-                      idPrefix="SearchFiltersPrimary"
+                      id={filterId}
                       config={filterConfig}
                       listingCategories={listingCategories}
                       marketplaceCurrency={marketplaceCurrency}
@@ -799,10 +807,11 @@ export class SearchPageComponent extends Component {
                     const key = `SearchFiltersSecondary.${filterConfig.scope || 'built-in'}.${
                       filterConfig.key
                     }`;
+                    const filterId = `SearchFiltersSecondary.${filterConfig.key.toLowerCase()}`;
                     return (
                       <FilterComponent
                         key={key}
-                        idPrefix="SearchFiltersSecondary"
+                        id={filterId}
                         config={filterConfig}
                         listingCategories={listingCategories}
                         marketplaceCurrency={marketplaceCurrency}
@@ -841,6 +850,7 @@ export class SearchPageComponent extends Component {
                   isMapVariant={this.state.isMapShow}
                   fullMap={this.state.fullMap}
                   listingTypeParam={listingTypePathParam}
+                  intl={intl}
                 />
               </div>
             )}

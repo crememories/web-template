@@ -82,6 +82,11 @@ const FilterForm = props => {
             onSubmit={handleSubmit}
             tabIndex="0"
             style={{ ...style }}
+            role="search"
+            aria-label={intl.formatMessage(
+              { id: 'FilterForm.screenreader.label' },
+              { mode: liveEdit ? 'live' : 'normal' }
+            )}
           >
             <div className={classNames(paddingClasses || css.contentWrapper)}>{children}</div>
 

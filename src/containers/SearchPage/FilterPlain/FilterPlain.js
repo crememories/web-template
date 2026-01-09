@@ -71,13 +71,21 @@ class FilterPlainComponent extends Component {
       children,
       initialValues,
       keepDirtyOnReinitialize = false,
+      ariaLabel,
     } = this.props;
+    const formId = `${id}.form`;
     const classes = classNames(rootClassName || css.root, className);
 
     return (
       <div className={classes}>
         <div className={css.filterHeader}>
-          <button className={css.labelButton} onClick={this.toggleIsOpen}>
+          <button
+            className={css.labelButton}
+            onClick={this.toggleIsOpen}
+            aria-label={ariaLabel}
+            aria-expanded={this.state.isOpen}
+            aria-controls={this.state.isOpen ? formId : ''}
+          >
             <span className={css.labelButtonContent}>
               <span className={css.labelWrapper}>
                 <span className={css.label}>
@@ -102,7 +110,7 @@ class FilterPlainComponent extends Component {
           }}
         >
           <FilterForm
-            id={`${id}.form`}
+            id={formId}
             liveEdit
             onChange={this.handleChange}
             initialValues={initialValues}

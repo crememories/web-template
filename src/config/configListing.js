@@ -270,6 +270,8 @@ export const listingFields = [
  */
 
 export const listingTypes = [
+  // // Here are some examples of listingTypes
+  // // TODO: SearchPage does not work well if both booking and product selling are used at the same time
   // {
   //   listingType: 'daily-booking',
   //   label: 'Daily booking',
@@ -284,8 +286,6 @@ export const listingTypes = [
   //     payoutDetails: true,
   //   },
   // },
-  // // Here are some examples for other listingTypes
-  // // TODO: SearchPage does not work well if both booking and product selling are used at the same time
   // {
   //   listingType: 'nightly-booking',
   //   label: 'Nightly booking',

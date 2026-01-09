@@ -33,6 +33,8 @@ const MAX_MOBILE_SCREEN_WIDTH = 1024;
 const SEARCH_DISPLAY_ALWAYS = 'always';
 const SEARCH_DISPLAY_NOT_LANDING_PAGE = 'notLandingPage';
 const SEARCH_DISPLAY_ONLY_SEARCH_PAGE = 'onlySearchPage';
+const MOBILE_MENU_BUTTON_ID = 'mobileMenuButton';
+const MOBILE_SEARCH_BUTTON_ID = 'mobileSearchButton';
 
 const redirectToURLWithModalState = (history, location, modalStateParam) => {
   const { pathname, search, state } = location;
@@ -60,7 +62,7 @@ const compareGroups = (a, b) => {
 };
 // Returns links in order where primary links are returned first
 const sortCustomLinks = customLinks => {
-  const links = Array.isArray(customLinks) ? customLinks : [];
+  const links = Array.isArray(customLinks) ? [...customLinks] : [];
   return links.sort(compareGroups);
 };
 
@@ -163,8 +165,8 @@ const TopbarComponent = props => {
         return { keywords: values?.keywords };
       }
       // topbar search defaults to 'location' search
-      const { search, selectedPlace } = values?.location;
-      const { origin, bounds } = selectedPlace;
+      const { search, selectedPlace } = values?.location || {};
+      const { origin, bounds } = selectedPlace || {};
       const originMaybe = isOriginInUse(config) ? { origin } : {};
 
       return {
@@ -295,6 +297,7 @@ const TopbarComponent = props => {
 
   const mobileSearchButtonMaybe = showSearchForm ? (
     <Button
+      id={MOBILE_SEARCH_BUTTON_ID}
       rootClassName={css.searchMenu}
       onClick={() => redirectToURLWithModalState(history, location, 'mobilesearch')}
       title={intl.formatMessage({ id: 'Topbar.searchIcon' })}
@@ -318,8 +321,9 @@ const TopbarComponent = props => {
         onLogout={handleLogout}
         currentPage={resolvedCurrentPage}
       />
-      <div className={classNames(mobileRootClassName || css.container, mobileClassName)}>
+      <nav className={classNames(mobileRootClassName || css.container, mobileClassName)}>
         <Button
+          id={MOBILE_MENU_BUTTON_ID}
           rootClassName={css.menu}
           onClick={() => redirectToURLWithModalState(history, location, 'mobilemenu')}
           title={intl.formatMessage({ id: 'Topbar.menuIcon' })}
@@ -336,7 +340,7 @@ const TopbarComponent = props => {
           linkToExternalSite={config?.topbar?.logoLink}
         />
         {mobileSearchButtonMaybe}
-      </div>
+      </nav>
       <div className={css.desktop}>
         <TopbarDesktop
           className={desktopClassName}
@@ -363,6 +367,7 @@ const TopbarComponent = props => {
         onClose={() => redirectToURLWithoutModalState(history, location, 'mobilemenu')}
         usePortal
         onManageDisableScrolling={onManageDisableScrolling}
+        focusElementId={MOBILE_MENU_BUTTON_ID}
       >
         {authInProgress ? null : mobileMenu}
       </Modal>
@@ -373,6 +378,7 @@ const TopbarComponent = props => {
         onClose={() => redirectToURLWithoutModalState(history, location, 'mobilesearch')}
         usePortal
         onManageDisableScrolling={onManageDisableScrolling}
+        focusElementId={MOBILE_SEARCH_BUTTON_ID}
       >
         <div className={css.searchContainer}>
           <TopbarSearchForm

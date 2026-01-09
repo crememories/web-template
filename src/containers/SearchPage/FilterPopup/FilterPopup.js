@@ -132,12 +132,14 @@ class FilterPopup extends Component {
       initialValues,
       keepDirtyOnReinitialize = false,
       contentPlacementOffset = 0,
+      ariaLabel,
     } = this.props;
 
     const classes = classNames(rootClassName || css.root, className);
     const popupClasses = classNames(css.popup, { [css.isOpen]: this.state.isOpen });
     const popupSizeClasses = popupClassName || css.popupSize;
     const contentStyle = this.positionStyleForContent();
+    const formId = `${id}.form`;
 
     return (
       <OutsideClickHandler onOutsideClick={this.handleBlur}>
@@ -152,6 +154,9 @@ class FilterPopup extends Component {
             isSelected={isSelected}
             labelMaxWidth={labelMaxWidth}
             toggleOpen={this.toggleOpen}
+            aria-label={ariaLabel}
+            aria-expanded={this.state.isOpen}
+            aria-controls={this.state.isOpen ? formId : ''}
           >
             {label}
           </PopupOpenerButton>
@@ -165,7 +170,7 @@ class FilterPopup extends Component {
           >
             {this.state.isOpen ? (
               <FilterForm
-                id={`${id}.form`}
+                id={formId}
                 paddingClasses={popupSizeClasses}
                 showAsPopup
                 contentPlacementOffset={contentPlacementOffset}
