@@ -174,25 +174,6 @@ class TopbarSearchFormComponent extends Component {
   }
 }
 
-TopbarSearchFormComponent.defaultProps = {
-  rootClassName: null,
-  className: null,
-  desktopInputRoot: null,
-  isMobile: false,
-};
-
-TopbarSearchFormComponent.propTypes = {
-  rootClassName: string,
-  className: string,
-  desktopInputRoot: string,
-  onSubmit: func.isRequired,
-  isMobile: bool,
-  appConfig: object.isRequired,
-
-  // from injectIntl
-  intl: intlShape.isRequired,
-};
-
 const TopbarSearchForm = injectIntl(TopbarSearchFormComponent);
 
 export default TopbarSearchForm;

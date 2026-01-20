@@ -59,27 +59,6 @@ const FieldCommissionInputComponent = props => {
   );
 };
 
-FieldCommissionInputComponent.defaultProps = {
-  rootClassName: null,
-  className: null,
-  id: null,
-  label: null,
-};
-
-FieldCommissionInputComponent.propTypes = {
-  rootClassName: string,
-  className: string,
-
-  // Label is optional, but if it is given, an id is also required so
-  // the label can reference the input in the `for` attribute
-  id: string,
-  label: string,
-  name: string.isRequired,
-
-  // from injectIntl
-  intl: intlShape.isRequired,
-};
-
 const FieldCommissionInput = compose(injectIntl)(FieldCommissionInputComponent)
 
 export default FieldCommissionInput;

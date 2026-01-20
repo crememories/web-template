@@ -239,28 +239,6 @@ const CommissionPageComponent = props => {
   );
 };
 
-CommissionPageComponent.defaultProps = {
-  currentUser: null,
-  user: null,
-  queryListingsError: null,
-  listingData:null,
-  // queryReviewsError: null,
-};
-
-CommissionPageComponent.propTypes = {
-  scrollingDisabled: bool.isRequired,
-  // queryReviewsError: propTypes.error,
-
-  // form withViewport
-  viewport: shape({
-    width: number.isRequired,
-    height: number.isRequired,
-  }).isRequired,
-
-  // from injectIntl
-  intl: intlShape.isRequired,
-};
-
 const mapStateToProps = state => {
   const { currentUser } = state.user;
 

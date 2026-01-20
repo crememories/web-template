@@ -67,20 +67,6 @@ const EditListingAvailabilityPlanFormComponent = props => {
   );
 };
 
-EditListingAvailabilityPlanFormComponent.defaultProps = {
-  rootClassName: null,
-  className: null,
-  submitButtonWrapperClassName: null,
-  inProgress: false,
-  commission:0,
-  onSubmit: func.isRequired
-};
-
-EditListingAvailabilityPlanFormComponent.propTypes = {
-  inProgress: bool,
-  onSubmit: func,
-};
-
 const EditListingAvailabilityPlanForm = compose(injectIntl)(
   EditListingAvailabilityPlanFormComponent
 );

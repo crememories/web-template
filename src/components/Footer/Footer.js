@@ -227,15 +227,4 @@ const Footer = props => {
   );
 };
 
-Footer.defaultProps = {
-  rootClassName: null,
-  className: null,
-};
-
-Footer.propTypes = {
-  rootClassName: string,
-  className: string,
-  intl: intlShape.isRequired,
-};
-
 export default injectIntl(Footer);

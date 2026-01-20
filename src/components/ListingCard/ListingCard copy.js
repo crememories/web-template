@@ -48,7 +48,6 @@ const priceData = (price, currency, intl) => {
 };
 
 const LazyImage = lazyLoadWithDimensions(ResponsiveImage, { loadAfterInitialRendering: 3000 });
-const LazyCarousel = lazyLoadWithDimensions(ImageCarousel, { loadAfterInitialRendering: 3000 });
 
 const PriceMaybe = props => {
   const { price, publicData, config, intl, listingTypeConfig } = props;
@@ -230,9 +229,8 @@ export const ListingCard = props => {
           variants={variants}
           sizes={renderSizes}
         /> */}
-        <LazyCarousel
+        <ImageCarousel
           key={carouselKey}
-          image={firstImage}
           images={currentListing.images}
           imageVariants={variants}
           link='ListingPage'

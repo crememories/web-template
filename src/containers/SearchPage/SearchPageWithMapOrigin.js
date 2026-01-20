@@ -550,43 +550,6 @@ export class SearchPageComponent extends Component {
   }
 }
 
-SearchPageComponent.defaultProps = {
-  listings: [],
-  pagination: null,
-  searchListingsError: null,
-  searchParams: {},
-  activeListingId: null,
-};
-
-SearchPageComponent.propTypes = {
-  listings: array,
-  onActivateListing: func.isRequired,
-  onManageDisableScrolling: func.isRequired,
-  pagination: propTypes.pagination,
-  scrollingDisabled: bool.isRequired,
-  searchInProgress: bool.isRequired,
-  searchListingsError: propTypes.error,
-  searchParams: object,
-
-  // from useHistory
-  history: shape({
-    push: func.isRequired,
-  }).isRequired,
-  // from useLocation
-  location: shape({
-    search: string.isRequired,
-  }).isRequired,
-
-  // from useIntl
-  intl: intlShape.isRequired,
-
-  // from useConfiguration
-  config: object.isRequired,
-
-  // from useRouteConfiguration
-  routeConfiguration: arrayOf(propTypes.route).isRequired,
-};
-
 const EnhancedSearchPage = props => {
   const config = useConfiguration();
   const routeConfiguration = useRouteConfiguration();

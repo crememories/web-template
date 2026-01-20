@@ -68,15 +68,4 @@ class SortComponent extends Component {
   }
 }
 
-SortComponent.defaultProps = {
-  rootClassName: null,
-  className: null,
-  initialValues: null,
-};
-
-SortComponent.propTypes = {
-  // form injectIntl
-  intl: intlShape.isRequired,
-};
-
 export default injectIntl(SortComponent);

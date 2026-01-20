@@ -50,18 +50,4 @@ const LayoutSingleColumnMidle = props => {
 
 LayoutSingleColumnMidle.displayName = 'LayoutSingleColumnMidle';
 
-LayoutSingleColumnMidle.defaultProps = {
-  className: null,
-  rootClassName: null,
-  footer: null,
-};
-
-LayoutSingleColumnMidle.propTypes = {
-  className: string,
-  rootClassName: string,
-  children: node.isRequired,
-  topbar: node.isRequired,
-  footer: node,
-};
-
 export default LayoutSingleColumnMidle;

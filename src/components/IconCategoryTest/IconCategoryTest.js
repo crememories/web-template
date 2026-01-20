@@ -23,10 +23,4 @@ const IconCategoryTest = props => {
   );
 };
 
-IconCategoryTest.defaultProps = { rootClassName: null, className: null };
-
-const { string } = PropTypes;
-
-IconCategoryTest.propTypes = { rootClassName: string, className: string };
-
 export default IconCategoryTest;

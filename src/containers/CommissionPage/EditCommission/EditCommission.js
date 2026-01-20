@@ -101,29 +101,6 @@ const EditCommissionComponent = props => {
     );
   };
 
-  EditCommissionComponent.defaultProps = {
-    currentUser: null,
-    user: null,
-    // userShowError: null,
-    queryListingsError: null,
-    reviews: [],
-    // queryReviewsError: null,
-  };
-  
-  EditCommissionComponent.propTypes = {
-
-    // queryReviewsError: propTypes.error,
-  
-    // form withViewport
-    viewport: shape({
-      width: number.isRequired,
-      height: number.isRequired,
-    }).isRequired,
-  
-    // from injectIntl
-    intl: intlShape.isRequired,
-  };
-
 const mapStateToProps = state => {
   const { currentUser } = state.user;
   

@@ -519,10 +519,10 @@ export class SearchPageComponent extends Component {
       ...customSecondaryFilters,
     ];
 
-    console.log('activeListingTypes');
-    console.log(activeListingTypes);
-    console.log('listingFieldsConfig');
-    console.log(listingFieldsConfig);
+    // console.log('activeListingTypes');
+    // console.log(activeListingTypes);
+    // console.log('listingFieldsConfig');
+    // console.log(listingFieldsConfig);
     
 
     const hasSecondaryFilters = !!(customSecondaryFilters && customSecondaryFilters.length > 0);
@@ -554,8 +554,8 @@ export class SearchPageComponent extends Component {
         }
       : {};
 
-      console.log('propsForSecondaryFiltersToggle');
-      console.log(propsForSecondaryFiltersToggle);
+      // console.log('propsForSecondaryFiltersToggle');
+      // console.log(propsForSecondaryFiltersToggle);
 
     const hasPaginationInfo = !!pagination && pagination.totalItems != null;
     const totalItems =
