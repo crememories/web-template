@@ -3,7 +3,7 @@ const CLIENT_ID = process.env.REACT_APP_SHARETRIBE_FLEX_CLIENT_ID;
 const CLIENT_SECRET = process.env.SHARETRIBE_FLEX_CLIENT_SECRET;
 
 
-exports.comissionVariable = (listingId) => {
+exports.commissionVariable = (listingId) => {
 //   console.log(' --------------------------------+++++++++++++++++++');
 //   console.log(listingId);
   // console.log(listingId.uuid);

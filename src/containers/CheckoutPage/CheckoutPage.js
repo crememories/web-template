@@ -41,7 +41,7 @@ import {
   confirmPayment,
   sendMessage,
   initiateInquiryWithoutPayment,
-  getCommission,
+  getCommission
 } from './CheckoutPage.duck';
 
 import CheckoutPageWithPayment, {
@@ -82,7 +82,7 @@ const EnhancedCheckoutPage = props => {
       fetchSpeculatedTransaction,
       fetchStripeCustomer,
       fetchCommission,
-      comissionValue
+      commission
     } = props;
     const initialData = { orderData, listing, transaction };
     const data = handlePageData(initialData, STORAGE_KEY, history);
@@ -90,6 +90,7 @@ const EnhancedCheckoutPage = props => {
     if(data?.listing?.id){
       fetchCommission(data.listing.id);
     }
+    const commissionValue = commission;
     setPageData(data || {});
     setIsDataLoaded(true);
 
@@ -103,7 +104,7 @@ const EnhancedCheckoutPage = props => {
           fetchSpeculatedTransaction,
           fetchStripeCustomer,
           config,
-          comissionValue,
+          commissionValue,
         });
       }
     }
@@ -228,7 +229,8 @@ const mapStateToProps = state => {
     initiateInquiryError,
     initiateOrderError,
     confirmPaymentError,
-    comissionValue,
+    commissionValue,
+    commission
   } = state.CheckoutPage;
   const { currentUser } = state.user;
   const { confirmCardPaymentError, paymentIntent, retrievePaymentIntentError } = state.stripe;
@@ -249,7 +251,8 @@ const mapStateToProps = state => {
     confirmPaymentError,
     paymentIntent,
     retrievePaymentIntentError,
-    comissionValue,
+    commissionValue,
+    commission
   };
 };
 

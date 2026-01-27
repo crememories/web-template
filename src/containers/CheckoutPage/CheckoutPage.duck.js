@@ -13,15 +13,14 @@ import Cookies from 'universal-cookie';
 // Initiate Order //
 ////////////////////
 const initiateOrderPayloadCreator = (
-  { orderParams, processAlias, transactionId, transitionName, isPrivilegedTransition },
+  { orderParams, processAlias, transactionId, transitionName, isPrivilegedTransition, commission },
   { dispatch, extra: sdk, rejectWithValue }
 ) => {
   // If we already have a transaction ID, we should transition, not initiate.
   const isTransition = !!transactionId;
 
   const { deliveryMethod, quantity, variant, bookingDates, addonVariant, ...otherOrderParams } = orderParams;
-  console.log('initiateOrder');
-  console.log(orderParams);
+  const cookies = new Cookies(); 
 
   //set cookie for tapfiliate transaction conversion
   cookies.set('tapfiliateOrder', orderParams?.listingId?.uuid, { path: '/' });
@@ -80,7 +79,7 @@ const initiateOrderPayloadCreator = (
 
   if (isTransition && isPrivilegedTransition) {
     // transition privileged
-    return transitionPrivileged({ isSpeculative: false, orderData, bodyParams, queryParams })
+    return transitionPrivileged({ isSpeculative: false, orderData, bodyParams, queryParams, commission })
       .then(handleSuccess)
       .catch(handleError);
   } else if (isTransition) {
@@ -91,7 +90,7 @@ const initiateOrderPayloadCreator = (
       .catch(handleError);
   } else if (isPrivilegedTransition) {
     // initiate privileged
-    return initiatePrivileged({ isSpeculative: false, orderData, bodyParams, queryParams })
+    return initiatePrivileged({ isSpeculative: false, orderData, bodyParams, queryParams, commission })
       .then(handleSuccess)
       .catch(handleError);
   } else {
@@ -113,7 +112,8 @@ export const initiateOrder = (
   processAlias,
   transactionId,
   transitionName,
-  isPrivilegedTransition
+  isPrivilegedTransition,
+  commission
 ) => dispatch => {
   return dispatch(
     initiateOrderThunk({
@@ -122,6 +122,7 @@ export const initiateOrder = (
       transactionId,
       transitionName,
       isPrivilegedTransition,
+      commission,
     })
   ).unwrap();
 };
@@ -243,31 +244,64 @@ const initiateInquiryPayloadCreator = (
     });
 };
 
-// getCommission is a comission for listing creator
-export const getCommission = (listingId) => (dispatch, getState, sdk) => {
-  dispatch(commissionRequest());
-
-  return getListingOwnerAdmin(listingId)
-  .then(res => {
-    return res;
-  })
-  .then(response => {
-    // dispatch(addMarketplaceEntities(response));
-    // dispatch(commissionSuccess(response));
-    if(response.attributes.profile.metadata && response.attributes.profile.metadata.commission){
-      dispatch(commissionSuccess(response.attributes.profile.metadata.commission));
-    }
-  })
-  .catch(e => {
-    log.error(e, 'create-user-with-idp-failed', { listingId });
-    dispatch(commissionError(storableError(e)));
-  });
-};
-
 export const initiateInquiryThunk = createAsyncThunk(
   'CheckoutPage/initiateInquiry',
   initiateInquiryPayloadCreator
 );
+
+//////////////////////
+// Initiate Commission
+//////////////////////
+
+const commissionCreator = async (
+  { listingId },
+  { rejectWithValue }
+) => {
+  try {
+    const response = await getListingOwnerAdmin(listingId);
+
+    const commission =
+      response?.attributes?.profile?.metadata?.commission;
+
+      // console.log(commission);
+      // console.log('commission');
+
+    // only return when commission exists
+    if (commission !== undefined) {
+      return commission;
+    }
+
+    // Do nothing if commission does not exist
+    return undefined;
+
+  } catch (e) {
+    log.error(e, 'get-commission-failed', { listingId });
+    return rejectWithValue(storableError(e));
+  }
+};
+
+// getCommission is a commission for listing creator
+export const commissionThunk = createAsyncThunk(
+  'CheckoutPage/getCommission',
+  commissionCreator
+);
+
+
+export const getCommission = (
+  listingId,
+  processAlias,
+  transitionName
+) => dispatch => {
+  console.log('initiate get commission');
+  return dispatch(
+    commissionThunk({
+      listingId,
+      processAlias,
+      transitionName,
+    })
+  ).unwrap();
+};
+
 // Backward compatible wrapper function for initiateInquiryWithoutPayment
 /**
  * Initiate transaction against default-inquiry process
@@ -318,6 +352,9 @@ const speculateTransactionPayloadCreator = (
 ) => {
   // If we already have a transaction ID, we should transition, not initiate.
   const isTransition = !!transactionId;
+
+  console.log('commission- commission');
+  console.log(commission);  
 
   const {
     deliveryMethod,
@@ -418,7 +455,8 @@ export const speculateTransaction = (
   processAlias,
   transactionId,
   transitionName,
-  isPrivilegedTransition
+  isPrivilegedTransition,
+  commission
 ) => dispatch => {
   return dispatch(
     speculateTransactionThunk({
@@ -427,6 +465,7 @@ export const speculateTransaction = (
       transactionId,
       transitionName,
       isPrivilegedTransition,
+      commission,
     })
   ).unwrap();
 };
@@ -475,6 +514,9 @@ const initialState = {
   stripeCustomerFetched: false,
   initiateInquiryInProgress: false,
   initiateInquiryError: null,
+  commissionInProgress: false,
+  commissionError: null,
+  commission: null,
 };
 
 const checkoutPageSlice = createSlice({
@@ -552,6 +594,24 @@ const checkoutPageSlice = createSlice({
       .addCase(initiateInquiryThunk.rejected, (state, action) => {
         state.initiateInquiryInProgress = false;
         state.initiateInquiryError = action.payload;
+      })
+      // Commission cases
+      .addCase(commissionThunk.pending, state => {
+        state.commissionInProgress = true;
+        state.commissionError = null;
+      })
+      .addCase(commissionThunk.fulfilled, (state, action) => {
+        state.commissionInProgress = false;
+        // Match old thunk behavior
+        if (action.payload !== undefined) {
+          console.log('action.payload');
+          console.log(action.payload);
+          state.commission = action.payload;
+        }
+      })
+      .addCase(commissionThunk.rejected, (state, action) => {
+        state.commissionInProgress = false;
+        state.commissionError = action.payload;
       });
   },
 });

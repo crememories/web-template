@@ -194,7 +194,7 @@ export const processCheckoutWithPayment = (orderParams, extraPaymentParams) => {
     sessionStorageKey,
     stripeCustomer,
     stripePaymentMethodId,
-    comissionValue
+    commissionValue
   } = extraPaymentParams;
   const storedTx = ensureTransaction(pageData.transaction);
 
@@ -223,7 +223,7 @@ export const processCheckoutWithPayment = (orderParams, extraPaymentParams) => {
         : process.transitions.REQUEST_PAYMENT;
     const isPrivileged = process.isPrivileged(requestTransition);
 
-    const commission = comissionValue ? comissionValue : false;
+    const commission = commissionValue ? commissionValue : false;
 
     // If paymentIntent exists, order has been initiated previously.
     const orderPromise = hasPaymentIntents

@@ -93,12 +93,12 @@ module.exports = (req, res) => {
       const { providerCommission, customerCommission } =
         commissionAsset?.type === 'jsonAsset' ? commissionAsset.attributes.data : {};
 
-      const newProviderComission = commission ? commission : providerCommission;
+      const newProviderCommission = commission ? commission : providerCommission;
 
       lineItems = transactionLineItems(
         listing,
         { ...orderData, ...bodyParams.params },
-        newProviderComission,
+        newProviderCommission,
         customerCommission
       );
       metadataMaybe = getMetadata(orderData, transitionName);

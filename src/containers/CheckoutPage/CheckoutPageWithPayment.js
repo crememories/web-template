@@ -155,7 +155,7 @@ const getOrderParams = (pageData, shippingDetails, optionalPaymentParams, config
   return orderParams;
 };
 
-const fetchSpeculatedTransactionIfNeeded = (orderParams, pageData, fetchSpeculatedTransaction, comissionValue) => {
+const fetchSpeculatedTransactionIfNeeded = (orderParams, pageData, fetchSpeculatedTransaction, commissionValue) => {
   const tx = pageData ? pageData.transaction : null;
   const pageDataListing = pageData.listing;
   const processName =
@@ -193,7 +193,7 @@ const fetchSpeculatedTransactionIfNeeded = (orderParams, pageData, fetchSpeculat
       transactionId,
       requestTransition,
       isPrivileged,
-      comissionValue
+      commissionValue
     );
   }
 };
@@ -219,12 +219,15 @@ export const loadInitialDataForStripePayments = ({
   fetchSpeculatedTransaction,
   fetchStripeCustomer,
   config,
-  comissionValue,
+  commissionValue,
 }) => {
   // Fetch currentUser with stripeCustomer entity
   // Note: since there's need for data loading in "componentWillMount" function,
   //       this is added here instead of loadData static function.
   fetchStripeCustomer();
+
+  console.log('commissionValue');
+  console.log(commissionValue);
 
   // Fetch speculated transaction for showing price in order breakdown
   // NOTE: if unit type is line-item/item, quantity needs to be added.
@@ -233,7 +236,7 @@ export const loadInitialDataForStripePayments = ({
   const optionalPaymentParams = {};
   const orderParams = getOrderParams(pageData, shippingDetails, optionalPaymentParams, config);
 
-  fetchSpeculatedTransactionIfNeeded(orderParams, pageData, fetchSpeculatedTransaction, comissionValue);
+  fetchSpeculatedTransactionIfNeeded(orderParams, pageData, fetchSpeculatedTransaction, commissionValue);
 };
 
 const handleSubmit = (values, process, props, stripe, submitting, setSubmitting) => {
@@ -260,7 +263,7 @@ const handleSubmit = (values, process, props, stripe, submitting, setSubmitting)
     pageData,
     setPageData,
     sessionStorageKey,
-    comissionValue,
+    commissionValue,
   } = props;
   const { card, message, paymentMethod: selectedPaymentMethod, formValues } = values;
   const { saveAfterOnetimePayment: saveAfterOnetimePaymentRaw } = formValues;
@@ -299,7 +302,7 @@ const handleSubmit = (values, process, props, stripe, submitting, setSubmitting)
     isPaymentFlowUseSavedCard: selectedPaymentFlow === USE_SAVED_CARD,
     isPaymentFlowPayAndSaveCard: selectedPaymentFlow === PAY_AND_SAVE_FOR_LATER_USE,
     setPageData,
-    comissionValue,
+    commissionValue,
   };
 
   const shippingDetails = getShippingDetailsMaybe(formValues);
