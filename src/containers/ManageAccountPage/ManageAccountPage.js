@@ -97,7 +97,7 @@ export const ManageAccountPageComponent = props => {
     const { currentPassword } = values;
 
     return onSubmitDeleteAccount(currentPassword).then(() => {
-      const path = pathByRouteName('LandingPage', routeConfiguration);
+      const path = pathByRouteName('Home', routeConfiguration);
 
       // Enforce full page load against LandingPage route
       if (typeof window !== 'undefined') {
