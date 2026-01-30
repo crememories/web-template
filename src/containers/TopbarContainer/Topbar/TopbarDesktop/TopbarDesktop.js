@@ -234,11 +234,11 @@ const TopbarDesktop = props => {
         linkToExternalSite={config?.topbar?.logoLink}
       />
       {search}
-      <div className={css.topbarLink} onClick={redirectToInfo}>
+      {/* <div className={css.topbarLink} onClick={redirectToInfo}>
         <span className={classNames(css.topbarLinkLabel, css.highlight)}>
           <FormattedMessage id="TopbarDesktop.articles" />
         </span>
-      </div>
+      </div> */}
       
       {manageCommission}
 
