@@ -167,6 +167,8 @@ export const AuthenticationForms = props => {
     authInProgress,
     submitSignup,
     termsAndConditions,
+    handleCaptchaChange,
+    captchaToken,
   } = props;
   const config = useConfiguration();
   const intl = useIntl();
@@ -282,6 +284,8 @@ export const AuthenticationForms = props => {
           preselectedUserType={preselectedUserType}
           userTypes={userTypes}
           userFields={userFields}
+          handleCaptchaChange={handleCaptchaChange}
+          captchaToken={captchaToken}
         />
       )}
 
@@ -415,6 +419,8 @@ export const AuthenticationOrConfirmInfoForm = props => {
     signupError,
     confirmError,
     termsAndConditions,
+    handleCaptchaChange,
+    captchaToken,
   } = props;
   const isConfirm = tab === 'confirm';
   const isLogin = tab === 'login';
@@ -442,6 +448,8 @@ export const AuthenticationOrConfirmInfoForm = props => {
       authInProgress={authInProgress}
       submitSignup={submitSignup}
       termsAndConditions={termsAndConditions}
+      handleCaptchaChange={handleCaptchaChange}
+      captchaToken={captchaToken}
     ></AuthenticationForms>
   );
 };
@@ -518,6 +526,7 @@ export const AuthenticationPageComponent = props => {
   const [authInfo, setAuthInfo] = useState(getAuthInfoFromCookies());
   const [authError, setAuthError] = useState(getAuthErrorFromCookies());
   const [mounted, setMounted] = useState(false);
+  const [captchaToken, setCaptchaToken] = useState(null);
 
   const config = useConfiguration();
   const intl = useIntl();
@@ -634,6 +643,11 @@ export const AuthenticationPageComponent = props => {
     </p>
   ) : null;
 
+  const handleCaptchaChange = (value) => {
+    // value is the reCAPTCHA token
+    setCaptchaToken(value);
+  };
+
   return (
     <Page
       title={schemaTitle}
@@ -689,6 +703,8 @@ export const AuthenticationPageComponent = props => {
                   intl={intl}
                 />
               }
+              handleCaptchaChange={handleCaptchaChange}
+              captchaToken={captchaToken}
             />
           )}
         </ResponsiveBackgroundImageContainer>

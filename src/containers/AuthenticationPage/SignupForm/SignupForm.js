@@ -14,6 +14,8 @@ import FieldSelectUserType from '../FieldSelectUserType';
 import UserFieldDisplayName from '../UserFieldDisplayName';
 import UserFieldPhoneNumber from '../UserFieldPhoneNumber';
 
+import ReCAPTCHA from 'react-google-recaptcha';
+
 import css from './SignupForm.module.css';
 
 const getSoleUserTypeMaybe = userTypes =>
@@ -49,6 +51,8 @@ const SignupFormComponent = props => (
         userTypes,
         userFields,
         values,
+        handleCaptchaChange,
+        captchaToken,
       } = formRenderProps;
 
       const { userType } = values || {};
@@ -111,7 +115,7 @@ const SignupFormComponent = props => (
 
       const classes = classNames(rootClassName || css.root, className);
       const submitInProgress = inProgress;
-      const submitDisabled = invalid || submitInProgress || isPasswordUsedMoreThanOnce(values);
+      const submitDisabled = invalid || submitInProgress || isPasswordUsedMoreThanOnce(values) || captchaToken == null;
 
       return (
         <Form className={classes} onSubmit={handleSubmit}>
@@ -214,7 +218,14 @@ const SignupFormComponent = props => (
               ))}
             </div>
           ) : null}
-
+          
+          <div className={css.customFields}>
+            <ReCAPTCHA
+              sitekey="6LdyMWQsAAAAAOKoxxd43cWBBI2REDSiQeDTEhXd" // Replace with your actual Site Key
+              onChange={handleCaptchaChange}
+            />
+          </div>
+          
           <div className={css.bottomWrapper}>
             {termsAndConditions}
             {isPasswordUsedMoreThanOnce(values) ? (
